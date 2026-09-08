@@ -22,9 +22,12 @@ jobs:
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
 
       - name: Install Nix
-        uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
+        uses: DeterminateSystems/determinate-nix-action@2b7bca919ce8854111c6f9135091ddf5eea8e0eb # v3.8.2
         with:
-          github_access_token: ${{ secrets.GITHUB_TOKEN }}
+          extra-config: accept-flake-config = true
+
+      - name: Cache Nix
+        uses: DeterminateSystems/magic-nix-cache-action@15226c9b1e255d12f1e3077e7e5581b1e231ba19 # v5
 
       - name: Build documentation
         run: nix run github:cachix/devenv/v2.3 -- tasks run govenv:docs
