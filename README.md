@@ -1,6 +1,15 @@
-# Govenv
+<h1 align="center">Govenv</h1>
 
-Compile formally governed projects into reproducible development runtimes. A type system for your repository.
+<p align="center">
+  <strong>Compile formally governed projects into reproducible development runtimes. A type system for your repository.</strong>
+</p>
+
+<p align="center">
+  <a href="https://klarkc.github.io/govenv/"><img src="https://img.shields.io/badge/docs-pages-brightgreen" alt="Docs" /></a>
+  <img src="https://img.shields.io/badge/agda-2.8.0-blueviolet" alt="Agda 2.8.0" />
+  <a href="https://github.com/klarkc/govenv/releases"><img src="https://img.shields.io/github/v/release/klarkc/govenv?display_name=tag&sort=semver" alt="Release" /></a>
+  <img src="https://img.shields.io/badge/license-Apache--2.0-blue" alt="License" />
+</p>
 
 ## Bootstrap
 
@@ -27,14 +36,3 @@ nix run github:cachix/devenv/v2.3 -- tasks run govenv:docs
 ```
 
 The static site is written to `_site/` and deployed to GitHub Pages from `main`.
-
-## Releases
-
-Releases are managed by Release Please from Conventional Commits on `main`.
-
-- `feat` proposes a minor version bump.
-- `fix` proposes a patch version bump.
-- `!` or `BREAKING CHANGE` proposes a major version bump.
-- Other configured commit types are included in the changelog without forcing a version bump.
-
-Release Please maintains a release pull request. Merging that pull request creates the immutable GitHub release and `vX.Y.Z` tag automatically.
