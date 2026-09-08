@@ -8,6 +8,7 @@ module Govenv where
 open import Agda.Builtin.Unit
 open import Govenv.Architecture
 open import Govenv.Kernel.Verdict
+open import Govenv.Kernel.Rule
 
 projectLoads : Set
 projectLoads = ArchitectureValid
