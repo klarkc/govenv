@@ -6,10 +6,10 @@
   ];
 
   tasks."govenv:check".exec = ''
-    agda Govenv.lagda.md
+    agda -i . -i src Govenv.lagda.md
   '';
 
   enterTest = ''
-    agda Govenv.lagda.md
+    agda -i . -i src Govenv.lagda.md
   '';
 }
