@@ -17,3 +17,13 @@ nix run github:cachix/devenv/v2.3 -- test
 ```
 
 This type-checks the literate Agda entrypoint `Govenv.lagda.md` and its imported Govenv modules.
+
+## Documentation
+
+Build the literate Agda documentation locally with:
+
+```bash
+nix run github:cachix/devenv/v2.3 -- tasks run govenv:docs
+```
+
+The static site is written to `_site/` and deployed to GitHub Pages from `main`.

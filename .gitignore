@@ -1,2 +1,4 @@
 .devenv/
 *.agdai
+.docs-build/
+_site/
