@@ -13,6 +13,7 @@
   "changelog-sections": [
     { "type": "feat", "section": "Features" },
     { "type": "fix", "section": "Bug Fixes" },
+    { "type": "gov", "section": "Governance" },
     { "type": "docs", "section": "Documentation" },
     { "type": "refactor", "section": "Code Refactoring" },
     { "type": "perf", "section": "Performance" },
