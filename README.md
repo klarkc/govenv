@@ -27,3 +27,14 @@ nix run github:cachix/devenv/v2.3 -- tasks run govenv:docs
 ```
 
 The static site is written to `_site/` and deployed to GitHub Pages from `main`.
+
+## Releases
+
+Releases are managed by Release Please from Conventional Commits on `main`.
+
+- `feat` proposes a minor version bump.
+- `fix` proposes a patch version bump.
+- `!` or `BREAKING CHANGE` proposes a major version bump.
+- Other configured commit types are included in the changelog without forcing a version bump.
+
+Release Please maintains a release pull request. Merging that pull request creates the immutable GitHub release and `vX.Y.Z` tag automatically.
