@@ -1,4 +1,5 @@
 .devenv/
+.govenv/
 *.agdai
 .docs-build/
 _site/
