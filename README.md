@@ -3,14 +3,14 @@
 <h1 align="center">Govenv</h1>
 
 <p align="center">
-  <strong>Compile formally governed projects into reproducible development runtimes. A type system for your repository.</strong>
+  <strong>A type system for your repository. Formally define what your project is allowed to become.</strong>
 </p>
 
 <p align="center">
   <a href="https://klarkc.github.io/govenv/"><img src="https://img.shields.io/badge/docs-pages-brightgreen" alt="Docs" /></a>
   <img src="https://img.shields.io/badge/agda-2.8.0-blueviolet" alt="Agda 2.8.0" />
   <a href="https://github.com/klarkc/govenv/releases"><img src="https://img.shields.io/github/v/release/klarkc/govenv?display_name=tag&sort=semver" alt="Release" /></a>
-  <img src="https://img.shields.io/badge/license-Apache--2.0-blue" alt="License" />
+  <img src="https://img.shields.io/badge/license-Apache--2.0-blue" alt="Apache-2.0" />
 </p>
 
 ## Roadmap
@@ -45,6 +45,12 @@
 - [x] **R1-12** Govern the README as a canonical materialization of `Govenv.Readme`; manual divergence must fail the project check.
 - [x] **R1-13** Keep the README roadmap projection to exactly two visible levels, `Phase → Item`, with phases collapsible.
 - [x] **R1-14** Materialize governed README sections from Agda rather than maintaining duplicate prose by hand.
+- [ ] **R1-15** Govern architecture roles and dependency directions for constitution, kernel, projection, adapters, and generated artifacts.
+- [ ] **R1-16** Allow versioned materializations to follow their governing source change in the immediately subsequent `chore(materialize)` commit; the final pushed or reviewed state must contain canonical materializations.
+- [x] **R1-17** Require CI validation and publication workflows to materialize governed artifacts from the constitution and reject any resulting tracked drift before continuing.
+- [x] **R1-18** Keep `Govenv` as the canonical immutable project identity; white-label distributions may change branding projections, never the Govenv identity.
+- [x] **R1-19** Project the canonical Govenv description from `Govenv.Project` into repository-facing materializations.
+- [x] **R1-20** Require admin-privileged external materializations to run only through the manual, target-restricted `Admin Materialize` workflow.
 
 </details>
 
@@ -100,6 +106,16 @@
 Govenv currently uses devenv only as its Stage 0 bootstrap environment.
 
 The bootstrap uses devenv tag `v2.3` (`e0781f7bee573eefcab4a7d2788fd9b455560ca2`), which reports `devenv 2.3.0+e0781f7`.
+
+### Materialization
+
+Materialize governed repository artifacts with:
+
+```bash
+nix run github:cachix/devenv/v2.3 -- tasks run govenv:materialize
+```
+
+Versioned materializations are committed immediately after their governing source change, using a subsequent `chore(materialize)` commit.
 
 ### Test
 
