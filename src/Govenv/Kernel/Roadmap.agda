@@ -3,7 +3,6 @@
 module Govenv.Kernel.Roadmap where
 
 open import Agda.Builtin.List
-open import Agda.Builtin.Nat using (Nat)
 open import Agda.Builtin.String using (String)
 
 data ItemState : Set where
@@ -12,20 +11,20 @@ data ItemState : Set where
 data PhaseState : Set where
   finished active future : PhaseState
 
-record Item (PhaseId : Set) (owner : PhaseId) : Set where
+record Item (PhaseId ItemId : Set) (owner : PhaseId) : Set where
   constructor item
   field
-    itemNumber : Nat
+    itemId : ItemId
     itemTitle : String
     itemState : ItemState
 
-record Phase (PhaseId : Set) : Set where
+record Phase (PhaseId ItemId : Set) : Set where
   constructor phase
   field
     phaseId : PhaseId
     phaseTitle : String
     phaseState : PhaseState
-    phaseItems : List (Item PhaseId phaseId)
+    phaseItems : List (Item PhaseId ItemId phaseId)
 
-Roadmap : Set → Set
-Roadmap PhaseId = List (Phase PhaseId)
+Roadmap : Set → Set → Set
+Roadmap PhaseId ItemId = List (Phase PhaseId ItemId)

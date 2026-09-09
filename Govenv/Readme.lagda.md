@@ -10,7 +10,7 @@ module Govenv.Readme where
 open import Govenv.Kernel.Readme
 open import Govenv.Roadmap
 
-readme : Readme PhaseId
+readme : Readme PhaseId GovernanceId
 readme = record
   { docsUrl = "https://klarkc.github.io/govenv/"
   ; agdaVersion = "2.8.0"

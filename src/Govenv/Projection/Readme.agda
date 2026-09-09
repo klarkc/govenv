@@ -10,7 +10,7 @@ open Readme
 open import Govenv.Kernel.Roadmap
 open import Govenv.Projection.Project using (projectName; projectDescription)
 open import Govenv.Readme using (readme)
-open import Govenv.Roadmap using (PhaseId; P0; P1; P2; P3; P4; P5; P6)
+open import Govenv.Roadmap using (PhaseId; P0; P1; P2; P3; P4; P5; P6; GovernanceId; GV)
 
 infixr 5 _++_
 
@@ -43,31 +43,34 @@ currentMark : PhaseState → String
 currentMark active = " ← current"
 currentMark _ = ""
 
-renderItem : {owner : PhaseId} → Item PhaseId owner → String
-renderItem {owner} (item number title state) =
-  "- " ++ checkbox state ++ " **GV" ++ primShowNat number ++ "** " ++ title ++ "\n"
+renderGovernanceId : GovernanceId → String
+renderGovernanceId (GV number) = "GV" ++ primShowNat number
 
-renderItems : {owner : PhaseId} → List (Item PhaseId owner) → String
+renderItem : {owner : PhaseId} → Item PhaseId GovernanceId owner → String
+renderItem {owner} (item identifier title state) =
+  "- " ++ checkbox state ++ " **" ++ renderGovernanceId identifier ++ "** " ++ title ++ "\n"
+
+renderItems : {owner : PhaseId} → List (Item PhaseId GovernanceId owner) → String
 renderItems [] = ""
 renderItems (x ∷ xs) = renderItem x ++ renderItems xs
 
-renderPhase : Phase PhaseId → String
+renderPhase : Phase PhaseId GovernanceId → String
 renderPhase (phase identifier title state items) =
   "<details" ++ openAttribute state ++ ">\n" ++
   "<summary>" ++ phaseMark state ++ " <strong>" ++ renderPhaseId identifier ++ " — " ++ title ++ "</strong>" ++ currentMark state ++ "</summary>\n\n" ++
   renderItems items ++ "\n</details>\n\n"
 
-renderPhases : Roadmap PhaseId → String
+renderPhases : Roadmap PhaseId GovernanceId → String
 renderPhases [] = ""
 renderPhases (x ∷ xs) = renderPhase x ++ renderPhases xs
 
-renderCurrent : String → Roadmap PhaseId → String
+renderCurrent : String → Roadmap PhaseId GovernanceId → String
 renderCurrent summary [] = ""
 renderCurrent summary (phase identifier title active items ∷ xs) =
   "**Current:** " ++ renderPhaseId identifier ++ " — " ++ title ++ ". " ++ summary ++ "\n\n"
 renderCurrent summary (_ ∷ xs) = renderCurrent summary xs
 
-renderHeader : Readme PhaseId → String
+renderHeader : Readme PhaseId GovernanceId → String
 renderHeader specification =
   "<!-- Generated from Govenv.Readme. Do not edit manually. -->\n\n" ++
   "<h1 align=\"center\">" ++ projectName ++ "</h1>\n\n" ++
@@ -79,14 +82,14 @@ renderHeader specification =
   "  <img src=\"https://img.shields.io/badge/license-Apache--2.0-blue\" alt=\"" ++ licenseName specification ++ "\" />\n" ++
   "</p>\n\n"
 
-renderRoadmap : Readme PhaseId → String
+renderRoadmap : Readme PhaseId GovernanceId → String
 renderRoadmap specification =
   "## Roadmap\n\n" ++
   renderCurrent (currentSummary specification) (roadmap specification) ++
   "> " ++ roadmapNote specification ++ "\n\n" ++
   renderPhases (roadmap specification)
 
-renderGettingStarted : Readme PhaseId → String
+renderGettingStarted : Readme PhaseId GovernanceId → String
 renderGettingStarted specification =
   "## " ++ gettingStartedTitle specification ++ "\n\n" ++
   bootstrapSummary specification ++ "\n\n" ++
