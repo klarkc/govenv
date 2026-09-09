@@ -14,7 +14,8 @@ open import Govenv.Kernel.Architecture
 architecture : Architecture
 architecture = record
   { areas =
-      area "Govenv.lagda.md" constitution
+      area "Govenv.lagda.md" closure
+    ∷ area "Govenv/Materialization/" materialization
     ∷ area "Govenv/" constitution
     ∷ area "src/Govenv/Kernel/" kernel
     ∷ area "src/Govenv/Projection/" projection
@@ -22,8 +23,13 @@ architecture = record
     ∷ area "README.md" generated
     ∷ []
   ; dependencies =
-      allow constitution kernel
-    ∷ allow projection constitution
+      allow closure constitution
+    ∷ allow closure materialization
+    ∷ allow closure kernel
+    ∷ allow constitution kernel
+    ∷ allow materialization constitution
+    ∷ allow materialization kernel
+    ∷ allow projection materialization
     ∷ allow projection kernel
     ∷ allow adapter projection
     ∷ []

@@ -9,6 +9,8 @@ open import Agda.Builtin.Unit
 open import Govenv.Architecture
 open import Govenv.Administration
 open import Govenv.Materialization
+open import Govenv.Materialization.Readme
+open import Govenv.Materialization.Github.Repository.Description
 open import Govenv.Project
 open import Govenv.Roadmap
 open import Govenv.Readme

@@ -6,7 +6,7 @@ open import Agda.Builtin.List
 open import Agda.Builtin.String using (String)
 
 data Role : Set where
-  constitution kernel projection adapter generated : Role
+  closure constitution kernel materialization projection adapter generated : Role
 
 record Area : Set where
   constructor area

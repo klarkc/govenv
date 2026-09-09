@@ -16,8 +16,8 @@ let
   materializeGithubDescription = ''
     rm -rf .govenv/admin-description-build
     mkdir -p .govenv/admin .govenv/admin-description-build
-    agda -i . -i src --compile --compile-dir=.govenv/admin-description-build src/Govenv/Adapter/ProjectDescription.agda >/dev/null
-    .govenv/admin-description-build/ProjectDescription > .govenv/admin/github-description
+    agda -i . -i src --compile --compile-dir=.govenv/admin-description-build src/Govenv/Adapter/Github/Repository/Description.agda >/dev/null
+    .govenv/admin-description-build/Description > .govenv/admin/github-description
   '';
 in
 {

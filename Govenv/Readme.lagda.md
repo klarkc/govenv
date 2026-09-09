@@ -1,6 +1,6 @@
 # README
 
-The repository README is governed project data. Rendering and materialization belong to implementation layers outside the constitution.
+This module contains governed source data used by the repository README. `Govenv.Materialization.Readme` is the canonical semantic README definition; projections only encode it and adapters only apply or verify effects.
 
 ```agda
 {-# OPTIONS --safe #-}
@@ -16,7 +16,7 @@ readme = record
   ; agdaVersion = "2.8.0"
   ; releaseUrl = "https://github.com/klarkc/govenv/releases"
   ; licenseName = "Apache-2.0"
-  ; currentSummary = "`Verdict`, typed `Fact`, dependency-indexed `Rule`, and typed roadmap structure are in place; materialization closure and typed release governance are the next active governance work."
+  ; currentSummary = "`Verdict`, typed `Fact`, dependency-indexed `Rule`, typed roadmap structure, and materialization closure are in place; roadmap integrity and typed release governance are the next active governance work."
   ; roadmapNote = "This roadmap is subject to change as Govenv's architecture evolves. IDs are intended to remain stable references whenever practical."
   ; roadmap = roadmap
   ; gettingStartedTitle = "Getting started"

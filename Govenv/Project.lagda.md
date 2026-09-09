@@ -15,6 +15,9 @@ data ProjectId : Set where
 project : ProjectId
 project = govenv
 
+name : String
+name = "Govenv"
+
 description : String
 description = "A type system for your repository. Formally define what your project is allowed to become."
 ```

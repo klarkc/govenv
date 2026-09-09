@@ -1,4 +1,4 @@
-<!-- Generated from Govenv.Readme. Do not edit manually. -->
+<!-- Generated from Govenv.Materialization.Readme. Do not edit manually. -->
 
 <h1 align="center">Govenv</h1>
 
@@ -15,7 +15,7 @@
 
 ## Roadmap
 
-**Current:** ▣ P1 — Formal governance model and repository closure. `Verdict`, typed `Fact`, dependency-indexed `Rule`, and typed roadmap structure are in place; materialization closure and typed release governance are the next active governance work.
+**Current:** ▣ P1 — Formal governance model and repository closure. `Verdict`, typed `Fact`, dependency-indexed `Rule`, typed roadmap structure, and materialization closure are in place; roadmap integrity and typed release governance are the next active governance work.
 
 > This roadmap is subject to change as Govenv's architecture evolves. IDs are intended to remain stable references whenever practical.
 
@@ -42,12 +42,12 @@
 - ◇ **GV9** Inventory repository behavior and policy, distinguishing governed semantics from irreducibly observational or effectful mechanisms.
 - ◇ **GV10** Require every inventory entry whose semantics can be expressed and checked by Govenv to be backed by governed data and a rule.
 - ◇ **GV11** Minimize the ungoverned surface to irreducible observation and effect execution; adapters may perform effects but must not introduce semantic content, policy, structure, ordering, or authorization decisions.
-- ◇ **GV17** Enforce architecture roles and dependency directions for constitution, materialization, kernel, projection, adapters, and generated artifacts.
+- ◇ **GV17** Enforce architecture roles and dependency directions for the closure root, constitution, materialization, kernel, projection, adapters, and generated artifacts.
 - ✓ **GV20** Keep `Govenv` as the canonical immutable project identity; white-label distributions may change branding projections, never the Govenv identity.
-- ✓ **GV14** Govern the README as a canonical materialization of `Govenv.Readme`; manual divergence must fail the project check.
+- ✓ **GV14** Govern `README.md` as the canonical output of `Govenv.Materialization.Readme`; manual divergence must fail the project check.
 - ✓ **GV15** Keep the README roadmap projection to exactly two visible levels, `Phase → Item`, with phases collapsible.
 - ✓ **GV16** Materialize governed README sections from Agda rather than maintaining duplicate prose by hand.
-- ◇ **GV51** Materialization closure: every state materialized by Govenv must have exactly one canonical `Govenv.Materialization.*` definition containing all semantic content, structure, ordering, inclusion, policy, and required capability decisions; projections encode only target-format representation, and adapters only observe, apply, or verify effects.
+- ✓ **GV51** Materialization closure: every state materialized by Govenv must have exactly one canonical `Govenv.Materialization.*` definition containing all semantic content, structure, ordering, inclusion, policy, and required capability decisions; projections encode only target-format representation, and adapters only observe, apply, or verify effects.
 - ◇ **GV18** Allow versioned materializations to follow their governing source change in the immediately subsequent `chore(materialize)` commit; the final pushed or reviewed state must contain canonical materializations.
 - ✓ **GV19** Require CI validation and publication workflows to materialize governed artifacts from the constitution and reject any resulting tracked drift before continuing.
 - ✓ **GV21** Project the canonical Govenv description from `Govenv.Project` into repository-facing materializations.

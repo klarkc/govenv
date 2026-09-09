@@ -3,14 +3,15 @@
 module Govenv.Projection.Readme where
 
 open import Agda.Builtin.List using (List; []; _∷_)
+open import Agda.Builtin.Maybe using (just; nothing)
 open import Agda.Builtin.Nat using (Nat)
 open import Agda.Builtin.String
 open import Govenv.Kernel.Identifier
-open import Govenv.Kernel.Readme
-open Readme
 open import Govenv.Kernel.Roadmap
-open import Govenv.Projection.Project using (projectName; projectDescription)
-open import Govenv.Readme using (readme)
+open import Govenv.Materialization using (Materialization)
+open Materialization
+open import Govenv.Materialization.Readme
+open Badge
 
 infixr 5 _++_
 
@@ -55,6 +56,7 @@ renderPhase mark attribute (phaseNode phaseId items) =
   "<summary>" ++ mark ++ " <strong>" ++ renderPhaseId phaseId ++
   " — " ++ descriptionOf phaseId ++ "</strong></summary>\n\n" ++
   renderItems items ++ "\n</details>\n\n"
+
 renderFinished : PhaseNode finished → String
 renderFinished = renderPhase "■" ""
 
@@ -79,51 +81,68 @@ renderPhases (progressing finishedPhases currentPhase futurePhases) =
 renderPhases (complete finishedPhases) =
   renderPhaseList renderFinished finishedPhases
 
-renderCurrent : String → Roadmap → String
-renderCurrent summary (progressing finishedPhases (phaseNode phaseId items) futurePhases) =
-  "**Current:** ▣ " ++ renderPhaseId phaseId ++ " — " ++
+renderInline : Inline → String
+renderInline (text value) = value
+renderInline (strong value) = "<strong>" ++ value ++ "</strong>"
+renderInline (code value) = "`" ++ value ++ "`"
+renderInline (link label url) = "[" ++ label ++ "](" ++ url ++ ")"
+
+renderInlines : List Inline → String
+renderInlines [] = ""
+renderInlines (x ∷ xs) = renderInline x ++ renderInlines xs
+
+renderBadge : Badge → String
+renderBadge specification with targetUrl specification
+... | nothing =
+  "<img src=\"" ++ imageUrl specification ++ "\" alt=\"" ++ alt specification ++ "\" />"
+... | just url =
+  "<a href=\"" ++ url ++ "\"><img src=\"" ++ imageUrl specification ++
+  "\" alt=\"" ++ alt specification ++ "\" /></a>"
+
+renderBadges : List Badge → String
+renderBadges [] = ""
+renderBadges (x ∷ xs) = "  " ++ renderBadge x ++ "\n" ++ renderBadges xs
+
+renderCurrent : Current → String
+renderCurrent (activeCurrent label (someIdentifier phaseId) summary) =
+  "**" ++ label ++ ":** ▣ " ++ renderPhaseId phaseId ++ " — " ++
   descriptionOf phaseId ++ ". " ++ summary ++ "\n\n"
-renderCurrent summary (complete finishedPhases) =
-  "**Current:** ■ Roadmap complete.\n\n"
+renderCurrent (roadmapComplete label message) =
+  "**" ++ label ++ ":** ■ " ++ message ++ "\n\n"
 
-renderHeader : Readme → String
-renderHeader specification =
-  "<!-- Generated from Govenv.Readme. Do not edit manually. -->\n\n" ++
-  "<h1 align=\"center\">" ++ projectName ++ "</h1>\n\n" ++
-  "<p align=\"center\">\n  <strong>" ++ projectDescription ++ "</strong>\n</p>\n\n" ++
-  "<p align=\"center\">\n" ++
-  "  <a href=\"" ++ docsUrl specification ++ "\"><img src=\"https://img.shields.io/badge/docs-pages-brightgreen\" alt=\"Docs\" /></a>\n" ++
-  "  <img src=\"https://img.shields.io/badge/agda-" ++ agdaVersion specification ++ "-blueviolet\" alt=\"Agda " ++ agdaVersion specification ++ "\" />\n" ++
-  "  <a href=\"" ++ releaseUrl specification ++ "\"><img src=\"https://img.shields.io/github/v/release/klarkc/govenv?display_name=tag&sort=semver\" alt=\"Release\" /></a>\n" ++
-  "  <img src=\"https://img.shields.io/badge/license-Apache--2.0-blue\" alt=\"" ++ licenseName specification ++ "\" />\n" ++
-  "</p>\n\n"
+renderHeading : HeadingLevel → Alignment → String → String
+renderHeading title centered value = "<h1 align=\"center\">" ++ value ++ "</h1>\n\n"
+renderHeading title normal value = "# " ++ value ++ "\n\n"
+renderHeading section centered value = "<h2 align=\"center\">" ++ value ++ "</h2>\n\n"
+renderHeading section normal value = "## " ++ value ++ "\n\n"
+renderHeading subsection centered value = "<h3 align=\"center\">" ++ value ++ "</h3>\n\n"
+renderHeading subsection normal value = "### " ++ value ++ "\n\n"
 
-renderRoadmap : Readme → String
-renderRoadmap specification =
-  "## Roadmap\n\n" ++
-  renderCurrent (currentSummary specification) (roadmap specification) ++
-  "> " ++ roadmapNote specification ++ "\n\n" ++
-  renderPhases (roadmap specification)
+renderParagraph : Alignment → List Inline → String
+renderParagraph normal content = renderInlines content ++ "\n\n"
+renderParagraph centered content =
+  "<p align=\"center\">\n  " ++ renderInlines content ++ "\n</p>\n\n"
 
-renderGettingStarted : Readme → String
-renderGettingStarted specification =
-  "## " ++ gettingStartedTitle specification ++ "\n\n" ++
-  bootstrapSummary specification ++ "\n\n" ++
-  bootstrapPin specification ++ "\n\n" ++
-  "### " ++ materializeTitle specification ++ "\n\n" ++
-  "Materialize governed repository artifacts with:\n\n```bash\n" ++ materializeCommand specification ++ "\n```\n\n" ++
-  materializeSummary specification ++ "\n\n" ++
-  "### " ++ administrationTitle specification ++ "\n\n" ++
-  administrationSummary specification ++ " [Read the governed setup guide](" ++ administrationUrl specification ++ ").\n\n" ++
-  "### " ++ testTitle specification ++ "\n\n" ++
-  "Run the test suite with the pinned devenv tag:\n\n```bash\n" ++ testCommand specification ++ "\n```\n\n" ++
-  testSummary specification ++ "\n\n" ++
-  "### " ++ docsTitle specification ++ "\n\n" ++
-  "Build the literate Agda documentation locally with:\n\n```bash\n" ++ docsCommand specification ++ "\n```\n\n" ++
-  docsSummary specification ++ "\n"
+renderBlock : Block → String
+renderBlock (comment value) = "<!-- " ++ value ++ " -->\n\n"
+renderBlock (heading level alignment value) = renderHeading level alignment value
+renderBlock (paragraph alignment content) = renderParagraph alignment content
+renderBlock (badges specifications) =
+  "<p align=\"center\">\n" ++ renderBadges specifications ++ "</p>\n\n"
+renderBlock (current value) = renderCurrent value
+renderBlock (blockQuote value) = "> " ++ value ++ "\n\n"
+renderBlock (roadmapTree value) = renderPhases value
+renderBlock (codeBlock language value) =
+  "```" ++ language ++ "\n" ++ value ++ "\n```\n\n"
+
+renderFinalBlock : Block → String
+renderFinalBlock (paragraph normal content) = renderInlines content ++ "\n"
+renderFinalBlock block = renderBlock block
+
+renderDocument : Document → String
+renderDocument [] = ""
+renderDocument (x ∷ []) = renderFinalBlock x
+renderDocument (x ∷ xs) = renderBlock x ++ renderDocument xs
 
 renderReadme : String
-renderReadme =
-  renderHeader readme ++
-  renderRoadmap readme ++
-  renderGettingStarted readme
+renderReadme = renderDocument (state materialization)

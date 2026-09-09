@@ -1,6 +1,6 @@
 # Administrative materialization
 
-Administrative materializations are governed projections that require permissions broader than normal CI should hold. Their credentials stay behind an explicit manual privilege boundary.
+Administrative materializations are governed targets whose canonical definitions require permissions broader than normal CI should hold. Their credentials stay behind an explicit manual privilege boundary; adapters only apply and verify the governed target state.
 
 ## Stage 0 setup
 
@@ -18,7 +18,7 @@ The token must not be exposed to normal Test, Pages, or Release workflows. `Admi
 
 ## Current targets
 
-`github-description` reads the canonical description from `Govenv.Project`, materializes it locally, applies only that projected value to GitHub repository metadata, then reads the description back. The workflow must fail unless the observed value equals the governed expected value, and it records the execution context as evidence.
+`github-description` is canonically defined by `Govenv.Materialization.Github.Repository.Description`, including its expected state, manual/admin capability, and read-back equality verification. The workflow applies only that projected value to GitHub repository metadata, verifies the observed value, and records the execution context as evidence.
 
 ```agda
 {-# OPTIONS --safe #-}
@@ -26,16 +26,6 @@ The token must not be exposed to normal Test, Pages, or Release workflows. `Admi
 module Govenv.Administration where
 
 open import Agda.Builtin.String using (String)
-
-data AdminTarget : Set where
-  githubDescription : AdminTarget
-
-data Verification : Set where
-  readBackEquality : Verification
-
-adminVerification : AdminTarget → Verification
-adminVerification githubDescription = readBackEquality
-
 adminEnvironment : String
 adminEnvironment = "admin-materialization"
 

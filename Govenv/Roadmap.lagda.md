@@ -26,12 +26,12 @@ roadmap = roadmapOf (
     ├ GV 9 "Inventory repository behavior and policy, distinguishing governed semantics from irreducibly observational or effectful mechanisms." ◇
     ├ GV 10 "Require every inventory entry whose semantics can be expressed and checked by Govenv to be backed by governed data and a rule." ◇
     ├ GV 11 "Minimize the ungoverned surface to irreducible observation and effect execution; adapters may perform effects but must not introduce semantic content, policy, structure, ordering, or authorization decisions." ◇
-    ├ GV 17 "Enforce architecture roles and dependency directions for constitution, materialization, kernel, projection, adapters, and generated artifacts." ◇
+    ├ GV 17 "Enforce architecture roles and dependency directions for the closure root, constitution, materialization, kernel, projection, adapters, and generated artifacts." ◇
     ├ GV 20 "Keep `Govenv` as the canonical immutable project identity; white-label distributions may change branding projections, never the Govenv identity." ✓
-    ├ GV 14 "Govern the README as a canonical materialization of `Govenv.Readme`; manual divergence must fail the project check." ✓
+    ├ GV 14 "Govern `README.md` as the canonical output of `Govenv.Materialization.Readme`; manual divergence must fail the project check." ✓
     ├ GV 15 "Keep the README roadmap projection to exactly two visible levels, `Phase → Item`, with phases collapsible." ✓
     ├ GV 16 "Materialize governed README sections from Agda rather than maintaining duplicate prose by hand." ✓
-    ├ GV 51 "Materialization closure: every state materialized by Govenv must have exactly one canonical `Govenv.Materialization.*` definition containing all semantic content, structure, ordering, inclusion, policy, and required capability decisions; projections encode only target-format representation, and adapters only observe, apply, or verify effects." ◇
+    ├ GV 51 "Materialization closure: every state materialized by Govenv must have exactly one canonical `Govenv.Materialization.*` definition containing all semantic content, structure, ordering, inclusion, policy, and required capability decisions; projections encode only target-format representation, and adapters only observe, apply, or verify effects." ✓
     ├ GV 18 "Allow versioned materializations to follow their governing source change in the immediately subsequent `chore(materialize)` commit; the final pushed or reviewed state must contain canonical materializations." ◇
     ├ GV 19 "Require CI validation and publication workflows to materialize governed artifacts from the constitution and reject any resulting tracked drift before continuing." ✓
     ├ GV 21 "Project the canonical Govenv description from `Govenv.Project` into repository-facing materializations." ✓
