@@ -51,6 +51,8 @@
 - [x] **R1-18** Keep `Govenv` as the canonical immutable project identity; white-label distributions may change branding projections, never the Govenv identity.
 - [x] **R1-19** Project the canonical Govenv description from `Govenv.Project` into repository-facing materializations.
 - [x] **R1-20** Require admin-privileged external materializations to run only through the manual, target-restricted `Admin Materialize` workflow.
+- [ ] **R1-21** Inventory every behavior currently encoded in GitHub Actions and extract it into explicit governance: triggers, permissions, concurrency, runners, timeouts, pinned actions, Nix runtime/cache, materialization, tests, Pages, releases, and admin boundaries.
+- [ ] **R1-22** CI projection closure rule: GitHub Actions workflows must contain no independent policy; every CI behavior must be traceable to governed project data and ultimately materializable from the constitution.
 
 </details>
 
@@ -98,6 +100,8 @@
 - [ ] **R6-02** Make Govenv govern and build itself.
 - [ ] **R6-03** Keep runtime backends replaceable behind the typed IR boundary.
 - [ ] **R6-04** Support white-label distributions while keeping the formal kernel reusable and product-neutral.
+- [ ] **R6-05** Make repository bootstrap, integrations, secrets/environments setup, and privileged materialization declarative and reproducible through Govenv rather than repository-specific manual steps.
+- [ ] **R6-06** Make the final product ejectable from the Govenv codebase: a white-label distribution must be able to carry its governed project model, generated CI/materializations, and integrations without depending on `klarkc/govenv` repository-specific code.
 
 </details>
 
@@ -116,6 +120,10 @@ nix run github:cachix/devenv/v2.3 -- tasks run govenv:materialize
 ```
 
 Versioned materializations are committed immediately after their governing source change, using a subsequent `chore(materialize)` commit.
+
+### Administrative materialization
+
+Stage 0 setup for privileged targets, including the `admin-materialization` environment and `GOVENV_ADMIN_TOKEN`, is documented as governed literate Agda rather than duplicated here. [Read the governed setup guide](https://klarkc.github.io/govenv/Govenv.Administration.html).
 
 ### Test
 
