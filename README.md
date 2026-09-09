@@ -15,7 +15,7 @@
 
 ## Roadmap
 
-**Current:** R1 — Formal governance kernel. `Verdict`, typed `Fact`, and the current `Rule` model are in place; dependency-indexed rules and the first self-governing rule are next.
+**Current:** R1 — Formal governance kernel. `Verdict`, typed `Fact`, and dependency-indexed `Rule` are in place; the roadmap release rule and Govenv's first self-governing repository rule are next.
 
 > This roadmap is subject to change as Govenv's architecture evolves. IDs are intended to remain stable references whenever practical.
 
@@ -34,7 +34,7 @@
 - [x] **R1-01** `Verdict`: `holds`, `violated`, and `unknown`.
 - [x] **R1-02** Minimal `Rule` abstraction.
 - [x] **R1-03** Typed repository facts.
-- [ ] **R1-04** Dependency-indexed rules.
+- [x] **R1-04** Dependency-indexed rules.
 - [ ] **R1-05** Roadmap release rule: every major or minor release must advance the roadmap by completing at least one unchecked item or moving `Current` to a later phase; patch releases are exempt.
 - [ ] **R1-06** Encode R1-05 as Govenv's first self-governing repository rule.
 - [ ] **R1-07** Extract governance rules from behavior, conventions, and infrastructure already implemented in the repository so existing decisions become explicit rather than remaining implicit in code or configuration.
