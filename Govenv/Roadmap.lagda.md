@@ -44,7 +44,7 @@ roadmap = roadmapOf (
     ├ GV 12 "CI governance rule: Govenv CI must run on Determinate Nix; changing the Nix runtime requires an explicit governance change." ◇
     ├ GV 13 "CI cache governance rule: every Govenv CI workflow that evaluates or builds Nix must use a local GitHub Actions Nix cache through `magic-nix-cache-action`; removing or replacing it requires an explicit governance change." ◇
     ├ GV 44 "Automatically apply versioned non-admin materializations on `main` using only repository-scoped CI permission; validation and publication workflows run after Materialize completes, while admin materializations remain manual." ✓
-    ├ GV 48 "Project every release governance delta from typed roadmap state and commit references, distinguishing completed, advanced, and introduced items plus phase progression while keeping SemVer independent." ◇
+    ├ GV 48 "Project every release governance delta from typed roadmap state and commit references, distinguishing completed, advanced, and introduced items plus phase progression while keeping SemVer independent." ✓
     ├ GV 7 "Model the governed release-progress policy: major and minor releases require governance progress by completing at least one pending item or advancing to a later phase; patch releases are exempt." ◇
     ├ GV 8 "Encode and enforce GV7 as Govenv's first self-governing `Rule` over typed release governance state." ◇
   ) ╟ (P 2 "Pure repository evaluator" □

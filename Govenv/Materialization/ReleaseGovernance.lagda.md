@@ -111,7 +111,7 @@ document baseRevision headRevision (governanceDeltaValue impacts phase) =
 pullRequestBody :
   Nat → String → String → GovernanceDelta → Materialization ReleaseDocument
 pullRequestBody number baseRevision headRevision delta = materialized
-  (githubPullRequestBodySection number releaseGovernanceImpact)
+  (githubPullRequestBodySection number releaseGovernanceImpact afterReleasePleaseBody)
   automatic
   repository
   pullRequestBodySectionEquality
@@ -120,7 +120,7 @@ pullRequestBody number baseRevision headRevision delta = materialized
 changelog :
   Nat → String → String → GovernanceDelta → Materialization ReleaseDocument
 changelog number baseRevision headRevision delta = materialized
-  (githubPullRequestFileSection number "CHANGELOG.md" releaseGovernanceImpact)
+  (githubPullRequestFileSection number "CHANGELOG.md" releaseGovernanceImpact afterReleaseHeading)
   automatic
   repository
   pullRequestFileSectionEquality

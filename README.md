@@ -15,7 +15,7 @@
 
 ## Roadmap
 
-**Current:** ▣ P1 — Formal governance model and repository closure. `Verdict`, typed `Fact`, dependency-indexed `Rule`, typed roadmap structure, materialization closure, and roadmap integrity are in place; typed release governance is the next active governance work.
+**Current:** ▣ P1 — Formal governance model and repository closure. `Verdict`, typed `Fact`, dependency-indexed `Rule`, typed roadmap structure, materialization closure, roadmap integrity, and typed release governance are in place; the governed release-progress policy and its self-governing `Rule` are next.
 
 > This roadmap is subject to change as Govenv's architecture evolves. IDs are intended to remain stable references whenever practical.
 
@@ -59,7 +59,7 @@
 - ◇ **GV12** CI governance rule: Govenv CI must run on Determinate Nix; changing the Nix runtime requires an explicit governance change.
 - ◇ **GV13** CI cache governance rule: every Govenv CI workflow that evaluates or builds Nix must use a local GitHub Actions Nix cache through `magic-nix-cache-action`; removing or replacing it requires an explicit governance change.
 - ✓ **GV44** Automatically apply versioned non-admin materializations on `main` using only repository-scoped CI permission; validation and publication workflows run after Materialize completes, while admin materializations remain manual.
-- ◇ **GV48** Project every release governance delta from typed roadmap state and commit references, distinguishing completed, advanced, and introduced items plus phase progression while keeping SemVer independent.
+- ✓ **GV48** Project every release governance delta from typed roadmap state and commit references, distinguishing completed, advanced, and introduced items plus phase progression while keeping SemVer independent.
 - ◇ **GV7** Model the governed release-progress policy: major and minor releases require governance progress by completing at least one pending item or advancing to a later phase; patch releases are exempt.
 - ◇ **GV8** Encode and enforce GV7 as Govenv's first self-governing `Rule` over typed release governance state.
 

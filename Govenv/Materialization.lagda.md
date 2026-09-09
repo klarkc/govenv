@@ -22,21 +22,32 @@ data GithubRepositoryProperty : Set where
 data GithubPullRequestSection : Set where
   releaseGovernanceImpact : GithubPullRequestSection
 
+data GithubPullRequestBodyPlacement : Set where
+  afterReleasePleaseBody : GithubPullRequestBodyPlacement
+
+data GithubPullRequestFilePlacement : Set where
+  afterReleaseHeading : GithubPullRequestFilePlacement
+
 data Target : Set where
   repositoryFile : String → Target
   githubRepository : GithubRepositoryProperty → Target
-  githubPullRequestBodySection : Nat → GithubPullRequestSection → Target
-  githubPullRequestFileSection : Nat → String → GithubPullRequestSection → Target
+  githubPullRequestBodySection :
+    Nat → GithubPullRequestSection → GithubPullRequestBodyPlacement → Target
+  githubPullRequestFileSection :
+    Nat → String → GithubPullRequestSection → GithubPullRequestFilePlacement → Target
 
 data Verification : Target → Set where
   trackedEquality : {path : String} → Verification (repositoryFile path)
   readBackEquality : {property : GithubRepositoryProperty} →
     Verification (githubRepository property)
-  pullRequestBodySectionEquality : {number : Nat} {section : GithubPullRequestSection} →
-    Verification (githubPullRequestBodySection number section)
+  pullRequestBodySectionEquality :
+    {number : Nat} {section : GithubPullRequestSection}
+    {placement : GithubPullRequestBodyPlacement} →
+    Verification (githubPullRequestBodySection number section placement)
   pullRequestFileSectionEquality :
-    {number : Nat} {path : String} {section : GithubPullRequestSection} →
-    Verification (githubPullRequestFileSection number path section)
+    {number : Nat} {path : String} {section : GithubPullRequestSection}
+    {placement : GithubPullRequestFilePlacement} →
+    Verification (githubPullRequestFileSection number path section placement)
 
 record Materialization (State : Set) : Set where
   constructor materialized
