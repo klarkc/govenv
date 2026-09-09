@@ -1,9 +1,9 @@
-module Govenv.Adapter.Readme where
+module Govenv.Adapter.ProjectDescription where
 
 open import Agda.Builtin.IO
 open import Agda.Builtin.String using (String)
 open import Agda.Builtin.Unit
-open import Govenv.Projection.Readme using (renderReadme)
+open import Govenv.Projection.Project using (projectDescription)
 
 postulate
   putStr : String → IO ⊤
@@ -12,4 +12,4 @@ postulate
 {-# COMPILE GHC putStr = Text.putStr #-}
 
 main : IO ⊤
-main = putStr renderReadme
+main = putStr projectDescription

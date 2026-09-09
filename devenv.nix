@@ -1,16 +1,23 @@
 { pkgs, ... }:
 
 let
-  buildReadmeRenderer = ''
-    rm -rf .govenv/readme-build
-    mkdir -p .govenv/readme-build
-    agda -i . -i src --compile --compile-dir=.govenv/readme-build src/Govenv/Adapter/Readme.agda >/dev/null
+  buildMaterializer = ''
+    rm -rf .govenv/materialize-build
+    mkdir -p .govenv/materialize-build
+    agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/Readme.agda >/dev/null
   '';
 
-  checkReadme = ''
-    ${buildReadmeRenderer}
-    .govenv/readme-build/Readme > .govenv/README.generated.md
+  checkMaterializations = ''
+    ${buildMaterializer}
+    .govenv/materialize-build/Readme > .govenv/README.generated.md
     diff -u README.md .govenv/README.generated.md
+  '';
+
+  materializeGithubDescription = ''
+    rm -rf .govenv/admin-description-build
+    mkdir -p .govenv/admin .govenv/admin-description-build
+    agda -i . -i src --compile --compile-dir=.govenv/admin-description-build src/Govenv/Adapter/ProjectDescription.agda >/dev/null
+    .govenv/admin-description-build/ProjectDescription > .govenv/admin/github-description
   '';
 in
 {
@@ -24,16 +31,18 @@ in
     pkgs.pandoc
   ];
 
-  tasks."govenv:readme".exec = ''
-    ${buildReadmeRenderer}
-    .govenv/readme-build/Readme > README.md
+  tasks."govenv:materialize".exec = ''
+    ${buildMaterializer}
+    .govenv/materialize-build/Readme > README.md
   '';
 
-  tasks."govenv:readme:check".exec = checkReadme;
+  tasks."govenv:materialize:check".exec = checkMaterializations;
+
+  tasks."govenv:materialize:admin:github-description".exec = materializeGithubDescription;
 
   tasks."govenv:check".exec = ''
     agda -i . -i src Govenv.lagda.md
-    ${checkReadme}
+    ${checkMaterializations}
   '';
 
   tasks."govenv:docs".exec = ''
@@ -52,6 +61,6 @@ in
 
   enterTest = ''
     agda -i . -i src Govenv.lagda.md
-    ${checkReadme}
+    ${checkMaterializations}
   '';
 }

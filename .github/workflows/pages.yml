@@ -36,6 +36,12 @@ jobs:
           use-gha-cache: enabled
           use-flakehub: disabled
 
+      - name: Materialize constitution
+        run: nix run github:cachix/devenv/v2.3 -- tasks run govenv:materialize
+
+      - name: Verify committed materializations
+        run: git diff --exit-code
+
       - name: Build documentation
         run: nix run github:cachix/devenv/v2.3 -- tasks run govenv:docs
 
