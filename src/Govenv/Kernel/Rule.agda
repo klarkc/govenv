@@ -2,8 +2,14 @@
 
 module Govenv.Kernel.Rule where
 
+open import Govenv.Kernel.Fact
 open import Govenv.Kernel.Verdict
 
-record Rule (Facts Diagnostic Obligation : Set) : Set where
+record Rule
+  (Subject : Set)
+  (Observation : Subject → Set)
+  (subject : Subject)
+  (Diagnostic Obligation : Set)
+  : Set where
   field
-    check : Facts → Verdict Diagnostic Obligation
+    check : Fact Subject Observation subject → Verdict Diagnostic Obligation
