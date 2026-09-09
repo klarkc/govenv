@@ -37,6 +37,7 @@
   - [ ] **R4.1** Recheck only rules affected by changed facts and emit diagnostic deltas.
   - [ ] **R4.2** Prove incremental checking equivalent to full checking.
   - [ ] **R4.3** Expose the checker through an LSP/editor loop.
+  - [ ] **R4.4** Expose governance context and diagnostic deltas through an MCP adapter for agent clients.
 - [ ] **R5 — Governed runtime compiler**
   - [ ] **R5.1** Define typed Environment/Runtime IR.
   - [ ] **R5.2** Compile valid projects through a devenv backend.
