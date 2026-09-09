@@ -25,7 +25,7 @@ phase1 = phase R1 "Formal governance kernel" active
   ( item 1 "`Verdict`: `holds`, `violated`, and `unknown`." done
   ∷ item 2 "Minimal `Rule` abstraction." done
   ∷ item 3 "Typed repository facts." done
-  ∷ item 4 "Dependency-indexed rules." todo
+  ∷ item 4 "Dependency-indexed rules." done
   ∷ item 5 "Roadmap release rule: every major or minor release must advance the roadmap by completing at least one unchecked item or moving `Current` to a later phase; patch releases are exempt." todo
   ∷ item 6 "Encode R1-05 as Govenv's first self-governing repository rule." todo
   ∷ item 7 "Extract governance rules from behavior, conventions, and infrastructure already implemented in the repository so existing decisions become explicit rather than remaining implicit in code or configuration." todo

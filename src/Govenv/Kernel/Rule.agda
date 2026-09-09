@@ -2,14 +2,15 @@
 
 module Govenv.Kernel.Rule where
 
+open import Agda.Builtin.List using (List)
 open import Govenv.Kernel.Fact
 open import Govenv.Kernel.Verdict
 
 record Rule
   (Subject : Set)
   (Observation : Subject → Set)
-  (subject : Subject)
+  (dependencies : List Subject)
   (Diagnostic Obligation : Set)
   : Set where
   field
-    check : Fact Subject Observation subject → Verdict Diagnostic Obligation
+    check : Facts Subject Observation dependencies → Verdict Diagnostic Obligation
