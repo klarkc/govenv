@@ -28,7 +28,7 @@ renderPhaseId P6 = "P6"
 
 itemMark : ItemState → String
 itemMark done = "✓"
-itemMark todo = "○"
+itemMark todo = "◇"
 
 renderGovernanceId : GovernanceId → String
 renderGovernanceId (GV number) = "GV" ++ primShowNat number
