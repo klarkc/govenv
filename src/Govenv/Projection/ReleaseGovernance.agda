@@ -1,0 +1,110 @@
+{-# OPTIONS --safe #-}
+
+module Govenv.Projection.ReleaseGovernance where
+
+open import Agda.Builtin.List using (List; []; _∷_)
+open import Agda.Builtin.Nat using (Nat)
+open import Agda.Builtin.String using
+  (String; primShowNat; primStringAppend)
+open import Govenv.Kernel.Identifier
+open import Govenv.Kernel.Release
+open GovernanceDelta
+open ItemImpact
+open import Govenv.Kernel.Roadmap using (ItemState; done; todo)
+open import Govenv.Materialization using (Materialization)
+open Materialization
+open import Govenv.Materialization.ReleaseGovernance
+open ImpactGroup
+open ImpactLine
+open ReleaseDocument
+
+infixr 5 _++_
+
+_++_ : String → String → String
+_++_ = primStringAppend
+
+renderPhaseId : SomePhaseId → String
+renderPhaseId (someIdentifier phaseId) =
+  "P" ++ primShowNat (indexOf phaseId)
+
+renderGovernanceId : SomeGovernanceId → String
+renderGovernanceId (someIdentifier governanceId) =
+  "GV" ++ primShowNat (indexOf governanceId)
+
+renderDescription : SomeGovernanceId → String
+renderDescription (someIdentifier governanceId) = descriptionOf governanceId
+
+renderItemMark : ItemState → String
+renderItemMark done = "✓"
+renderItemMark todo = "◇"
+
+renderChangeMark : ItemProgress → String
+renderChangeMark completed = ""
+renderChangeMark advanced = "↑ "
+renderChangeMark introduced = "+ "
+
+renderPhase : ReleaseDocument → String
+renderPhase document with phase document
+... | phaseIntroduced current =
+  "+ ▣ " ++ renderPhaseId current ++ " — " ++ introducedPhaseLabel document
+... | phaseUnchanged current =
+  "▣ " ++ renderPhaseId current ++ " — " ++ unchangedPhaseLabel document
+... | phaseAdvanced previous current =
+  "■ " ++ renderPhaseId previous ++ " → ▣ " ++ renderPhaseId current
+... | roadmapCompleted previous =
+  "■ " ++ renderPhaseId previous ++ " → ■ " ++ roadmapCompleteLabel document
+
+renderCount : ImpactGroup → String
+renderCount group = primShowNat (count group) ++ " " ++ label group
+
+renderSummary : ReleaseDocument → String
+renderSummary document =
+  renderCount (completedGroup document) ++ " · " ++
+  renderCount (advancedGroup document) ++ " · " ++
+  renderCount (introducedGroup document)
+
+renderImpact : String → ImpactLine → String
+renderImpact branch line with impactValue line
+... | impact itemId itemState progress =
+  branch ++ " " ++ renderItemMark itemState ++ " **" ++
+  renderGovernanceId itemId ++ "** — " ++ renderChangeMark progress ++
+  progressLabel line ++ " — " ++ renderDescription itemId ++ "  \n"
+
+renderImpacts : String → List ImpactLine → String
+renderImpacts emptyLabel [] = "└ — " ++ emptyLabel ++ "\n"
+renderImpacts emptyLabel (line ∷ []) = renderImpact "└" line
+renderImpacts emptyLabel (line ∷ rest) =
+  renderImpact "├" line ++ renderImpacts emptyLabel rest
+
+renderDocument : String → ReleaseDocument → String
+renderDocument headingPrefix document =
+  headingPrefix ++ " " ++ heading document ++ "\n\n" ++
+  "**" ++ phaseLabel document ++ ":** " ++ renderPhase document ++ "  \n\n" ++
+  "**" ++ itemsLabel document ++ ":** " ++ renderSummary document ++ "  \n\n" ++
+  renderImpacts (noImpactLabel document) (impactLines document) ++
+  "\n<sub>" ++ footer document ++ " `" ++ baseRevision document ++
+  ".." ++ headRevision document ++ "`.</sub>\n"
+
+startMarker : String
+startMarker = "<!-- govenv-governance-impact:start -->\n"
+
+endMarker : String
+endMarker = "<!-- govenv-governance-impact:end -->\n"
+
+renderBodyMaterialization : Materialization ReleaseDocument → String
+renderBodyMaterialization materialization =
+  startMarker ++ renderDocument "##" (state materialization) ++ endMarker
+
+renderChangelogMaterialization : Materialization ReleaseDocument → String
+renderChangelogMaterialization materialization =
+  startMarker ++ renderDocument "###" (state materialization) ++ endMarker
+
+renderError : GovernanceDeltaError → String
+renderError (itemRegressed itemId) =
+  "Governance item regressed from done to pending: " ++ renderGovernanceId itemId
+renderError (governanceRemoved idx) =
+  "Governance item disappeared from the roadmap: GV" ++ primShowNat idx
+renderError (phaseRegressed previous current) =
+  "Roadmap phase regressed from P" ++ primShowNat previous ++
+  " to " ++ renderPhaseId current
+renderError emptyRoadmap = "A completed roadmap must contain at least one phase"

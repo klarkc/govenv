@@ -1,5 +1,6 @@
 .devenv/
-.govenv/
+.govenv/*
+!.govenv/roadmap.snapshot
 *.agdai
 .docs-build/
 _site/

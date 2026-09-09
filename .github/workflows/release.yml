@@ -25,6 +25,7 @@ jobs:
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           ref: ${{ github.event_name == 'workflow_run' && 'main' || github.ref }}
+          fetch-depth: 0
 
       - name: Install Nix
         uses: DeterminateSystems/determinate-nix-action@021c8a1bd3570eb21f5c20a054812b0c4d9ca614 # v3.22.3
@@ -47,8 +48,23 @@ jobs:
         run: git diff --exit-code
 
       - name: Release Please
+        id: release
         uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           config-file: .github/release-please/config.json
           manifest-file: .github/release-please/manifest.json
+
+      - name: Materialize release governance
+        if: steps.release.outputs.prs_created == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GOVENV_RELEASE_PR_JSON: ${{ steps.release.outputs.pr }}
+        run: |
+          GOVENV_RELEASE_PR="$(jq -r '.number' <<< "${GOVENV_RELEASE_PR_JSON}")"
+          if [[ ! "${GOVENV_RELEASE_PR}" =~ ^[0-9]+$ ]]; then
+            echo "Release Please did not return a valid pull request number." >&2
+            exit 2
+          fi
+          export GOVENV_RELEASE_PR
+          bash src/Govenv/Adapter/release-governance-pr.sh

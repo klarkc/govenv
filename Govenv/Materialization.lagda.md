@@ -7,6 +7,7 @@ Materialization defines canonical semantic target state from governed project da
 
 module Govenv.Materialization where
 
+open import Agda.Builtin.Nat using (Nat)
 open import Agda.Builtin.String using (String)
 
 data Application : Set where
@@ -18,14 +19,24 @@ data Privilege : Set where
 data GithubRepositoryProperty : Set where
   repositoryDescription : GithubRepositoryProperty
 
+data GithubPullRequestSection : Set where
+  releaseGovernanceImpact : GithubPullRequestSection
+
 data Target : Set where
   repositoryFile : String → Target
   githubRepository : GithubRepositoryProperty → Target
+  githubPullRequestBodySection : Nat → GithubPullRequestSection → Target
+  githubPullRequestFileSection : Nat → String → GithubPullRequestSection → Target
 
 data Verification : Target → Set where
   trackedEquality : {path : String} → Verification (repositoryFile path)
   readBackEquality : {property : GithubRepositoryProperty} →
     Verification (githubRepository property)
+  pullRequestBodySectionEquality : {number : Nat} {section : GithubPullRequestSection} →
+    Verification (githubPullRequestBodySection number section)
+  pullRequestFileSectionEquality :
+    {number : Nat} {path : String} {section : GithubPullRequestSection} →
+    Verification (githubPullRequestFileSection number path section)
 
 record Materialization (State : Set) : Set where
   constructor materialized

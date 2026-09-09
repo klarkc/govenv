@@ -10,6 +10,8 @@ open import Govenv.Architecture
 open import Govenv.Administration
 open import Govenv.Materialization
 open import Govenv.Materialization.Readme
+open import Govenv.Materialization.RoadmapSnapshot
+open import Govenv.Materialization.ReleaseGovernance
 open import Govenv.Materialization.Github.Repository.Description
 open import Govenv.Project
 open import Govenv.Roadmap

@@ -21,6 +21,7 @@ architecture = record
     ∷ area "src/Govenv/Projection/" projection
     ∷ area "src/Govenv/Adapter/" adapter
     ∷ area "README.md" generated
+    ∷ area ".govenv/roadmap.snapshot" generated
     ∷ []
   ; dependencies =
       allow closure constitution

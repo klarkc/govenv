@@ -1,16 +1,19 @@
 { pkgs, ... }:
 
 let
-  buildMaterializer = ''
+  buildMaterializers = ''
     rm -rf .govenv/materialize-build
     mkdir -p .govenv/materialize-build
     agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/Readme.agda >/dev/null
+    agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/RoadmapSnapshot.agda >/dev/null
   '';
 
   checkMaterializations = ''
-    ${buildMaterializer}
+    ${buildMaterializers}
     .govenv/materialize-build/Readme > .govenv/README.generated.md
+    .govenv/materialize-build/RoadmapSnapshot > .govenv/roadmap.generated.snapshot
     diff -u README.md .govenv/README.generated.md
+    diff -u .govenv/roadmap.snapshot .govenv/roadmap.generated.snapshot
   '';
 
   materializeGithubDescription = ''
@@ -32,8 +35,9 @@ in
   ];
 
   tasks."govenv:materialize".exec = ''
-    ${buildMaterializer}
+    ${buildMaterializers}
     .govenv/materialize-build/Readme > README.md
+    .govenv/materialize-build/RoadmapSnapshot > .govenv/roadmap.snapshot
   '';
 
   tasks."govenv:materialize:check".exec = checkMaterializations;
