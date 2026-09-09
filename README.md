@@ -13,7 +13,7 @@
 
 ## Roadmap
 
-**Current:** Phase 1 — Formal governance kernel. `Verdict` and the minimal `Rule` are in place; typed facts and rule dependencies are next.
+**Current:** Phase 1 — Formal governance kernel. `Verdict`, typed `Fact`, and the current `Rule` model are in place; dependency-indexed rules and the first self-governing rule are next.
 
 - [x] **Phase 0 — Bootstrap and project shape**
   - Literate `Govenv.lagda.md` closure root.
@@ -22,7 +22,8 @@
 - [ ] **Phase 1 — Formal governance kernel** ← current
   - [x] `Verdict`: `holds`, `violated`, and `unknown`.
   - [x] Minimal `Rule` abstraction.
-  - [ ] Typed facts and dependency-indexed rules.
+  - [x] Typed repository facts.
+  - [ ] Dependency-indexed rules.
   - [ ] Roadmap governance rule: every major or minor release must advance the README roadmap by completing at least one unchecked item or moving `Current` to a later phase; patch releases are exempt.
   - [ ] Encode the roadmap rule as Govenv's first self-governing repository rule.
 - [ ] **Phase 2 — Pure repository evaluator**
