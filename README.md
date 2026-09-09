@@ -13,36 +13,39 @@
 
 ## Roadmap
 
-**Current:** Phase 1 — Formal governance kernel. `Verdict`, typed `Fact`, and the current `Rule` model are in place; dependency-indexed rules and the first self-governing rule are next.
+**Current:** R1 — Formal governance kernel. `Verdict`, typed `Fact`, and the current `Rule` model are in place; dependency-indexed rules and the first self-governing rule are next.
 
-- [x] **Phase 0 — Bootstrap and project shape**
-  - Literate `Govenv.lagda.md` closure root.
-  - Project governance under `Govenv/`; reusable kernel under `Govenv.Kernel.*`.
-  - Reproducible Stage 0 bootstrap, documentation site, and automated releases.
-- [ ] **Phase 1 — Formal governance kernel** ← current
-  - [x] `Verdict`: `holds`, `violated`, and `unknown`.
-  - [x] Minimal `Rule` abstraction.
-  - [x] Typed repository facts.
-  - [ ] Dependency-indexed rules.
-  - [ ] Roadmap governance rule: every major or minor release must advance the README roadmap by completing at least one unchecked item or moving `Current` to a later phase; patch releases are exempt.
-  - [ ] Encode the roadmap rule as Govenv's first self-governing repository rule.
-- [ ] **Phase 2 — Pure repository evaluator**
-  - Evaluate facts, rules, verdicts, obligations, and diagnostics without IO.
-- [ ] **Phase 3 — `govenv check`**
-  - Observe repository facts through a thin impure adapter.
-  - Produce source-mapped governance diagnostics from the pure kernel.
-- [ ] **Phase 4 — Incremental governance**
-  - Recheck only rules affected by changed facts and emit diagnostic deltas.
-  - Prove incremental checking equivalent to full checking.
-  - Expose the checker through an LSP/editor loop.
-- [ ] **Phase 5 — Governed runtime compiler**
-  - Define typed Environment/Runtime IR.
-  - Compile valid projects through a devenv backend.
-  - Expose `govenv shell`, `govenv test`, and `govenv up`.
-- [ ] **Phase 6 — Product bootstrap and self-hosting**
-  - Ship a standalone `govenv` entrypoint and managed runtime setup.
-  - Make Govenv govern and build itself.
-  - Keep runtime backends replaceable behind the typed IR boundary.
+> This roadmap is subject to change as Govenv's architecture evolves. IDs are intended to remain stable references whenever practical.
+
+- [x] **R0 — Bootstrap and project shape**
+  - [x] **R0.1** Literate `Govenv.lagda.md` closure root.
+  - [x] **R0.2** Project governance under `Govenv/`; reusable kernel under `Govenv.Kernel.*`.
+  - [x] **R0.3** Reproducible Stage 0 bootstrap, documentation site, and automated releases.
+- [ ] **R1 — Formal governance kernel** ← current
+  - [x] **R1.1** `Verdict`: `holds`, `violated`, and `unknown`.
+  - [x] **R1.2** Minimal `Rule` abstraction.
+  - [x] **R1.3** Typed repository facts.
+  - [ ] **R1.4** Dependency-indexed rules.
+  - [ ] **R1.5** Roadmap release rule: every major or minor release must advance the README roadmap by completing at least one unchecked item or moving `Current` to a later phase; patch releases are exempt.
+  - [ ] **R1.6** Encode R1.5 as Govenv's first self-governing repository rule.
+- [ ] **R2 — Pure repository evaluator**
+  - [ ] **R2.1** Evaluate facts, rules, verdicts, obligations, and diagnostics without IO.
+- [ ] **R3 — `govenv check`**
+  - [ ] **R3.1** Observe repository facts through a thin impure adapter.
+  - [ ] **R3.2** Produce source-mapped governance diagnostics from the pure kernel.
+- [ ] **R4 — Incremental governance**
+  - [ ] **R4.1** Recheck only rules affected by changed facts and emit diagnostic deltas.
+  - [ ] **R4.2** Prove incremental checking equivalent to full checking.
+  - [ ] **R4.3** Expose the checker through an LSP/editor loop.
+- [ ] **R5 — Governed runtime compiler**
+  - [ ] **R5.1** Define typed Environment/Runtime IR.
+  - [ ] **R5.2** Compile valid projects through a devenv backend.
+  - [ ] **R5.3** Expose `govenv shell`, `govenv test`, and `govenv up`.
+- [ ] **R6 — Product bootstrap and self-hosting**
+  - [ ] **R6.1** Ship a standalone `govenv` entrypoint and managed runtime setup.
+  - [ ] **R6.2** Make Govenv govern and build itself.
+  - [ ] **R6.3** Keep runtime backends replaceable behind the typed IR boundary.
+  - [ ] **R6.4** Support white-label distributions while keeping the formal kernel reusable and product-neutral.
 
 ## Bootstrap
 
