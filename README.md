@@ -15,7 +15,7 @@
 
 ## Roadmap
 
-**Current:** ▣ P1 — Formal governance model and repository closure. `Verdict`, typed `Fact`, dependency-indexed `Rule`, typed roadmap structure, and materialization closure are in place; roadmap integrity and typed release governance are the next active governance work.
+**Current:** ▣ P1 — Formal governance model and repository closure. `Verdict`, typed `Fact`, dependency-indexed `Rule`, typed roadmap structure, materialization closure, and roadmap integrity are in place; typed release governance is the next active governance work.
 
 > This roadmap is subject to change as Govenv's architecture evolves. IDs are intended to remain stable references whenever practical.
 
@@ -38,7 +38,7 @@
 - ✓ **GV47** Type roadmap governance identifiers as `GovernanceId` and use readable `✓`/`◇` item notation instead of raw `Nat` plus `done`/`todo`.
 - ✓ **GV49** Make roadmap phase progression structurally valid with exactly one active phase while in progress, declare phases with `■`/`▣`/`□`, and render phase/item state using the same operator glyphs.
 - ✓ **GV50** Use generic typed identifiers with structural `BelongsTo`, and express the entire roadmap as one declarative tree with implementation mechanics hidden.
-- ◇ **GV52** Enforce roadmap identity and completion integrity: phase and governance indices must be unique, phase indices must progress monotonically, and a finished phase may contain no pending governance items.
+- ✓ **GV52** Enforce roadmap identity and completion integrity: phase and governance indices must be unique, phase indices must progress monotonically, and a finished phase may contain no pending governance items.
 - ◇ **GV9** Inventory repository behavior and policy, distinguishing governed semantics from irreducibly observational or effectful mechanisms.
 - ◇ **GV10** Require every inventory entry whose semantics can be expressed and checked by Govenv to be backed by governed data and a rule.
 - ◇ **GV11** Minimize the ungoverned surface to irreducible observation and effect execution; adapters may perform effects but must not introduce semantic content, policy, structure, ordering, or authorization decisions.

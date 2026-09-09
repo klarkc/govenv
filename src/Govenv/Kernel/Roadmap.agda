@@ -2,8 +2,9 @@
 
 module Govenv.Kernel.Roadmap where
 
+open import Agda.Builtin.Bool using (Bool; true; false)
 open import Agda.Builtin.List using (List; []; _∷_)
-open import Agda.Builtin.Nat using (Nat)
+open import Agda.Builtin.Nat using (Nat; zero; suc)
 open import Agda.Builtin.String using (String)
 open import Govenv.Kernel.Identifier
 
@@ -71,6 +72,42 @@ private
   singleton : {A : Set} → A → Forest A
   singleton x = forest (x ∷ [])
 
+  _and_ : Bool → Bool → Bool
+  true and right = right
+  false and right = false
+
+  not : Bool → Bool
+  not true = false
+  not false = true
+
+  equalNat : Nat → Nat → Bool
+  equalNat zero zero = true
+  equalNat zero (suc right) = false
+  equalNat (suc left) zero = false
+  equalNat (suc left) (suc right) = equalNat left right
+
+  lessNat : Nat → Nat → Bool
+  lessNat zero zero = false
+  lessNat zero (suc right) = true
+  lessNat (suc left) zero = false
+  lessNat (suc left) (suc right) = lessNat left right
+
+  containsNat : Nat → List Nat → Bool
+  containsNat value [] = false
+  containsNat value (x ∷ xs) with equalNat value x
+  ... | true = true
+  ... | false = containsNat value xs
+
+  uniqueNats : List Nat → Bool
+  uniqueNats [] = true
+  uniqueNats (x ∷ xs) = not (containsNat x xs) and uniqueNats xs
+
+  strictlyIncreasing : List Nat → Bool
+  strictlyIncreasing [] = true
+  strictlyIncreasing (x ∷ []) = true
+  strictlyIncreasing (x ∷ y ∷ rest) =
+    lessNat x y and strictlyIncreasing (y ∷ rest)
+
 attach :
   {phaseIdx : Nat} {phaseDescription : String} →
   (phase : PhaseId phaseIdx phaseDescription) →
@@ -95,6 +132,78 @@ data RoadmapChain : ChainShape → Set where
   invalidChain : RoadmapChain invalidShape
 
 private
+  membershipIndices :
+    {phaseIdx : Nat} {phaseDescription : String}
+    {phase : PhaseId phaseIdx phaseDescription} →
+    List (Membership phase) → List Nat
+  membershipIndices [] = []
+  membershipIndices (membership governanceId state relation ∷ rest) =
+    indexOf governanceId ∷ membershipIndices rest
+
+  phaseIndex : {state : PhaseState} → PhaseNode state → Nat
+  phaseIndex (phaseNode phaseId items) = indexOf phaseId
+
+  phaseIndices : {state : PhaseState} → List (PhaseNode state) → List Nat
+  phaseIndices [] = []
+  phaseIndices (phase ∷ rest) = phaseIndex phase ∷ phaseIndices rest
+
+  phaseGovernanceIndices :
+    {state : PhaseState} → List (PhaseNode state) → List Nat
+  phaseGovernanceIndices [] = []
+  phaseGovernanceIndices (phaseNode phaseId items ∷ rest) =
+    membershipIndices items ++ phaseGovernanceIndices rest
+
+  itemsDone :
+    {phaseIdx : Nat} {phaseDescription : String}
+    {phase : PhaseId phaseIdx phaseDescription} →
+    List (Membership phase) → Bool
+  itemsDone [] = true
+  itemsDone (membership governanceId done relation ∷ rest) = itemsDone rest
+  itemsDone (membership governanceId todo relation ∷ rest) = false
+
+  finishedPhasesDone : List (PhaseNode finished) → Bool
+  finishedPhasesDone [] = true
+  finishedPhasesDone (phaseNode phaseId items ∷ rest) =
+    itemsDone items and finishedPhasesDone rest
+
+  chainPhaseIndices : {shape : ChainShape} → RoadmapChain shape → List Nat
+  chainPhaseIndices (finishedChain phases) = phaseIndices phases
+  chainPhaseIndices (activeChain current futures) =
+    phaseIndex current ∷ phaseIndices futures
+  chainPhaseIndices (futureChain futures) = phaseIndices futures
+  chainPhaseIndices (progressingChain finishedPhases current futures) =
+    phaseIndices finishedPhases ++ (phaseIndex current ∷ phaseIndices futures)
+  chainPhaseIndices invalidChain = []
+
+  chainGovernanceIndices :
+    {shape : ChainShape} → RoadmapChain shape → List Nat
+  chainGovernanceIndices (finishedChain phases) =
+    phaseGovernanceIndices phases
+  chainGovernanceIndices (activeChain current futures) =
+    phaseGovernanceIndices (current ∷ []) ++ phaseGovernanceIndices futures
+  chainGovernanceIndices (futureChain futures) =
+    phaseGovernanceIndices futures
+  chainGovernanceIndices (progressingChain finishedPhases current futures) =
+    phaseGovernanceIndices finishedPhases ++
+    (phaseGovernanceIndices (current ∷ []) ++
+     phaseGovernanceIndices futures)
+  chainGovernanceIndices invalidChain = []
+
+  chainFinishedPhasesDone :
+    {shape : ChainShape} → RoadmapChain shape → Bool
+  chainFinishedPhasesDone (finishedChain phases) = finishedPhasesDone phases
+  chainFinishedPhasesDone (activeChain current futures) = true
+  chainFinishedPhasesDone (futureChain futures) = true
+  chainFinishedPhasesDone (progressingChain finishedPhases current futures) =
+    finishedPhasesDone finishedPhases
+  chainFinishedPhasesDone invalidChain = false
+
+  integrity : {shape : ChainShape} → RoadmapChain shape → Bool
+  integrity chain =
+    strictlyIncreasing (chainPhaseIndices chain) and
+    (uniqueNats (chainGovernanceIndices chain) and
+     chainFinishedPhasesDone chain)
+
   appendShape : ChainShape → ChainShape → ChainShape
   appendShape finishedOnly finishedOnly = finishedOnly
   appendShape finishedOnly activeAndFuture = progressingShape
@@ -189,16 +298,29 @@ _□ :
   RoadmapChain futureOnly
 _□ phaseId items = futureChain (makePhase future phaseId items ∷ [])
 
-RoadmapResult : ChainShape → Set
-RoadmapResult finishedOnly = Roadmap
-RoadmapResult activeAndFuture = Roadmap
-RoadmapResult progressingShape = Roadmap
-RoadmapResult futureOnly = RoadmapChain futureOnly
-RoadmapResult invalidShape = RoadmapChain invalidShape
+IntegrityResult : Bool → Set
+IntegrityResult true = Roadmap
+IntegrityResult false = RoadmapChain invalidShape
 
-roadmapOf : {shape : ChainShape} → RoadmapChain shape → RoadmapResult shape
-roadmapOf (finishedChain phases) = complete phases
-roadmapOf (activeChain current futures) = progressing [] current futures
-roadmapOf (progressingChain phases current futures) = progressing phases current futures
+RoadmapResult : {shape : ChainShape} → RoadmapChain shape → Set
+RoadmapResult {finishedOnly} chain = IntegrityResult (integrity chain)
+RoadmapResult {activeAndFuture} chain = IntegrityResult (integrity chain)
+RoadmapResult {progressingShape} chain = IntegrityResult (integrity chain)
+RoadmapResult {futureOnly} chain = RoadmapChain futureOnly
+RoadmapResult {invalidShape} chain = RoadmapChain invalidShape
+
+roadmapOf :
+  {shape : ChainShape} →
+  (chain : RoadmapChain shape) →
+  RoadmapResult chain
+roadmapOf chain@(finishedChain phases) with integrity chain
+... | true = complete phases
+... | false = invalidChain
+roadmapOf chain@(activeChain current futures) with integrity chain
+... | true = progressing [] current futures
+... | false = invalidChain
+roadmapOf chain@(progressingChain phases current futures) with integrity chain
+... | true = progressing phases current futures
+... | false = invalidChain
 roadmapOf chain@(futureChain _) = chain
 roadmapOf invalidChain = invalidChain

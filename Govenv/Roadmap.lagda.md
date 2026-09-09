@@ -9,6 +9,7 @@ module Govenv.Roadmap where
 
 open import Govenv.Roadmap.DSL
 
+roadmap : Roadmap
 roadmap = roadmapOf (
     (P 0 "Bootstrap and project shape" ■
     ┬ GV 0 "Literate `Govenv.lagda.md` closure root." ✓
@@ -22,7 +23,7 @@ roadmap = roadmapOf (
     ├ GV 47 "Type roadmap governance identifiers as `GovernanceId` and use readable `✓`/`◇` item notation instead of raw `Nat` plus `done`/`todo`." ✓
     ├ GV 49 "Make roadmap phase progression structurally valid with exactly one active phase while in progress, declare phases with `■`/`▣`/`□`, and render phase/item state using the same operator glyphs." ✓
     ├ GV 50 "Use generic typed identifiers with structural `BelongsTo`, and express the entire roadmap as one declarative tree with implementation mechanics hidden." ✓
-    ├ GV 52 "Enforce roadmap identity and completion integrity: phase and governance indices must be unique, phase indices must progress monotonically, and a finished phase may contain no pending governance items." ◇
+    ├ GV 52 "Enforce roadmap identity and completion integrity: phase and governance indices must be unique, phase indices must progress monotonically, and a finished phase may contain no pending governance items." ✓
     ├ GV 9 "Inventory repository behavior and policy, distinguishing governed semantics from irreducibly observational or effectful mechanisms." ◇
     ├ GV 10 "Require every inventory entry whose semantics can be expressed and checked by Govenv to be backed by governed data and a rule." ◇
     ├ GV 11 "Minimize the ungoverned surface to irreducible observation and effect execution; adapters may perform effects but must not introduce semantic content, policy, structure, ordering, or authorization decisions." ◇
