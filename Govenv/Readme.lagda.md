@@ -8,9 +8,9 @@ The repository README is governed project data. Rendering and materialization be
 module Govenv.Readme where
 
 open import Govenv.Kernel.Readme
-open import Govenv.Roadmap
+open import Govenv.Roadmap using (roadmap)
 
-readme : Readme PhaseId GovernanceId
+readme : Readme
 readme = record
   { docsUrl = "https://klarkc.github.io/govenv/"
   ; agdaVersion = "2.8.0"

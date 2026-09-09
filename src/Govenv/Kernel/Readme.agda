@@ -5,7 +5,7 @@ module Govenv.Kernel.Readme where
 open import Agda.Builtin.String using (String)
 open import Govenv.Kernel.Roadmap using (Roadmap)
 
-record Readme (PhaseId : Set) (ItemId : PhaseId → Set) : Set where
+record Readme : Set where
   field
     docsUrl : String
     agdaVersion : String
@@ -13,7 +13,7 @@ record Readme (PhaseId : Set) (ItemId : PhaseId → Set) : Set where
     licenseName : String
     currentSummary : String
     roadmapNote : String
-    roadmap : Roadmap PhaseId ItemId
+    roadmap : Roadmap
     gettingStartedTitle : String
     bootstrapSummary : String
     bootstrapPin : String
