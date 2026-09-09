@@ -42,6 +42,8 @@ phase1 = phase R1 "Formal governance kernel" active
   ∷ item 18 "Keep `Govenv` as the canonical immutable project identity; white-label distributions may change branding projections, never the Govenv identity." done
   ∷ item 19 "Project the canonical Govenv description from `Govenv.Project` into repository-facing materializations." done
   ∷ item 20 "Require admin-privileged external materializations to run only through the manual, target-restricted `Admin Materialize` workflow." done
+  ∷ item 21 "Inventory every behavior currently encoded in GitHub Actions and extract it into explicit governance: triggers, permissions, concurrency, runners, timeouts, pinned actions, Nix runtime/cache, materialization, tests, Pages, releases, and admin boundaries." todo
+  ∷ item 22 "CI projection closure rule: GitHub Actions workflows must contain no independent policy; every CI behavior must be traceable to governed project data and ultimately materializable from the constitution." todo
   ∷ [] )
 
 phase2 : Phase PhaseId
@@ -79,6 +81,8 @@ phase6 = phase R6 "Product bootstrap and self-hosting" future
   ∷ item 2 "Make Govenv govern and build itself." todo
   ∷ item 3 "Keep runtime backends replaceable behind the typed IR boundary." todo
   ∷ item 4 "Support white-label distributions while keeping the formal kernel reusable and product-neutral." todo
+  ∷ item 5 "Make repository bootstrap, integrations, secrets/environments setup, and privileged materialization declarative and reproducible through Govenv rather than repository-specific manual steps." todo
+  ∷ item 6 "Make the final product ejectable from the Govenv codebase: a white-label distribution must be able to carry its governed project model, generated CI/materializations, and integrations without depending on `klarkc/govenv` repository-specific code." todo
   ∷ [] )
 
 roadmap : Roadmap PhaseId

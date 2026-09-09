@@ -100,6 +100,8 @@ renderGettingStarted specification =
   "### " ++ materializeTitle specification ++ "\n\n" ++
   "Materialize governed repository artifacts with:\n\n```bash\n" ++ materializeCommand specification ++ "\n```\n\n" ++
   materializeSummary specification ++ "\n\n" ++
+  "### " ++ administrationTitle specification ++ "\n\n" ++
+  administrationSummary specification ++ " [Read the governed setup guide](" ++ administrationUrl specification ++ ").\n\n" ++
   "### " ++ testTitle specification ++ "\n\n" ++
   "Run the test suite with the pinned devenv tag:\n\n```bash\n" ++ testCommand specification ++ "\n```\n\n" ++
   testSummary specification ++ "\n\n" ++

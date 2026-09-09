@@ -20,6 +20,9 @@ record Readme (PhaseId : Set) : Set where
     materializeTitle : String
     materializeCommand : String
     materializeSummary : String
+    administrationTitle : String
+    administrationUrl : String
+    administrationSummary : String
     testTitle : String
     testCommand : String
     testSummary : String
