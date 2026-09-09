@@ -2,16 +2,15 @@
 
 module Govenv.Projection.Readme where
 
-open import Agda.Builtin.Bool
 open import Agda.Builtin.List
-open import Agda.Builtin.Nat using (Nat; _<_)
+open import Agda.Builtin.Nat using (Nat)
 open import Agda.Builtin.String
 open import Govenv.Kernel.Readme
 open Readme
 open import Govenv.Kernel.Roadmap
 open import Govenv.Projection.Project using (projectName; projectDescription)
 open import Govenv.Readme using (readme)
-open import Govenv.Roadmap using (PhaseId; R0; R1; R2; R3; R4; R5; R6)
+open import Govenv.Roadmap using (PhaseId; P0; P1; P2; P3; P4; P5; P6)
 
 infixr 5 _++_
 
@@ -19,18 +18,13 @@ _++_ : String → String → String
 _++_ = primStringAppend
 
 renderPhaseId : PhaseId → String
-renderPhaseId R0 = "R0"
-renderPhaseId R1 = "R1"
-renderPhaseId R2 = "R2"
-renderPhaseId R3 = "R3"
-renderPhaseId R4 = "R4"
-renderPhaseId R5 = "R5"
-renderPhaseId R6 = "R6"
-
-renderOrdinal : Nat → String
-renderOrdinal n with n < 10
-... | true = "0" ++ primShowNat n
-... | false = primShowNat n
+renderPhaseId P0 = "P0"
+renderPhaseId P1 = "P1"
+renderPhaseId P2 = "P2"
+renderPhaseId P3 = "P3"
+renderPhaseId P4 = "P4"
+renderPhaseId P5 = "P5"
+renderPhaseId P6 = "P6"
 
 checkbox : ItemState → String
 checkbox done = "[x]"
@@ -51,7 +45,7 @@ currentMark _ = ""
 
 renderItem : {owner : PhaseId} → Item PhaseId owner → String
 renderItem {owner} (item number title state) =
-  "- " ++ checkbox state ++ " **" ++ renderPhaseId owner ++ "-" ++ renderOrdinal number ++ "** " ++ title ++ "\n"
+  "- " ++ checkbox state ++ " **GV" ++ primShowNat number ++ "** " ++ title ++ "\n"
 
 renderItems : {owner : PhaseId} → List (Item PhaseId owner) → String
 renderItems [] = ""
