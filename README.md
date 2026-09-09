@@ -28,6 +28,10 @@
   - [ ] **R1-04** Dependency-indexed rules.
   - [ ] **R1-05** Roadmap release rule: every major or minor release must advance the README roadmap by completing at least one unchecked item or moving `Current` to a later phase; patch releases are exempt.
   - [ ] **R1-06** Encode R1-05 as Govenv's first self-governing repository rule.
+  - [ ] **R1-07** Extract governance rules from behavior, conventions, and infrastructure already implemented in the repository so existing decisions become explicit rather than remaining implicit in code or configuration.
+  - [ ] **R1-08** Governance coverage rule: every project property that can be expressed and checked by Govenv must become a governance rule rather than remain an unenforced convention.
+  - [ ] **R1-09** Minimize the ungoverned surface: keep only unavoidable observation, IO, and adapter effects outside governance, and make every remaining exception explicit and justified.
+  - [ ] **R1-10** CI governance rule: Govenv CI must run on Determinate Nix; changing the Nix runtime requires an explicit governance change.
 - [ ] **R2 — Pure repository evaluator**
   - [ ] **R2-01** Evaluate facts, rules, verdicts, obligations, and diagnostics without IO.
 - [ ] **R3 — `govenv check` and commit governance**
