@@ -47,3 +47,14 @@ SomePhaseId = SomeIdentifier Phase
 
 SomeGovernanceId : Set
 SomeGovernanceId = SomeIdentifier Governance
+
+record IdentifierRef (kind : IdentifierKind) : Set where
+  constructor identifierRef
+  field
+    referenceIndex : Nat
+
+GovernanceRef : Set
+GovernanceRef = IdentifierRef Governance
+
+GVR : Nat → GovernanceRef
+GVR = identifierRef

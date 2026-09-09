@@ -15,9 +15,9 @@
 
 ## Roadmap
 
-**Current:** ▣ P1 — Formal governance model and repository closure. `Verdict`, typed `Fact`, dependency-indexed `Rule`, typed roadmap structure, materialization closure, roadmap integrity, and typed release governance are in place; the governed release-progress policy and its self-governing `Rule` are next.
+**Current:** ▣ P1 — Formal governance model and repository closure. `Verdict`, typed `Fact`, dependency-indexed `Rule`, typed roadmap structure, materialization closure, roadmap integrity, immutable governance identity, and typed release governance are in place; GV55 release-progress policy and its GV56 self-governing `Rule` are next.
 
-> This roadmap is subject to change as Govenv's architecture evolves. IDs are intended to remain stable references whenever practical.
+> Governance IDs are immutable historical references. Definitions and owning phases never change after introduction; abandoned work is cancelled, while corrections or changed intent require a newer GV and explicit supersession.
 
 <details>
 <summary>■ <strong>P0 — Bootstrap and project shape</strong></summary>
@@ -35,16 +35,24 @@
 - ✓ **GV4** Minimal `Rule` abstraction.
 - ✓ **GV5** Typed repository facts.
 - ✓ **GV6** Dependency-indexed rules.
-- ✓ **GV47** Type roadmap governance identifiers as `GovernanceId` and use readable `✓`/`◇` item notation instead of raw `Nat` plus `done`/`todo`.
-- ✓ **GV49** Make roadmap phase progression structurally valid with exactly one active phase while in progress, declare phases with `■`/`▣`/`□`, and render phase/item state using the same operator glyphs.
+- ↪ **GV47** Type roadmap governance identifiers as `GovernanceId` and use readable `✓`/`○` item notation instead of raw `Nat` plus `done`/`todo`. → **GV68**
+- ✓ **GV68** Type roadmap governance identifiers as `GovernanceId` and use readable `✓`/`◇` item notation instead of raw `Nat` plus `done`/`todo`.
+- ↪ **GV49** Make roadmap phase progression structurally valid with exactly one active phase while in progress, declare phases with `■`/`▶`/`□`, and render phase/item state using the same operator glyphs. → **GV69**
+- ✓ **GV69** Make roadmap phase progression structurally valid with exactly one active phase while in progress, declare phases with `■`/`▣`/`□`, and render phase/item state using the same operator glyphs.
 - ✓ **GV50** Use generic typed identifiers with structural `BelongsTo`, and express the entire roadmap as one declarative tree with implementation mechanics hidden.
 - ✓ **GV52** Enforce roadmap identity and completion integrity: phase and governance indices must be unique, phase indices must progress monotonically, and a finished phase may contain no pending governance items.
-- ◇ **GV9** Inventory repository behavior and policy, distinguishing governed semantics from irreducibly observational or effectful mechanisms.
-- ◇ **GV10** Require every inventory entry whose semantics can be expressed and checked by Govenv to be backed by governed data and a rule.
-- ◇ **GV11** Minimize the ungoverned surface to irreducible observation and effect execution; adapters may perform effects but must not introduce semantic content, policy, structure, ordering, or authorization decisions.
-- ◇ **GV17** Enforce architecture roles and dependency directions for the closure root, constitution, materialization, kernel, projection, adapters, and generated artifacts.
+- ↪ **GV9** Extract governance rules from behavior, conventions, and infrastructure already implemented in the repository so existing decisions become explicit rather than remaining implicit in code or configuration. → **GV57**
+- ◇ **GV57** Inventory repository behavior and policy, distinguishing governed semantics from irreducibly observational or effectful mechanisms.
+- ↪ **GV10** Governance coverage rule: every project property that can be expressed and checked by Govenv must become a governance rule rather than remain an unenforced convention. → **GV58**
+- ◇ **GV58** Require every inventory entry whose semantics can be expressed and checked by Govenv to be backed by governed data and a rule.
+- ↪ **GV11** Minimize the ungoverned surface: keep only unavoidable observation, IO, and adapter effects outside governance, and make every remaining exception explicit and justified. → **GV59**
+- ◇ **GV59** Minimize the ungoverned surface to irreducible observation and effect execution; adapters may perform effects but must not introduce semantic content, policy, structure, ordering, or authorization decisions.
+- ↪ **GV17** Govern architecture roles and dependency directions for constitution, kernel, projection, adapters, and generated artifacts. → **GV61**
+- ↪ **GV61** Enforce architecture roles and dependency directions for constitution, materialization, kernel, projection, adapters, and generated artifacts. → **GV62**
+- ◇ **GV62** Enforce architecture roles and dependency directions for the closure root, constitution, materialization, kernel, projection, adapters, and generated artifacts.
 - ✓ **GV20** Keep `Govenv` as the canonical immutable project identity; white-label distributions may change branding projections, never the Govenv identity.
-- ✓ **GV14** Govern `README.md` as the canonical output of `Govenv.Materialization.Readme`; manual divergence must fail the project check.
+- ↪ **GV14** Govern the README as a canonical materialization of `Govenv.Readme`; manual divergence must fail the project check. → **GV60**
+- ✓ **GV60** Govern `README.md` as the canonical output of `Govenv.Materialization.Readme`; manual divergence must fail the project check.
 - ✓ **GV15** Keep the README roadmap projection to exactly two visible levels, `Phase → Item`, with phases collapsible.
 - ✓ **GV16** Materialize governed README sections from Agda rather than maintaining duplicate prose by hand.
 - ✓ **GV51** Materialization closure: every state materialized by Govenv must have exactly one canonical `Govenv.Materialization.*` definition containing all semantic content, structure, ordering, inclusion, policy, and required capability decisions; projections encode only target-format representation, and adapters only observe, apply, or verify effects.
@@ -54,22 +62,28 @@
 - ✓ **GV22** Require admin-privileged external materializations to run only through the manual, target-restricted `Admin Materialize` workflow.
 - ✓ **GV45** Require every admin materialization to read the target back after applying it, fail unless the observed value equals the governed expected value, and emit execution evidence tied to the constitution SHA, target, repository, and workflow run.
 - ◇ **GV46** Model admin materialization evidence as typed governed data that can be consumed by a formal rule or assurance check rather than relying on workflow success alone.
-- ◇ **GV23** Close the GitHub Actions portion of the governance inventory: triggers, permissions, concurrency, runners, timeouts, pinned actions, Nix runtime/cache, materialization, tests, Pages, releases, and admin boundaries.
+- ↪ **GV23** Inventory every behavior currently encoded in GitHub Actions and extract it into explicit governance: triggers, permissions, concurrency, runners, timeouts, pinned actions, Nix runtime/cache, materialization, tests, Pages, releases, and admin boundaries. → **GV63**
+- ◇ **GV63** Close the GitHub Actions portion of the governance inventory: triggers, permissions, concurrency, runners, timeouts, pinned actions, Nix runtime/cache, materialization, tests, Pages, releases, and admin boundaries.
 - ◇ **GV24** CI projection closure rule: GitHub Actions workflows must contain no independent policy; every CI behavior must be traceable to governed project data and ultimately materializable from the constitution.
 - ◇ **GV12** CI governance rule: Govenv CI must run on Determinate Nix; changing the Nix runtime requires an explicit governance change.
 - ◇ **GV13** CI cache governance rule: every Govenv CI workflow that evaluates or builds Nix must use a local GitHub Actions Nix cache through `magic-nix-cache-action`; removing or replacing it requires an explicit governance change.
 - ✓ **GV44** Automatically apply versioned non-admin materializations on `main` using only repository-scoped CI permission; validation and publication workflows run after Materialize completes, while admin materializations remain manual.
-- ✓ **GV48** Project every release governance delta from typed roadmap state and commit references, distinguishing completed, advanced, and introduced items plus phase progression while keeping SemVer independent.
-- ◇ **GV7** Model the governed release-progress policy: major and minor releases require governance progress by completing at least one pending item or advancing to a later phase; patch releases are exempt.
-- ◇ **GV8** Encode and enforce GV7 as Govenv's first self-governing `Rule` over typed release governance state.
+- ↪ **GV48** Project every release governance delta from typed roadmap state and commit references, distinguishing completed, advanced, and introduced items plus phase progression while keeping SemVer independent. → **GV70**
+- ✓ **GV70** Project release governance deltas from immutable typed roadmap snapshots and commit references, distinguishing introduced, advanced, completed, cancelled, and superseded items plus phase progression while rejecting identity mutation or removal and keeping SemVer independent.
+- ✓ **GV54** Preserve immutable governance identity across roadmap evolution: once introduced, a `GovernanceId`, its definition, and its owning phase may never be removed, reused, or modified; obsolete or corrected governance must remain represented as cancelled or superseded, with supersession explicitly identifying a newer replacement `GovernanceId`.
+- ↪ **GV7** Roadmap release rule: every major or minor release must advance the roadmap by completing at least one unchecked item or moving `Current` to a later phase; patch releases are exempt. → **GV55**
+- ◇ **GV55** Model the governed release-progress policy: major and minor releases require governance progress by completing at least one pending item or advancing to a later phase; patch releases are exempt.
+- ↪ **GV8** Encode GV7 as Govenv's first self-governing repository rule. → **GV56**
+- ◇ **GV56** Encode and enforce GV55 as Govenv's first self-governing `Rule` over typed release governance state.
 
 </details>
 
 <details>
 <summary>□ <strong>P2 — Pure repository evaluator</strong></summary>
 
-- ◇ **GV25** Purely evaluate facts and rules into verdicts, obligations, and typed diagnostics without IO.
-- ◇ **GV27** Purely associate governance diagnostics with governed repository provenance so consumers can produce source-mapped diagnostics without IO.
+- ↪ **GV25** Evaluate facts, rules, verdicts, obligations, and diagnostics without IO. → **GV64**
+- ◇ **GV64** Purely evaluate facts and rules into verdicts, obligations, and typed diagnostics without IO.
+- ◇ **GV65** Purely associate governance diagnostics with governed repository provenance so consumers can produce source-mapped diagnostics without IO.
 
 </details>
 
@@ -77,8 +91,10 @@
 <summary>□ <strong>P3 — `govenv check` and commit governance</strong></summary>
 
 - ◇ **GV26** Observe repository facts through a thin impure adapter.
+- ↪ **GV27** Produce source-mapped governance diagnostics from the pure kernel. → **GV65**
 - ◇ **GV53** Expose repository evaluation as `govenv check`, with deterministic exit status and source-mapped diagnostics while keeping observation and effects outside the pure evaluator.
-- ◇ **GV28** Model governed commit policy as project data with a simplified Conventional Commits vocabulary; governance changes must use `gov(...)`, and every governed commit must reference its related roadmap subitem(s) using a `Refs: GV…` footer.
+- ↪ **GV28** Define governed commit policy with a simplified Conventional Commits vocabulary; governance changes must use `gov(...)`, and every governed commit must reference its related roadmap subitem(s) using a `Refs: GV…` footer. → **GV66**
+- ◇ **GV66** Model governed commit policy as project data with a simplified Conventional Commits vocabulary; governance changes must use `gov(...)`, and every governed commit must reference its related roadmap subitem(s) using a `Refs: GV…` footer.
 - ◇ **GV29** Validate the staged candidate repository state using the candidate governance before accepting a commit.
 - ◇ **GV30** Enforce commit governance transparently through a Git hook; Stage 0 installs it through devenv, and Govenv later owns the integration directly.
 
@@ -98,7 +114,7 @@
 <summary>□ <strong>P5 — Governed runtime compiler</strong></summary>
 
 - ◇ **GV35** Define typed Environment/Runtime IR.
-- ◇ **GV40** Keep runtime backends replaceable behind the typed IR boundary.
+- ◇ **GV67** Keep runtime backends replaceable behind the typed IR boundary.
 - ◇ **GV36** Compile valid projects through a devenv backend.
 - ◇ **GV37** Expose `govenv shell`, `govenv test`, and `govenv up`.
 
@@ -108,6 +124,7 @@
 <summary>□ <strong>P6 — Product bootstrap, self-hosting, and distribution</strong></summary>
 
 - ◇ **GV38** Ship a standalone `govenv` entrypoint and managed runtime setup.
+- ↪ **GV40** Keep runtime backends replaceable behind the typed IR boundary. → **GV67**
 - ◇ **GV39** Make Govenv govern and build itself.
 - ◇ **GV41** Support white-label distributions while keeping the formal kernel reusable and product-neutral.
 - ◇ **GV42** Make repository bootstrap, integrations, secrets/environments setup, and privileged materialization declarative and reproducible through Govenv rather than repository-specific manual steps.

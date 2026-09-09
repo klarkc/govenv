@@ -10,7 +10,8 @@ open import Govenv.Kernel.Identifier
 open import Govenv.Kernel.Release
 open GovernanceDelta
 open ItemImpact
-open import Govenv.Kernel.Roadmap using (ItemState; done; todo)
+open import Govenv.Kernel.Roadmap using
+  (ItemState; done; todo; cancelled; superseded)
 open import Govenv.Materialization using (Materialization)
 open Materialization
 open import Govenv.Materialization.ReleaseGovernance
@@ -31,17 +32,32 @@ renderGovernanceId : SomeGovernanceId → String
 renderGovernanceId (someIdentifier governanceId) =
   "GV" ++ primShowNat (indexOf governanceId)
 
+renderGovernanceRef : GovernanceRef → String
+renderGovernanceRef replacement =
+  "GV" ++ primShowNat (IdentifierRef.referenceIndex replacement)
+
 renderDescription : SomeGovernanceId → String
 renderDescription (someIdentifier governanceId) = descriptionOf governanceId
 
 renderItemMark : ItemState → String
 renderItemMark done = "✓"
 renderItemMark todo = "◇"
+renderItemMark cancelled = "×"
+renderItemMark (superseded replacement) = "↪"
+
+renderStateTransition : ItemState → String
+renderStateTransition done = ""
+renderStateTransition todo = ""
+renderStateTransition cancelled = ""
+renderStateTransition (superseded replacement) =
+  " → **" ++ renderGovernanceRef replacement ++ "**"
 
 renderChangeMark : ItemProgress → String
 renderChangeMark completed = ""
 renderChangeMark advanced = "↑ "
 renderChangeMark introduced = "+ "
+renderChangeMark cancelledProgress = ""
+renderChangeMark (supersededProgress replacement) = ""
 
 renderPhase : ReleaseDocument → String
 renderPhase document with phase document
@@ -61,14 +77,17 @@ renderSummary : ReleaseDocument → String
 renderSummary document =
   renderCount (completedGroup document) ++ " · " ++
   renderCount (advancedGroup document) ++ " · " ++
-  renderCount (introducedGroup document)
+  renderCount (introducedGroup document) ++ " · " ++
+  renderCount (cancelledGroup document) ++ " · " ++
+  renderCount (supersededGroup document)
 
 renderImpact : String → ImpactLine → String
 renderImpact branch line with impactValue line
 ... | impact itemId itemState progress =
   branch ++ " " ++ renderItemMark itemState ++ " **" ++
   renderGovernanceId itemId ++ "** — " ++ renderChangeMark progress ++
-  progressLabel line ++ " — " ++ renderDescription itemId ++ "  \n"
+  progressLabel line ++ renderStateTransition itemState ++
+  " — " ++ renderDescription itemId ++ "  \n"
 
 renderImpacts : String → List ImpactLine → String
 renderImpacts emptyLabel [] = "└ — " ++ emptyLabel ++ "\n"
@@ -101,9 +120,16 @@ renderChangelogMaterialization materialization =
 
 renderError : GovernanceDeltaError → String
 renderError (itemRegressed itemId) =
-  "Governance item regressed from done to pending: " ++ renderGovernanceId itemId
+  "Governance item regressed from completed to pending: " ++ renderGovernanceId itemId
+renderError (terminalItemChanged itemId) =
+  "Terminal governance state was changed: " ++ renderGovernanceId itemId
 renderError (governanceRemoved idx) =
-  "Governance item disappeared from the roadmap: GV" ++ primShowNat idx
+  "Governance identity was removed from the roadmap: GV" ++ primShowNat idx
+renderError (governanceDefinitionChanged itemId) =
+  "Immutable governance definition was changed: " ++ renderGovernanceId itemId
+renderError (governancePhaseChanged itemId previous current) =
+  "Immutable governance owner phase was changed for " ++ renderGovernanceId itemId ++
+  " from P" ++ primShowNat previous ++ " to P" ++ primShowNat current
 renderError (phaseRegressed previous current) =
   "Roadmap phase regressed from P" ++ primShowNat previous ++
   " to " ++ renderPhaseId current

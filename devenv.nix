@@ -8,8 +8,13 @@ let
     agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/RoadmapSnapshot.agda >/dev/null
   '';
 
+  validateRoadmapEvolution = ''
+    bash src/Govenv/Adapter/roadmap-evolution.sh
+  '';
+
   checkMaterializations = ''
     ${buildMaterializers}
+    ${validateRoadmapEvolution}
     .govenv/materialize-build/Readme > .govenv/README.generated.md
     .govenv/materialize-build/RoadmapSnapshot > .govenv/roadmap.generated.snapshot
     diff -u README.md .govenv/README.generated.md
@@ -36,6 +41,7 @@ in
 
   tasks."govenv:materialize".exec = ''
     ${buildMaterializers}
+    ${validateRoadmapEvolution}
     .govenv/materialize-build/Readme > README.md
     .govenv/materialize-build/RoadmapSnapshot > .govenv/roadmap.snapshot
   '';

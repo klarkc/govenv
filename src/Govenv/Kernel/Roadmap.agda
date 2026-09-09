@@ -9,7 +9,8 @@ open import Agda.Builtin.String using (String)
 open import Govenv.Kernel.Identifier
 
 data ItemState : Set where
-  done todo : ItemState
+  done todo cancelled : ItemState
+  superseded : GovernanceRef → ItemState
 
 data PhaseState : Set where
   finished active future : PhaseState
@@ -160,6 +161,9 @@ private
   itemsDone [] = true
   itemsDone (membership governanceId done relation ∷ rest) = itemsDone rest
   itemsDone (membership governanceId todo relation ∷ rest) = false
+  itemsDone (membership governanceId cancelled relation ∷ rest) = itemsDone rest
+  itemsDone (membership governanceId (superseded replacement) relation ∷ rest) =
+    itemsDone rest
 
   finishedPhasesDone : List (PhaseNode finished) → Bool
   finishedPhasesDone [] = true
@@ -198,11 +202,54 @@ private
     finishedPhasesDone finishedPhases
   chainFinishedPhasesDone invalidChain = false
 
+  supersessionsValidItems :
+    {phaseIdx : Nat} {phaseDescription : String}
+    {phase : PhaseId phaseIdx phaseDescription} →
+    List Nat → List (Membership phase) → Bool
+  supersessionsValidItems allIndices [] = true
+  supersessionsValidItems allIndices
+    (membership governanceId done relation ∷ rest) =
+      supersessionsValidItems allIndices rest
+  supersessionsValidItems allIndices
+    (membership governanceId todo relation ∷ rest) =
+      supersessionsValidItems allIndices rest
+  supersessionsValidItems allIndices
+    (membership governanceId cancelled relation ∷ rest) =
+      supersessionsValidItems allIndices rest
+  supersessionsValidItems allIndices
+    (membership governanceId (superseded replacement) relation ∷ rest) =
+      (lessNat (indexOf governanceId) (IdentifierRef.referenceIndex replacement) and
+       containsNat (IdentifierRef.referenceIndex replacement) allIndices) and
+      supersessionsValidItems allIndices rest
+
+  supersessionsValidPhases :
+    {state : PhaseState} →
+    List Nat → List (PhaseNode state) → Bool
+  supersessionsValidPhases allIndices [] = true
+  supersessionsValidPhases allIndices (phaseNode phaseId items ∷ rest) =
+    supersessionsValidItems allIndices items and
+    supersessionsValidPhases allIndices rest
+
+  chainSupersessionsValid :
+    {shape : ChainShape} → RoadmapChain shape → Bool
+  chainSupersessionsValid chain@(finishedChain phases) =
+    supersessionsValidPhases (chainGovernanceIndices chain) phases
+  chainSupersessionsValid chain@(activeChain current futures) =
+    supersessionsValidPhases (chainGovernanceIndices chain) (current ∷ []) and
+    supersessionsValidPhases (chainGovernanceIndices chain) futures
+  chainSupersessionsValid chain@(futureChain futures) =
+    supersessionsValidPhases (chainGovernanceIndices chain) futures
+  chainSupersessionsValid chain@(progressingChain finishedPhases current futures) =
+    supersessionsValidPhases (chainGovernanceIndices chain) finishedPhases and
+    (supersessionsValidPhases (chainGovernanceIndices chain) (current ∷ []) and
+     supersessionsValidPhases (chainGovernanceIndices chain) futures)
+  chainSupersessionsValid invalidChain = false
+
   integrity : {shape : ChainShape} → RoadmapChain shape → Bool
   integrity chain =
     strictlyIncreasing (chainPhaseIndices chain) and
     (uniqueNats (chainGovernanceIndices chain) and
-     chainFinishedPhasesDone chain)
+     (chainFinishedPhasesDone chain and chainSupersessionsValid chain))
 
   appendShape : ChainShape → ChainShape → ChainShape
   appendShape finishedOnly finishedOnly = finishedOnly
@@ -216,7 +263,8 @@ private
 infixr 5 _├_
 infixr 4 _┬_
 infixr 2 _╟_
-infix 8 _✓ _◇
+infix 8 _✓ _◇ _×
+infix 8 _↪_
 infix 7 _■ _▣ _□
 
 _├_ : {A : Set} → Forest A → Forest A → Forest A
@@ -266,6 +314,20 @@ _◇ :
   GovernanceId idx description →
   Forest GovernanceSpec
 _◇ governanceId = singleton (governanceSpec governanceId todo)
+
+_× :
+  {idx : Nat} {description : String} →
+  GovernanceId idx description →
+  Forest GovernanceSpec
+_× governanceId = singleton (governanceSpec governanceId cancelled)
+
+_↪_ :
+  {idx : Nat} {description : String} →
+  GovernanceId idx description →
+  GovernanceRef →
+  Forest GovernanceSpec
+governanceId ↪ replacement =
+  singleton (governanceSpec governanceId (superseded replacement))
 
 private
   makePhase :

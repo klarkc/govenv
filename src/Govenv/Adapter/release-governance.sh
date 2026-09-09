@@ -34,21 +34,21 @@ mkdir -p "${build_dir}"
 previous_snapshot=".govenv/release-previous.snapshot"
 if git show "${base_ref}:.govenv/roadmap.snapshot" > "${previous_snapshot}" 2>/dev/null; then
   first_line="$(sed -n '1p' "${previous_snapshot}")"
-  if [[ "${first_line}" != "govenv-roadmap-snapshot-v1" ]]; then
+  if [[ "${first_line}" != "govenv-roadmap-snapshot-v2" ]]; then
     echo "Unsupported roadmap snapshot format at ${base_ref}." >&2
     exit 3
   fi
 else
   # v0.1.0 predates governed roadmap snapshots. Treat it conservatively as
   # an absent historical roadmap; future releases must use the typed snapshot.
-  printf '%s\n' 'govenv-roadmap-snapshot-v1' 'phase absent' > "${previous_snapshot}"
+  printf '%s\n' 'govenv-roadmap-snapshot-v2' 'phase absent' > "${previous_snapshot}"
 fi
 
 phase_expr=""
 item_exprs=()
 while IFS= read -r line; do
   case "${line}" in
-    govenv-roadmap-snapshot-v1) ;;
+    govenv-roadmap-snapshot-v2) ;;
     "phase absent")
       [[ -z "${phase_expr}" ]] || { echo "Duplicate phase in snapshot." >&2; exit 3; }
       phase_expr="snapshotAbsent"
@@ -66,8 +66,10 @@ while IFS= read -r line; do
       phase_expr="snapshotComplete ${value}"
       ;;
     "item "*)
-      if [[ "${line}" =~ ^item\ ([0-9]+)\ (done|todo)$ ]]; then
-        item_exprs+=("snapshotItem ${BASH_REMATCH[1]} ${BASH_REMATCH[2]}")
+      if [[ "${line}" =~ ^item\ ([0-9]+)\ phase\ ([0-9]+)\ (done|todo|cancelled)\ (".*")$ ]]; then
+        item_exprs+=("snapshotItem ${BASH_REMATCH[1]} ${BASH_REMATCH[2]} ${BASH_REMATCH[4]} ${BASH_REMATCH[3]}")
+      elif [[ "${line}" =~ ^item\ ([0-9]+)\ phase\ ([0-9]+)\ superseded\ ([0-9]+)\ (".*")$ ]]; then
+        item_exprs+=("snapshotItem ${BASH_REMATCH[1]} ${BASH_REMATCH[2]} ${BASH_REMATCH[4]} (superseded (GVR ${BASH_REMATCH[3]}))")
       else
         echo "Invalid roadmap snapshot item: ${line}" >&2
         exit 3
@@ -130,8 +132,9 @@ module Govenv.Adapter.ReleaseObservation where
 open import Agda.Builtin.List using (List; []; _∷_)
 open import Agda.Builtin.Nat using (Nat)
 open import Agda.Builtin.String using (String)
+open import Govenv.Kernel.Identifier using (GVR)
 open import Govenv.Kernel.Release
-open import Govenv.Kernel.Roadmap using (done; todo)
+open import Govenv.Kernel.Roadmap using (done; todo; cancelled; superseded)
 
 previous : RoadmapSnapshot
 previous = roadmapSnapshot (${phase_expr}) (${items_expr})

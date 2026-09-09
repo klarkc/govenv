@@ -1,56 +1,73 @@
-govenv-roadmap-snapshot-v1
+govenv-roadmap-snapshot-v2
 phase active 1
-item 0 done
-item 1 done
-item 2 done
-item 3 done
-item 4 done
-item 5 done
-item 6 done
-item 47 done
-item 49 done
-item 50 done
-item 52 done
-item 9 todo
-item 10 todo
-item 11 todo
-item 17 todo
-item 20 done
-item 14 done
-item 15 done
-item 16 done
-item 51 done
-item 18 todo
-item 19 done
-item 21 done
-item 22 done
-item 45 done
-item 46 todo
-item 23 todo
-item 24 todo
-item 12 todo
-item 13 todo
-item 44 done
-item 48 done
-item 7 todo
-item 8 todo
-item 25 todo
-item 27 todo
-item 26 todo
-item 53 todo
-item 28 todo
-item 29 todo
-item 30 todo
-item 31 todo
-item 32 todo
-item 33 todo
-item 34 todo
-item 35 todo
-item 40 todo
-item 36 todo
-item 37 todo
-item 38 todo
-item 39 todo
-item 41 todo
-item 42 todo
-item 43 todo
+item 0 phase 0 done "Literate `Govenv.lagda.md` closure root."
+item 1 phase 0 done "Project governance under `Govenv/`; reusable kernel under `Govenv.Kernel.*`."
+item 2 phase 0 done "Reproducible Stage 0 bootstrap, documentation site, and automated releases."
+item 3 phase 1 done "`Verdict`: `holds`, `violated`, and `unknown`."
+item 4 phase 1 done "Minimal `Rule` abstraction."
+item 5 phase 1 done "Typed repository facts."
+item 6 phase 1 done "Dependency-indexed rules."
+item 47 phase 1 superseded 68 "Type roadmap governance identifiers as `GovernanceId` and use readable `\10003`/`\9675` item notation instead of raw `Nat` plus `done`/`todo`."
+item 68 phase 1 done "Type roadmap governance identifiers as `GovernanceId` and use readable `\10003`/`\9671` item notation instead of raw `Nat` plus `done`/`todo`."
+item 49 phase 1 superseded 69 "Make roadmap phase progression structurally valid with exactly one active phase while in progress, declare phases with `\9632`/`\9654`/`\9633`, and render phase/item state using the same operator glyphs."
+item 69 phase 1 done "Make roadmap phase progression structurally valid with exactly one active phase while in progress, declare phases with `\9632`/`\9635`/`\9633`, and render phase/item state using the same operator glyphs."
+item 50 phase 1 done "Use generic typed identifiers with structural `BelongsTo`, and express the entire roadmap as one declarative tree with implementation mechanics hidden."
+item 52 phase 1 done "Enforce roadmap identity and completion integrity: phase and governance indices must be unique, phase indices must progress monotonically, and a finished phase may contain no pending governance items."
+item 9 phase 1 superseded 57 "Extract governance rules from behavior, conventions, and infrastructure already implemented in the repository so existing decisions become explicit rather than remaining implicit in code or configuration."
+item 57 phase 1 todo "Inventory repository behavior and policy, distinguishing governed semantics from irreducibly observational or effectful mechanisms."
+item 10 phase 1 superseded 58 "Governance coverage rule: every project property that can be expressed and checked by Govenv must become a governance rule rather than remain an unenforced convention."
+item 58 phase 1 todo "Require every inventory entry whose semantics can be expressed and checked by Govenv to be backed by governed data and a rule."
+item 11 phase 1 superseded 59 "Minimize the ungoverned surface: keep only unavoidable observation, IO, and adapter effects outside governance, and make every remaining exception explicit and justified."
+item 59 phase 1 todo "Minimize the ungoverned surface to irreducible observation and effect execution; adapters may perform effects but must not introduce semantic content, policy, structure, ordering, or authorization decisions."
+item 17 phase 1 superseded 61 "Govern architecture roles and dependency directions for constitution, kernel, projection, adapters, and generated artifacts."
+item 61 phase 1 superseded 62 "Enforce architecture roles and dependency directions for constitution, materialization, kernel, projection, adapters, and generated artifacts."
+item 62 phase 1 todo "Enforce architecture roles and dependency directions for the closure root, constitution, materialization, kernel, projection, adapters, and generated artifacts."
+item 20 phase 1 done "Keep `Govenv` as the canonical immutable project identity; white-label distributions may change branding projections, never the Govenv identity."
+item 14 phase 1 superseded 60 "Govern the README as a canonical materialization of `Govenv.Readme`; manual divergence must fail the project check."
+item 60 phase 1 done "Govern `README.md` as the canonical output of `Govenv.Materialization.Readme`; manual divergence must fail the project check."
+item 15 phase 1 done "Keep the README roadmap projection to exactly two visible levels, `Phase \8594 Item`, with phases collapsible."
+item 16 phase 1 done "Materialize governed README sections from Agda rather than maintaining duplicate prose by hand."
+item 51 phase 1 done "Materialization closure: every state materialized by Govenv must have exactly one canonical `Govenv.Materialization.*` definition containing all semantic content, structure, ordering, inclusion, policy, and required capability decisions; projections encode only target-format representation, and adapters only observe, apply, or verify effects."
+item 18 phase 1 todo "Allow versioned materializations to follow their governing source change in the immediately subsequent `chore(materialize)` commit; the final pushed or reviewed state must contain canonical materializations."
+item 19 phase 1 done "Require CI validation and publication workflows to materialize governed artifacts from the constitution and reject any resulting tracked drift before continuing."
+item 21 phase 1 done "Project the canonical Govenv description from `Govenv.Project` into repository-facing materializations."
+item 22 phase 1 done "Require admin-privileged external materializations to run only through the manual, target-restricted `Admin Materialize` workflow."
+item 45 phase 1 done "Require every admin materialization to read the target back after applying it, fail unless the observed value equals the governed expected value, and emit execution evidence tied to the constitution SHA, target, repository, and workflow run."
+item 46 phase 1 todo "Model admin materialization evidence as typed governed data that can be consumed by a formal rule or assurance check rather than relying on workflow success alone."
+item 23 phase 1 superseded 63 "Inventory every behavior currently encoded in GitHub Actions and extract it into explicit governance: triggers, permissions, concurrency, runners, timeouts, pinned actions, Nix runtime/cache, materialization, tests, Pages, releases, and admin boundaries."
+item 63 phase 1 todo "Close the GitHub Actions portion of the governance inventory: triggers, permissions, concurrency, runners, timeouts, pinned actions, Nix runtime/cache, materialization, tests, Pages, releases, and admin boundaries."
+item 24 phase 1 todo "CI projection closure rule: GitHub Actions workflows must contain no independent policy; every CI behavior must be traceable to governed project data and ultimately materializable from the constitution."
+item 12 phase 1 todo "CI governance rule: Govenv CI must run on Determinate Nix; changing the Nix runtime requires an explicit governance change."
+item 13 phase 1 todo "CI cache governance rule: every Govenv CI workflow that evaluates or builds Nix must use a local GitHub Actions Nix cache through `magic-nix-cache-action`; removing or replacing it requires an explicit governance change."
+item 44 phase 1 done "Automatically apply versioned non-admin materializations on `main` using only repository-scoped CI permission; validation and publication workflows run after Materialize completes, while admin materializations remain manual."
+item 48 phase 1 superseded 70 "Project every release governance delta from typed roadmap state and commit references, distinguishing completed, advanced, and introduced items plus phase progression while keeping SemVer independent."
+item 70 phase 1 done "Project release governance deltas from immutable typed roadmap snapshots and commit references, distinguishing introduced, advanced, completed, cancelled, and superseded items plus phase progression while rejecting identity mutation or removal and keeping SemVer independent."
+item 54 phase 1 done "Preserve immutable governance identity across roadmap evolution: once introduced, a `GovernanceId`, its definition, and its owning phase may never be removed, reused, or modified; obsolete or corrected governance must remain represented as cancelled or superseded, with supersession explicitly identifying a newer replacement `GovernanceId`."
+item 7 phase 1 superseded 55 "Roadmap release rule: every major or minor release must advance the roadmap by completing at least one unchecked item or moving `Current` to a later phase; patch releases are exempt."
+item 55 phase 1 todo "Model the governed release-progress policy: major and minor releases require governance progress by completing at least one pending item or advancing to a later phase; patch releases are exempt."
+item 8 phase 1 superseded 56 "Encode GV7 as Govenv's first self-governing repository rule."
+item 56 phase 1 todo "Encode and enforce GV55 as Govenv's first self-governing `Rule` over typed release governance state."
+item 25 phase 2 superseded 64 "Evaluate facts, rules, verdicts, obligations, and diagnostics without IO."
+item 64 phase 2 todo "Purely evaluate facts and rules into verdicts, obligations, and typed diagnostics without IO."
+item 65 phase 2 todo "Purely associate governance diagnostics with governed repository provenance so consumers can produce source-mapped diagnostics without IO."
+item 26 phase 3 todo "Observe repository facts through a thin impure adapter."
+item 27 phase 3 superseded 65 "Produce source-mapped governance diagnostics from the pure kernel."
+item 53 phase 3 todo "Expose repository evaluation as `govenv check`, with deterministic exit status and source-mapped diagnostics while keeping observation and effects outside the pure evaluator."
+item 28 phase 3 superseded 66 "Define governed commit policy with a simplified Conventional Commits vocabulary; governance changes must use `gov(...)`, and every governed commit must reference its related roadmap subitem(s) using a `Refs: GV\8230` footer."
+item 66 phase 3 todo "Model governed commit policy as project data with a simplified Conventional Commits vocabulary; governance changes must use `gov(...)`, and every governed commit must reference its related roadmap subitem(s) using a `Refs: GV\8230` footer."
+item 29 phase 3 todo "Validate the staged candidate repository state using the candidate governance before accepting a commit."
+item 30 phase 3 todo "Enforce commit governance transparently through a Git hook; Stage 0 installs it through devenv, and Govenv later owns the integration directly."
+item 31 phase 4 todo "Recheck only rules affected by changed facts and emit diagnostic deltas."
+item 32 phase 4 todo "Prove incremental checking equivalent to full checking."
+item 33 phase 4 todo "Expose the checker through an LSP/editor loop."
+item 34 phase 4 todo "Expose governance context and diagnostic deltas through an MCP adapter for agent clients."
+item 35 phase 5 todo "Define typed Environment/Runtime IR."
+item 67 phase 5 todo "Keep runtime backends replaceable behind the typed IR boundary."
+item 36 phase 5 todo "Compile valid projects through a devenv backend."
+item 37 phase 5 todo "Expose `govenv shell`, `govenv test`, and `govenv up`."
+item 38 phase 6 todo "Ship a standalone `govenv` entrypoint and managed runtime setup."
+item 40 phase 6 superseded 67 "Keep runtime backends replaceable behind the typed IR boundary."
+item 39 phase 6 todo "Make Govenv govern and build itself."
+item 41 phase 6 todo "Support white-label distributions while keeping the formal kernel reusable and product-neutral."
+item 42 phase 6 todo "Make repository bootstrap, integrations, secrets/environments setup, and privileged materialization declarative and reproducible through Govenv rather than repository-specific manual steps."
+item 43 phase 6 todo "Make the final product ejectable from the Govenv codebase: a white-label distribution must be able to carry its governed project model, generated CI/materializations, and integrations without depending on `klarkc/govenv` repository-specific code."

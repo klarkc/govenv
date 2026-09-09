@@ -31,6 +31,15 @@ renderGovernanceId governanceId = "GV" ++ primShowNat (indexOf governanceId)
 itemMark : ItemState → String
 itemMark done = "✓"
 itemMark todo = "◇"
+itemMark cancelled = "×"
+itemMark (superseded replacement) = "↪"
+
+itemSuffix : ItemState → String
+itemSuffix done = ""
+itemSuffix todo = ""
+itemSuffix cancelled = ""
+itemSuffix (superseded replacement) =
+  " → **GV" ++ primShowNat (IdentifierRef.referenceIndex replacement) ++ "**"
 
 renderMembership :
   {phaseIdx : Nat} {phaseDescription : String}
@@ -39,7 +48,7 @@ renderMembership :
 renderMembership (membership governanceId state relation) =
   "- " ++ itemMark state ++
   " **" ++ renderGovernanceId governanceId ++ "** " ++
-  descriptionOf governanceId ++ "\n"
+  descriptionOf governanceId ++ itemSuffix state ++ "\n"
 
 renderItems :
   {phaseIdx : Nat} {phaseDescription : String}

@@ -1,6 +1,6 @@
 # Roadmap snapshot materialization
 
-This materialization preserves the release-relevant semantic roadmap state in a stable versioned artifact. It is derived from the typed roadmap and exists so future releases can compare governance state without interpreting a human-facing projection.
+This materialization preserves immutable governance identity and release-relevant roadmap state in a stable versioned artifact. Snapshot v2 records each `GovernanceId` with its exact definition, owning phase, and lifecycle state, including cancellation or an explicit supersession target. It is derived from the typed roadmap so evolution can be validated without interpreting a human-facing projection.
 
 ```agda
 {-# OPTIONS --safe #-}

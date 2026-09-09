@@ -15,6 +15,7 @@ open import Govenv.Materialization
 
 data ImpactKind : Set where
   completedImpact advancedImpact introducedImpact : ImpactKind
+  cancelledImpact supersededImpact : ImpactKind
 
 record ImpactGroup : Set where
   constructor impactGroup
@@ -39,6 +40,8 @@ record ReleaseDocument : Set where
     completedGroup : ImpactGroup
     advancedGroup : ImpactGroup
     introducedGroup : ImpactGroup
+    cancelledGroup : ImpactGroup
+    supersededGroup : ImpactGroup
     impactLines : List ImpactLine
     phase : PhaseProgress
     noImpactLabel : String
@@ -64,6 +67,9 @@ private
     item ∷ completedItems rest
   completedItems (impact itemId state advanced ∷ rest) = completedItems rest
   completedItems (impact itemId state introduced ∷ rest) = completedItems rest
+  completedItems (impact itemId state cancelledProgress ∷ rest) = completedItems rest
+  completedItems (impact itemId state (supersededProgress replacement) ∷ rest) =
+    completedItems rest
 
   advancedItems : List ItemImpact → List ItemImpact
   advancedItems [] = []
@@ -71,6 +77,9 @@ private
   advancedItems (item@(impact itemId state advanced) ∷ rest) =
     item ∷ advancedItems rest
   advancedItems (impact itemId state introduced ∷ rest) = advancedItems rest
+  advancedItems (impact itemId state cancelledProgress ∷ rest) = advancedItems rest
+  advancedItems (impact itemId state (supersededProgress replacement) ∷ rest) =
+    advancedItems rest
 
   introducedItems : List ItemImpact → List ItemImpact
   introducedItems [] = []
@@ -78,6 +87,29 @@ private
   introducedItems (impact itemId state advanced ∷ rest) = introducedItems rest
   introducedItems (item@(impact itemId state introduced) ∷ rest) =
     item ∷ introducedItems rest
+  introducedItems (impact itemId state cancelledProgress ∷ rest) = introducedItems rest
+  introducedItems (impact itemId state (supersededProgress replacement) ∷ rest) =
+    introducedItems rest
+
+  cancelledItems : List ItemImpact → List ItemImpact
+  cancelledItems [] = []
+  cancelledItems (impact itemId state completed ∷ rest) = cancelledItems rest
+  cancelledItems (impact itemId state advanced ∷ rest) = cancelledItems rest
+  cancelledItems (impact itemId state introduced ∷ rest) = cancelledItems rest
+  cancelledItems (item@(impact itemId state cancelledProgress) ∷ rest) =
+    item ∷ cancelledItems rest
+  cancelledItems (impact itemId state (supersededProgress replacement) ∷ rest) =
+    cancelledItems rest
+
+  supersededItems : List ItemImpact → List ItemImpact
+  supersededItems [] = []
+  supersededItems (impact itemId state completed ∷ rest) = supersededItems rest
+  supersededItems (impact itemId state advanced ∷ rest) = supersededItems rest
+  supersededItems (impact itemId state introduced ∷ rest) = supersededItems rest
+  supersededItems (impact itemId state cancelledProgress ∷ rest) = supersededItems rest
+  supersededItems
+    (item@(impact itemId state (supersededProgress replacement)) ∷ rest) =
+      item ∷ supersededItems rest
 
   group : ImpactKind → String → List ItemImpact → ImpactGroup
   group kind label items = impactGroup kind label items (countItems items)
@@ -96,15 +128,19 @@ document baseRevision headRevision (governanceDeltaValue impacts phase) =
     (group completedImpact "completed" (completedItems impacts))
     (group advancedImpact "advanced" (advancedItems impacts))
     (group introducedImpact "introduced" (introducedItems impacts))
+    (group cancelledImpact "cancelled" (cancelledItems impacts))
+    (group supersededImpact "superseded" (supersededItems impacts))
     ( labelItems "completed" (completedItems impacts) ++
       (labelItems "advanced" (advancedItems impacts) ++
-       labelItems "introduced" (introducedItems impacts)) )
+       (labelItems "introduced" (introducedItems impacts) ++
+        (labelItems "cancelled" (cancelledItems impacts) ++
+         labelItems "superseded" (supersededItems impacts)))) )
     phase
     "no roadmap item impact"
     "phase governance introduced"
     "unchanged"
     "roadmap complete"
-    "Derived from typed roadmap state and governed `Refs: GV…` commit metadata. SemVer remains independent."
+    "Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent."
     baseRevision
     headRevision
 

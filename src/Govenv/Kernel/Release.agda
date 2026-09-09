@@ -6,7 +6,7 @@ open import Agda.Builtin.Bool using (Bool; true; false)
 open import Agda.Builtin.List using (List; []; _∷_)
 open import Agda.Builtin.Maybe using (Maybe; just; nothing)
 open import Agda.Builtin.Nat using (Nat; _==_; _<_)
-open import Agda.Builtin.String using (String)
+open import Agda.Builtin.String using (String; primStringEquality)
 open import Govenv.Kernel.Identifier
 open import Govenv.Kernel.Roadmap
 
@@ -14,7 +14,8 @@ data ReleaseKind : Set where
   major minor patch : ReleaseKind
 
 data ItemProgress : Set where
-  completed advanced introduced : ItemProgress
+  completed advanced introduced cancelledProgress : ItemProgress
+  supersededProgress : GovernanceRef → ItemProgress
 
 data PhaseProgress : Set where
   phaseIntroduced : SomePhaseId → PhaseProgress
@@ -44,6 +45,8 @@ record SnapshotItem : Set where
   constructor snapshotItem
   field
     snapshotItemId : Nat
+    snapshotItemPhase : Nat
+    snapshotItemDescription : String
     snapshotItemState : ItemState
 
 record RoadmapSnapshot : Set where
@@ -56,11 +59,15 @@ record CurrentItem : Set where
   constructor currentItem
   field
     currentItemId : SomeGovernanceId
+    currentItemPhase : Nat
     currentItemState : ItemState
 
 data GovernanceDeltaError : Set where
   itemRegressed : SomeGovernanceId → GovernanceDeltaError
+  terminalItemChanged : SomeGovernanceId → GovernanceDeltaError
   governanceRemoved : Nat → GovernanceDeltaError
+  governanceDefinitionChanged : SomeGovernanceId → GovernanceDeltaError
+  governancePhaseChanged : SomeGovernanceId → Nat → Nat → GovernanceDeltaError
   phaseRegressed : Nat → SomePhaseId → GovernanceDeltaError
   emptyRoadmap : GovernanceDeltaError
 
@@ -87,19 +94,23 @@ private
   (x ∷ xs) ++ ys = x ∷ (xs ++ ys)
 
   membershipItemList :
-    {phaseIdx : Nat} {phaseDescription : String}
-    {phase : PhaseId phaseIdx phaseDescription} →
+    {phaseIdx : Nat} {phaseDescription : String} →
+    (phase : PhaseId phaseIdx phaseDescription) →
     List (Membership phase) →
     List CurrentItem
-  membershipItemList [] = []
-  membershipItemList (membership governanceId state relation ∷ rest) =
-    currentItem (someIdentifier governanceId) state ∷ membershipItemList rest
+  membershipItemList phase [] = []
+  membershipItemList phase (membership governanceId state relation ∷ rest) =
+    currentItem
+      (someIdentifier governanceId)
+      (indexOf phase)
+      state ∷
+    membershipItemList phase rest
 
   phaseItemList :
     {state : PhaseState} →
     PhaseNode state →
     List CurrentItem
-  phaseItemList (phaseNode phaseId items) = membershipItemList items
+  phaseItemList (phaseNode phaseId items) = membershipItemList phaseId items
 
   phaseItemsList :
     {state : PhaseState} →
@@ -116,13 +127,21 @@ private
   currentItems (complete finishedPhases) = phaseItemsList finishedPhases
 
   itemIndex : CurrentItem → Nat
-  itemIndex (currentItem (someIdentifier governanceId) state) =
+  itemIndex (currentItem (someIdentifier governanceId) phase state) =
     indexOf governanceId
+
+  itemDescription : CurrentItem → String
+  itemDescription (currentItem (someIdentifier governanceId) phase state) =
+    descriptionOf governanceId
 
   snapshotCurrentItems : List CurrentItem → List SnapshotItem
   snapshotCurrentItems [] = []
   snapshotCurrentItems (item ∷ rest) =
-    snapshotItem (itemIndex item) (CurrentItem.currentItemState item) ∷
+    snapshotItem
+      (itemIndex item)
+      (CurrentItem.currentItemPhase item)
+      (itemDescription item)
+      (CurrentItem.currentItemState item) ∷
     snapshotCurrentItems rest
 
   phaseSomeId :
@@ -158,10 +177,11 @@ private
       (snapshotComplete (somePhaseIndex phaseId))
       (snapshotCurrentItems (currentItems roadmap))
 
-  findPrevious : Nat → List SnapshotItem → Maybe ItemState
+  findPrevious : Nat → List SnapshotItem → Maybe SnapshotItem
   findPrevious idx [] = nothing
-  findPrevious idx (snapshotItem candidate state ∷ rest) with idx == candidate
-  ... | true = just state
+  findPrevious idx (item@(snapshotItem candidate phase description state) ∷ rest)
+    with idx == candidate
+  ... | true = just item
   ... | false = findPrevious idx rest
 
   referenced : Nat → List Nat → Bool
@@ -178,35 +198,94 @@ private
 
   removedItem : List SnapshotItem → List CurrentItem → Maybe Nat
   removedItem [] current = nothing
-  removedItem (snapshotItem idx state ∷ rest) current with currentContains idx current
+  removedItem (snapshotItem idx phase description state ∷ rest) current
+    with currentContains idx current
   ... | true = removedItem rest current
   ... | false = just idx
 
-  classifyKnown : CurrentItem → ItemState → List Nat → ItemDecision
-  classifyKnown (currentItem governanceId done) done references = noImpact
-  classifyKnown (currentItem governanceId todo) done references =
+  sameGovernanceRef : GovernanceRef → GovernanceRef → Bool
+  sameGovernanceRef left right =
+    IdentifierRef.referenceIndex left == IdentifierRef.referenceIndex right
+
+  identityError : CurrentItem → SnapshotItem → Maybe GovernanceDeltaError
+  identityError item previous
+    with CurrentItem.currentItemPhase item == SnapshotItem.snapshotItemPhase previous
+  ... | false = just
+      (governancePhaseChanged
+        (CurrentItem.currentItemId item)
+        (SnapshotItem.snapshotItemPhase previous)
+        (CurrentItem.currentItemPhase item))
+  ... | true with primStringEquality
+      (itemDescription item)
+      (SnapshotItem.snapshotItemDescription previous)
+  ...   | true = nothing
+  ...   | false = just
+      (governanceDefinitionChanged (CurrentItem.currentItemId item))
+
+  classifyKnownState :
+    CurrentItem → ItemState → List Nat → ItemDecision
+  classifyKnownState (currentItem governanceId phase done) done references = noImpact
+  classifyKnownState (currentItem governanceId phase todo) done references =
     rejectItem (itemRegressed governanceId)
-  classifyKnown (currentItem governanceId done) todo references =
+  classifyKnownState (currentItem governanceId phase cancelled) done references =
+    rejectItem (terminalItemChanged governanceId)
+  classifyKnownState
+    (currentItem governanceId phase (superseded replacement)) done references =
+      includeImpact
+        (impact governanceId (superseded replacement) (supersededProgress replacement))
+
+  classifyKnownState (currentItem governanceId phase done) todo references =
     includeImpact (impact governanceId done completed)
-  classifyKnown item@(currentItem governanceId todo) todo references
+  classifyKnownState item@(currentItem governanceId phase todo) todo references
     with referenced (itemIndex item) references
   ... | true = includeImpact (impact governanceId todo advanced)
   ... | false = noImpact
+  classifyKnownState (currentItem governanceId phase cancelled) todo references =
+    includeImpact (impact governanceId cancelled cancelledProgress)
+  classifyKnownState
+    (currentItem governanceId phase (superseded replacement)) todo references =
+      includeImpact
+        (impact governanceId (superseded replacement) (supersededProgress replacement))
+
+  classifyKnownState (currentItem governanceId phase done) cancelled references =
+    rejectItem (terminalItemChanged governanceId)
+  classifyKnownState (currentItem governanceId phase todo) cancelled references =
+    rejectItem (terminalItemChanged governanceId)
+  classifyKnownState (currentItem governanceId phase cancelled) cancelled references = noImpact
+  classifyKnownState
+    (currentItem governanceId phase (superseded replacement)) cancelled references =
+      rejectItem (terminalItemChanged governanceId)
+
+  classifyKnownState (currentItem governanceId phase done)
+    (superseded previousReplacement) references =
+      rejectItem (terminalItemChanged governanceId)
+  classifyKnownState (currentItem governanceId phase todo)
+    (superseded previousReplacement) references =
+      rejectItem (terminalItemChanged governanceId)
+  classifyKnownState (currentItem governanceId phase cancelled)
+    (superseded previousReplacement) references =
+      rejectItem (terminalItemChanged governanceId)
+  classifyKnownState
+    (currentItem governanceId phase (superseded replacement))
+    (superseded previousReplacement) references
+    with sameGovernanceRef replacement previousReplacement
+  ... | true = noImpact
+  ... | false = rejectItem (terminalItemChanged governanceId)
+
+  classifyKnown : CurrentItem → SnapshotItem → List Nat → ItemDecision
+  classifyKnown item previous references with identityError item previous
+  ... | just error = rejectItem error
+  ... | nothing =
+      classifyKnownState item (SnapshotItem.snapshotItemState previous) references
 
   classifyAbsent : CurrentItem → List Nat → ItemDecision
-  classifyAbsent item@(currentItem governanceId done) references
-    with referenced (itemIndex item) references
-  ... | true = includeImpact (impact governanceId done completed)
-  ... | false = includeImpact (impact governanceId done introduced)
-  classifyAbsent item@(currentItem governanceId todo) references
-    with referenced (itemIndex item) references
-  ... | true = includeImpact (impact governanceId todo advanced)
-  ... | false = includeImpact (impact governanceId todo introduced)
+  classifyAbsent item@(currentItem governanceId phase state) references =
+    includeImpact (impact governanceId state introduced)
 
   classifyItem :
     CurrentItem → List SnapshotItem → List Nat → ItemDecision
   classifyItem item previous references with findPrevious (itemIndex item) previous
-  ... | just previousState = classifyKnown item previousState references
+  ... | just previousItem = classifyKnown item previousItem references
   ... | nothing = classifyAbsent item references
 
   classifyItems :
