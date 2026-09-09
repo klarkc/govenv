@@ -12,6 +12,7 @@ open import Govenv.Materialization
 open import Govenv.Project
 open import Govenv.Roadmap
 open import Govenv.Readme
+open import Govenv.Release
 open import Govenv.Kernel.Fact
 open import Govenv.Kernel.Verdict
 open import Govenv.Kernel.Rule

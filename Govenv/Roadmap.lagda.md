@@ -61,6 +61,7 @@ phase1 = phase P1 "Formal governance kernel" active
   ∷ GV 45 ✓ "Require every admin materialization to read the target back after applying it, fail unless the observed value equals the governed expected value, and emit execution evidence tied to the constitution SHA, target, repository, and workflow run."
   ∷ GV 46 ○ "Model admin materialization evidence as typed governed data that can be consumed by a formal rule or assurance check rather than relying on workflow success alone."
   ∷ GV 47 ✓ "Type roadmap governance identifiers as `GovernanceId` and use readable `✓`/`○` item notation instead of raw `Nat` plus `done`/`todo`."
+  ∷ GV 48 ○ "Project every release governance delta from typed roadmap state and commit references, distinguishing completed, advanced, and introduced items plus phase progression while keeping SemVer independent."
   ∷ [] )
 
 phase2 : Phase PhaseId GovernanceId
