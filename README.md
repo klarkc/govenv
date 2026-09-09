@@ -32,6 +32,7 @@
   - [ ] **R1-08** Governance coverage rule: every project property that can be expressed and checked by Govenv must become a governance rule rather than remain an unenforced convention.
   - [ ] **R1-09** Minimize the ungoverned surface: keep only unavoidable observation, IO, and adapter effects outside governance, and make every remaining exception explicit and justified.
   - [ ] **R1-10** CI governance rule: Govenv CI must run on Determinate Nix; changing the Nix runtime requires an explicit governance change.
+  - [ ] **R1-11** CI cache governance rule: every Govenv CI workflow that evaluates or builds Nix must use a local GitHub Actions Nix cache through `magic-nix-cache-action`; removing or replacing it requires an explicit governance change.
 - [ ] **R2 — Pure repository evaluator**
   - [ ] **R2-01** Evaluate facts, rules, verdicts, obligations, and diagnostics without IO.
 - [ ] **R3 — `govenv check` and commit governance**
