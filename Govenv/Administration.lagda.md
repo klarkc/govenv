@@ -18,7 +18,7 @@ The token must not be exposed to normal Test, Pages, or Release workflows. `Admi
 
 ## Current targets
 
-`github-description` reads the canonical description from `Govenv.Project`, materializes it locally, and applies only that projected value to GitHub repository metadata.
+`github-description` reads the canonical description from `Govenv.Project`, materializes it locally, applies only that projected value to GitHub repository metadata, then reads the description back. The workflow must fail unless the observed value equals the governed expected value, and it records the execution context as evidence.
 
 ```agda
 {-# OPTIONS --safe #-}
@@ -29,6 +29,12 @@ open import Agda.Builtin.String using (String)
 
 data AdminTarget : Set where
   githubDescription : AdminTarget
+
+data Verification : Set where
+  readBackEquality : Verification
+
+adminVerification : AdminTarget → Verification
+adminVerification githubDescription = readBackEquality
 
 adminEnvironment : String
 adminEnvironment = "admin-materialization"

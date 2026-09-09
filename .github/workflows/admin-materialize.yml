@@ -54,10 +54,30 @@ jobs:
         run: |
           case "${{ inputs.target }}" in
             github-description)
+              expected="$(cat .govenv/admin/github-description)"
               gh api \
                 --method PATCH \
                 "repos/${GITHUB_REPOSITORY}" \
-                --field "description=$(cat .govenv/admin/github-description)"
+                --field "description=${expected}" >/dev/null
+
+              observed="$(gh api "repos/${GITHUB_REPOSITORY}" --jq '.description // ""')"
+              if [[ "${observed}" != "${expected}" ]]; then
+                echo "Admin materialization verification failed." >&2
+                echo "Expected: ${expected}" >&2
+                echo "Observed: ${observed}" >&2
+                exit 1
+              fi
+
+              {
+                echo "### Admin materialization evidence"
+                echo "- Constitution: \`${GITHUB_SHA}\`"
+                echo "- Target: \`${{ inputs.target }}\`"
+                echo "- Repository: \`${GITHUB_REPOSITORY}\`"
+                echo "- Workflow run: \`${GITHUB_RUN_ID}\`"
+                echo "- Expected: \`${expected}\`"
+                echo "- Observed: \`${observed}\`"
+                echo "- Assurance: \`expected == observed\`"
+              } >> "${GITHUB_STEP_SUMMARY}"
               ;;
             *)
               echo "Unsupported admin materialization: ${{ inputs.target }}" >&2
