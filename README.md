@@ -53,6 +53,7 @@
 - [x] **GV22** Require admin-privileged external materializations to run only through the manual, target-restricted `Admin Materialize` workflow.
 - [ ] **GV23** Inventory every behavior currently encoded in GitHub Actions and extract it into explicit governance: triggers, permissions, concurrency, runners, timeouts, pinned actions, Nix runtime/cache, materialization, tests, Pages, releases, and admin boundaries.
 - [ ] **GV24** CI projection closure rule: GitHub Actions workflows must contain no independent policy; every CI behavior must be traceable to governed project data and ultimately materializable from the constitution.
+- [ ] **GV44** Automatically apply versioned non-admin materializations on `main` using only repository-scoped CI permission; validation and publication workflows run after Materialize completes, while admin materializations remain manual.
 
 </details>
 
@@ -119,7 +120,7 @@ Materialize governed repository artifacts with:
 nix run github:cachix/devenv/v2.3 -- tasks run govenv:materialize
 ```
 
-Versioned materializations are committed immediately after their governing source change, using a subsequent `chore(materialize)` commit.
+On `main`, the Materialize workflow applies versioned non-admin projections automatically and commits any tracked drift as a subsequent `chore(materialize)` commit. The command above remains available for local materialization.
 
 ### Administrative materialization
 
