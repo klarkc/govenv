@@ -1,29 +1,26 @@
-name: Test
+name: Materialize
 
 on:
-  pull_request:
+  push:
+    branches: [main]
   workflow_dispatch:
-  workflow_run:
-    workflows: [Materialize]
-    types: [completed]
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
-  group: test-${{ github.workflow }}-${{ github.ref }}
+  group: materialize-main
   cancel-in-progress: true
 
 jobs:
-  test:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+  materialize:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
       - name: Checkout
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          ref: ${{ github.event_name == 'workflow_run' && 'main' || github.ref }}
+          fetch-depth: 0
 
       - name: Install Nix
         uses: DeterminateSystems/determinate-nix-action@021c8a1bd3570eb21f5c20a054812b0c4d9ca614 # v3.22.3
@@ -42,8 +39,15 @@ jobs:
       - name: Materialize constitution
         run: nix run github:cachix/devenv/v2.3 -- tasks run govenv:materialize
 
-      - name: Verify committed materializations
-        run: git diff --exit-code
+      - name: Commit materializations
+        run: |
+          if git diff --quiet; then
+            echo "Materializations are already canonical."
+            exit 0
+          fi
 
-      - name: Run tests
-        run: nix run github:cachix/devenv/v2.3 -- test
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add --all
+          git commit -m "chore(materialize): update governed materializations"
+          git push origin HEAD:main

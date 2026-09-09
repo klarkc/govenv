@@ -8,6 +8,7 @@ module Govenv where
 open import Agda.Builtin.Unit
 open import Govenv.Architecture
 open import Govenv.Administration
+open import Govenv.Materialization
 open import Govenv.Project
 open import Govenv.Roadmap
 open import Govenv.Readme

@@ -44,6 +44,7 @@ phase1 = phase P1 "Formal governance kernel" active
   ∷ item 22 "Require admin-privileged external materializations to run only through the manual, target-restricted `Admin Materialize` workflow." done
   ∷ item 23 "Inventory every behavior currently encoded in GitHub Actions and extract it into explicit governance: triggers, permissions, concurrency, runners, timeouts, pinned actions, Nix runtime/cache, materialization, tests, Pages, releases, and admin boundaries." todo
   ∷ item 24 "CI projection closure rule: GitHub Actions workflows must contain no independent policy; every CI behavior must be traceable to governed project data and ultimately materializable from the constitution." todo
+  ∷ item 44 "Automatically apply versioned non-admin materializations on `main` using only repository-scoped CI permission; validation and publication workflows run after Materialize completes, while admin materializations remain manual." todo
   ∷ [] )
 
 phase2 : Phase PhaseId
