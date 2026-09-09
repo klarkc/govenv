@@ -19,6 +19,7 @@ data GovernanceId : Set where
   GV : Nat → GovernanceId
 
 infix 6 _✓_ _○_
+infix 5 _■_⟨_⟩ _▶_⟨_⟩ _□_⟨_⟩
 
 _✓_ : {owner : PhaseId} → GovernanceId → String → Item PhaseId GovernanceId owner
 identifier ✓ title = item identifier title done
@@ -26,16 +27,25 @@ identifier ✓ title = item identifier title done
 _○_ : {owner : PhaseId} → GovernanceId → String → Item PhaseId GovernanceId owner
 identifier ○ title = item identifier title todo
 
-phase0 : Phase PhaseId GovernanceId
-phase0 = phase P0 "Bootstrap and project shape" finished
-  ( GV 0 ✓ "Literate `Govenv.lagda.md` closure root."
+_■_⟨_⟩ : (identifier : PhaseId) → String → List (Item PhaseId GovernanceId identifier) → Phase PhaseId GovernanceId finished
+identifier ■ title ⟨ items ⟩ = phase identifier title items
+
+_▶_⟨_⟩ : (identifier : PhaseId) → String → List (Item PhaseId GovernanceId identifier) → Phase PhaseId GovernanceId active
+identifier ▶ title ⟨ items ⟩ = phase identifier title items
+
+_□_⟨_⟩ : (identifier : PhaseId) → String → List (Item PhaseId GovernanceId identifier) → Phase PhaseId GovernanceId future
+identifier □ title ⟨ items ⟩ = phase identifier title items
+
+phase0 : Phase PhaseId GovernanceId finished
+phase0 = P0 ■ "Bootstrap and project shape" ⟨
+   GV 0 ✓ "Literate `Govenv.lagda.md` closure root."
   ∷ GV 1 ✓ "Project governance under `Govenv/`; reusable kernel under `Govenv.Kernel.*`."
   ∷ GV 2 ✓ "Reproducible Stage 0 bootstrap, documentation site, and automated releases."
-  ∷ [] )
+  ∷ [] ⟩
 
-phase1 : Phase PhaseId GovernanceId
-phase1 = phase P1 "Formal governance kernel" active
-  ( GV 3 ✓ "`Verdict`: `holds`, `violated`, and `unknown`."
+phase1 : Phase PhaseId GovernanceId active
+phase1 = P1 ▶ "Formal governance kernel" ⟨
+   GV 3 ✓ "`Verdict`: `holds`, `violated`, and `unknown`."
   ∷ GV 4 ✓ "Minimal `Rule` abstraction."
   ∷ GV 5 ✓ "Typed repository facts."
   ∷ GV 6 ✓ "Dependency-indexed rules."
@@ -62,47 +72,48 @@ phase1 = phase P1 "Formal governance kernel" active
   ∷ GV 46 ○ "Model admin materialization evidence as typed governed data that can be consumed by a formal rule or assurance check rather than relying on workflow success alone."
   ∷ GV 47 ✓ "Type roadmap governance identifiers as `GovernanceId` and use readable `✓`/`○` item notation instead of raw `Nat` plus `done`/`todo`."
   ∷ GV 48 ○ "Project every release governance delta from typed roadmap state and commit references, distinguishing completed, advanced, and introduced items plus phase progression while keeping SemVer independent."
-  ∷ [] )
+  ∷ GV 49 ✓ "Make roadmap phase progression structurally valid with exactly one active phase while in progress, declare phases with `■`/`▶`/`□`, and render phase/item state using the same operator glyphs."
+  ∷ [] ⟩
 
-phase2 : Phase PhaseId GovernanceId
-phase2 = phase P2 "Pure repository evaluator" future
-  ( GV 25 ○ "Evaluate facts, rules, verdicts, obligations, and diagnostics without IO."
-  ∷ [] )
+phase2 : Phase PhaseId GovernanceId future
+phase2 = P2 □ "Pure repository evaluator" ⟨
+   GV 25 ○ "Evaluate facts, rules, verdicts, obligations, and diagnostics without IO."
+  ∷ [] ⟩
 
-phase3 : Phase PhaseId GovernanceId
-phase3 = phase P3 "`govenv check` and commit governance" future
-  ( GV 26 ○ "Observe repository facts through a thin impure adapter."
+phase3 : Phase PhaseId GovernanceId future
+phase3 = P3 □ "`govenv check` and commit governance" ⟨
+   GV 26 ○ "Observe repository facts through a thin impure adapter."
   ∷ GV 27 ○ "Produce source-mapped governance diagnostics from the pure kernel."
   ∷ GV 28 ○ "Define governed commit policy with a simplified Conventional Commits vocabulary; governance changes must use `gov(...)`, and every governed commit must reference its related roadmap subitem(s) using a `Refs: GV…` footer."
   ∷ GV 29 ○ "Validate the staged candidate repository state using the candidate governance before accepting a commit."
   ∷ GV 30 ○ "Enforce commit governance transparently through a Git hook; Stage 0 installs it through devenv, and Govenv later owns the integration directly."
-  ∷ [] )
+  ∷ [] ⟩
 
-phase4 : Phase PhaseId GovernanceId
-phase4 = phase P4 "Incremental governance" future
-  ( GV 31 ○ "Recheck only rules affected by changed facts and emit diagnostic deltas."
+phase4 : Phase PhaseId GovernanceId future
+phase4 = P4 □ "Incremental governance" ⟨
+   GV 31 ○ "Recheck only rules affected by changed facts and emit diagnostic deltas."
   ∷ GV 32 ○ "Prove incremental checking equivalent to full checking."
   ∷ GV 33 ○ "Expose the checker through an LSP/editor loop."
   ∷ GV 34 ○ "Expose governance context and diagnostic deltas through an MCP adapter for agent clients."
-  ∷ [] )
+  ∷ [] ⟩
 
-phase5 : Phase PhaseId GovernanceId
-phase5 = phase P5 "Governed runtime compiler" future
-  ( GV 35 ○ "Define typed Environment/Runtime IR."
+phase5 : Phase PhaseId GovernanceId future
+phase5 = P5 □ "Governed runtime compiler" ⟨
+   GV 35 ○ "Define typed Environment/Runtime IR."
   ∷ GV 36 ○ "Compile valid projects through a devenv backend."
   ∷ GV 37 ○ "Expose `govenv shell`, `govenv test`, and `govenv up`."
-  ∷ [] )
+  ∷ [] ⟩
 
-phase6 : Phase PhaseId GovernanceId
-phase6 = phase P6 "Product bootstrap and self-hosting" future
-  ( GV 38 ○ "Ship a standalone `govenv` entrypoint and managed runtime setup."
+phase6 : Phase PhaseId GovernanceId future
+phase6 = P6 □ "Product bootstrap and self-hosting" ⟨
+   GV 38 ○ "Ship a standalone `govenv` entrypoint and managed runtime setup."
   ∷ GV 39 ○ "Make Govenv govern and build itself."
   ∷ GV 40 ○ "Keep runtime backends replaceable behind the typed IR boundary."
   ∷ GV 41 ○ "Support white-label distributions while keeping the formal kernel reusable and product-neutral."
   ∷ GV 42 ○ "Make repository bootstrap, integrations, secrets/environments setup, and privileged materialization declarative and reproducible through Govenv rather than repository-specific manual steps."
   ∷ GV 43 ○ "Make the final product ejectable from the Govenv codebase: a white-label distribution must be able to carry its governed project model, generated CI/materializations, and integrations without depending on `klarkc/govenv` repository-specific code."
-  ∷ [] )
+  ∷ [] ⟩
 
 roadmap : Roadmap PhaseId GovernanceId
-roadmap = phase0 ∷ phase1 ∷ phase2 ∷ phase3 ∷ phase4 ∷ phase5 ∷ phase6 ∷ []
+roadmap = progressing (phase0 ∷ []) phase1 (phase2 ∷ phase3 ∷ phase4 ∷ phase5 ∷ phase6 ∷ [])
 ```

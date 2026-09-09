@@ -18,13 +18,19 @@ record Item (PhaseId ItemId : Set) (owner : PhaseId) : Set where
     itemTitle : String
     itemState : ItemState
 
-record Phase (PhaseId ItemId : Set) : Set where
+record Phase (PhaseId ItemId : Set) (state : PhaseState) : Set where
   constructor phase
   field
     phaseId : PhaseId
     phaseTitle : String
-    phaseState : PhaseState
     phaseItems : List (Item PhaseId ItemId phaseId)
 
-Roadmap : Set → Set → Set
-Roadmap PhaseId ItemId = List (Phase PhaseId ItemId)
+data Roadmap (PhaseId ItemId : Set) : Set where
+  progressing :
+    List (Phase PhaseId ItemId finished) →
+    Phase PhaseId ItemId active →
+    List (Phase PhaseId ItemId future) →
+    Roadmap PhaseId ItemId
+  complete :
+    List (Phase PhaseId ItemId finished) →
+    Roadmap PhaseId ItemId

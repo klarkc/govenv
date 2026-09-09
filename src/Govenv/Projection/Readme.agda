@@ -26,49 +26,51 @@ renderPhaseId P4 = "P4"
 renderPhaseId P5 = "P5"
 renderPhaseId P6 = "P6"
 
-checkbox : ItemState → String
-checkbox done = "[x]"
-checkbox todo = "[ ]"
-
-phaseMark : PhaseState → String
-phaseMark finished = "☑"
-phaseMark active = "☐"
-phaseMark future = "☐"
-
-openAttribute : PhaseState → String
-openAttribute active = " open"
-openAttribute _ = ""
-
-currentMark : PhaseState → String
-currentMark active = " ← current"
-currentMark _ = ""
+itemMark : ItemState → String
+itemMark done = "✓"
+itemMark todo = "○"
 
 renderGovernanceId : GovernanceId → String
 renderGovernanceId (GV number) = "GV" ++ primShowNat number
 
 renderItem : {owner : PhaseId} → Item PhaseId GovernanceId owner → String
 renderItem {owner} (item identifier title state) =
-  "- " ++ checkbox state ++ " **" ++ renderGovernanceId identifier ++ "** " ++ title ++ "\n"
+  "- " ++ itemMark state ++ " **" ++ renderGovernanceId identifier ++ "** " ++ title ++ "\n"
 
 renderItems : {owner : PhaseId} → List (Item PhaseId GovernanceId owner) → String
 renderItems [] = ""
 renderItems (x ∷ xs) = renderItem x ++ renderItems xs
 
-renderPhase : Phase PhaseId GovernanceId → String
-renderPhase (phase identifier title state items) =
-  "<details" ++ openAttribute state ++ ">\n" ++
-  "<summary>" ++ phaseMark state ++ " <strong>" ++ renderPhaseId identifier ++ " — " ++ title ++ "</strong>" ++ currentMark state ++ "</summary>\n\n" ++
+renderPhase : {state : PhaseState} → String → String → Phase PhaseId GovernanceId state → String
+renderPhase mark attribute (phase identifier title items) =
+  "<details" ++ attribute ++ ">\n" ++
+  "<summary>" ++ mark ++ " <strong>" ++ renderPhaseId identifier ++ " — " ++ title ++ "</strong></summary>\n\n" ++
   renderItems items ++ "\n</details>\n\n"
 
+renderFinished : Phase PhaseId GovernanceId finished → String
+renderFinished = renderPhase "■" ""
+
+renderActive : Phase PhaseId GovernanceId active → String
+renderActive = renderPhase "▶" " open"
+
+renderFuture : Phase PhaseId GovernanceId future → String
+renderFuture = renderPhase "□" ""
+
+renderPhaseList : {state : PhaseState} → (Phase PhaseId GovernanceId state → String) → List (Phase PhaseId GovernanceId state) → String
+renderPhaseList render [] = ""
+renderPhaseList render (x ∷ xs) = render x ++ renderPhaseList render xs
+
 renderPhases : Roadmap PhaseId GovernanceId → String
-renderPhases [] = ""
-renderPhases (x ∷ xs) = renderPhase x ++ renderPhases xs
+renderPhases (progressing finishedPhases currentPhase futurePhases) =
+  renderPhaseList renderFinished finishedPhases ++
+  renderActive currentPhase ++
+  renderPhaseList renderFuture futurePhases
+renderPhases (complete finishedPhases) = renderPhaseList renderFinished finishedPhases
 
 renderCurrent : String → Roadmap PhaseId GovernanceId → String
-renderCurrent summary [] = ""
-renderCurrent summary (phase identifier title active items ∷ xs) =
-  "**Current:** " ++ renderPhaseId identifier ++ " — " ++ title ++ ". " ++ summary ++ "\n\n"
-renderCurrent summary (_ ∷ xs) = renderCurrent summary xs
+renderCurrent summary (progressing finishedPhases (phase identifier title items) futurePhases) =
+  "**Current:** ▶ " ++ renderPhaseId identifier ++ " — " ++ title ++ ". " ++ summary ++ "\n\n"
+renderCurrent summary (complete finishedPhases) = "**Current:** ■ Roadmap complete.\n\n"
 
 renderHeader : Readme PhaseId GovernanceId → String
 renderHeader specification =
