@@ -59,6 +59,7 @@
 - ✓ **GV47** Type roadmap governance identifiers as `GovernanceId` and use readable `✓`/`◇` item notation instead of raw `Nat` plus `done`/`todo`.
 - ◇ **GV48** Project every release governance delta from typed roadmap state and commit references, distinguishing completed, advanced, and introduced items plus phase progression while keeping SemVer independent.
 - ✓ **GV49** Make roadmap phase progression structurally valid with exactly one active phase while in progress, declare phases with `■`/`▣`/`□`, and render phase/item state using the same operator glyphs.
+- ✓ **GV50** Index each governance identifier by its owning phase and express roadmap hierarchy through declarative tree operators, keeping list and constructor mechanics out of the constitution.
 
 </details>
 

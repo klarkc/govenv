@@ -11,14 +11,15 @@ data ReleaseKind : Set where
 data ItemProgress : Set where
   completed advanced introduced : ItemProgress
 
-record ItemImpact (ItemId : Set) : Set where
+record ItemImpact (PhaseId : Set) (ItemId : PhaseId → Set) : Set where
   constructor impact
   field
-    itemId : ItemId
+    phaseId : PhaseId
+    itemId : ItemId phaseId
     progress : ItemProgress
 
-record GovernanceDelta (PhaseId ItemId : Set) : Set where
+record GovernanceDelta (PhaseId : Set) (ItemId : PhaseId → Set) : Set where
   field
-    itemImpacts : List (ItemImpact ItemId)
+    itemImpacts : List (ItemImpact PhaseId ItemId)
     previousPhase : Maybe PhaseId
     currentPhase : Maybe PhaseId
