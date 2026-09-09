@@ -51,7 +51,7 @@ renderFinished : Phase PhaseId GovernanceId finished → String
 renderFinished = renderPhase "■" ""
 
 renderActive : Phase PhaseId GovernanceId active → String
-renderActive = renderPhase "▶" " open"
+renderActive = renderPhase "▣" " open"
 
 renderFuture : Phase PhaseId GovernanceId future → String
 renderFuture = renderPhase "□" ""
@@ -69,7 +69,7 @@ renderPhases (complete finishedPhases) = renderPhaseList renderFinished finished
 
 renderCurrent : String → Roadmap PhaseId GovernanceId → String
 renderCurrent summary (progressing finishedPhases (phase identifier title items) futurePhases) =
-  "**Current:** ▶ " ++ renderPhaseId identifier ++ " — " ++ title ++ ". " ++ summary ++ "\n\n"
+  "**Current:** ▣ " ++ renderPhaseId identifier ++ " — " ++ title ++ ". " ++ summary ++ "\n\n"
 renderCurrent summary (complete finishedPhases) = "**Current:** ■ Roadmap complete.\n\n"
 
 renderHeader : Readme PhaseId GovernanceId → String

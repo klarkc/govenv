@@ -19,7 +19,7 @@ data GovernanceId : Set where
   GV : Nat → GovernanceId
 
 infix 6 _✓_ _○_
-infix 5 _■_⟨_⟩ _▶_⟨_⟩ _□_⟨_⟩
+infix 5 _■_⟨_⟩ _▣_⟨_⟩ _□_⟨_⟩
 
 _✓_ : {owner : PhaseId} → GovernanceId → String → Item PhaseId GovernanceId owner
 identifier ✓ title = item identifier title done
@@ -30,8 +30,8 @@ identifier ○ title = item identifier title todo
 _■_⟨_⟩ : (identifier : PhaseId) → String → List (Item PhaseId GovernanceId identifier) → Phase PhaseId GovernanceId finished
 identifier ■ title ⟨ items ⟩ = phase identifier title items
 
-_▶_⟨_⟩ : (identifier : PhaseId) → String → List (Item PhaseId GovernanceId identifier) → Phase PhaseId GovernanceId active
-identifier ▶ title ⟨ items ⟩ = phase identifier title items
+_▣_⟨_⟩ : (identifier : PhaseId) → String → List (Item PhaseId GovernanceId identifier) → Phase PhaseId GovernanceId active
+identifier ▣ title ⟨ items ⟩ = phase identifier title items
 
 _□_⟨_⟩ : (identifier : PhaseId) → String → List (Item PhaseId GovernanceId identifier) → Phase PhaseId GovernanceId future
 identifier □ title ⟨ items ⟩ = phase identifier title items
@@ -44,7 +44,7 @@ phase0 = P0 ■ "Bootstrap and project shape" ⟨
   ∷ [] ⟩
 
 phase1 : Phase PhaseId GovernanceId active
-phase1 = P1 ▶ "Formal governance kernel" ⟨
+phase1 = P1 ▣ "Formal governance kernel" ⟨
    GV 3 ✓ "`Verdict`: `holds`, `violated`, and `unknown`."
   ∷ GV 4 ✓ "Minimal `Rule` abstraction."
   ∷ GV 5 ✓ "Typed repository facts."
@@ -72,7 +72,7 @@ phase1 = P1 ▶ "Formal governance kernel" ⟨
   ∷ GV 46 ○ "Model admin materialization evidence as typed governed data that can be consumed by a formal rule or assurance check rather than relying on workflow success alone."
   ∷ GV 47 ✓ "Type roadmap governance identifiers as `GovernanceId` and use readable `✓`/`○` item notation instead of raw `Nat` plus `done`/`todo`."
   ∷ GV 48 ○ "Project every release governance delta from typed roadmap state and commit references, distinguishing completed, advanced, and introduced items plus phase progression while keeping SemVer independent."
-  ∷ GV 49 ✓ "Make roadmap phase progression structurally valid with exactly one active phase while in progress, declare phases with `■`/`▶`/`□`, and render phase/item state using the same operator glyphs."
+  ∷ GV 49 ✓ "Make roadmap phase progression structurally valid with exactly one active phase while in progress, declare phases with `■`/`▣`/`□`, and render phase/item state using the same operator glyphs."
   ∷ [] ⟩
 
 phase2 : Phase PhaseId GovernanceId future

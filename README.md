@@ -15,7 +15,7 @@
 
 ## Roadmap
 
-**Current:** ▶ P1 — Formal governance kernel. `Verdict`, typed `Fact`, and dependency-indexed `Rule` are in place; the roadmap release rule and Govenv's first self-governing repository rule are next.
+**Current:** ▣ P1 — Formal governance kernel. `Verdict`, typed `Fact`, and dependency-indexed `Rule` are in place; the roadmap release rule and Govenv's first self-governing repository rule are next.
 
 > This roadmap is subject to change as Govenv's architecture evolves. IDs are intended to remain stable references whenever practical.
 
@@ -29,7 +29,7 @@
 </details>
 
 <details open>
-<summary>▶ <strong>P1 — Formal governance kernel</strong></summary>
+<summary>▣ <strong>P1 — Formal governance kernel</strong></summary>
 
 - ✓ **GV3** `Verdict`: `holds`, `violated`, and `unknown`.
 - ✓ **GV4** Minimal `Rule` abstraction.
@@ -58,7 +58,7 @@
 - ○ **GV46** Model admin materialization evidence as typed governed data that can be consumed by a formal rule or assurance check rather than relying on workflow success alone.
 - ✓ **GV47** Type roadmap governance identifiers as `GovernanceId` and use readable `✓`/`○` item notation instead of raw `Nat` plus `done`/`todo`.
 - ○ **GV48** Project every release governance delta from typed roadmap state and commit references, distinguishing completed, advanced, and introduced items plus phase progression while keeping SemVer independent.
-- ✓ **GV49** Make roadmap phase progression structurally valid with exactly one active phase while in progress, declare phases with `■`/`▶`/`□`, and render phase/item state using the same operator glyphs.
+- ✓ **GV49** Make roadmap phase progression structurally valid with exactly one active phase while in progress, declare phases with `■`/`▣`/`□`, and render phase/item state using the same operator glyphs.
 
 </details>
 
