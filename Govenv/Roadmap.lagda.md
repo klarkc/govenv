@@ -56,7 +56,7 @@ phase3 : Phase PhaseId
 phase3 = phase P3 "`govenv check` and commit governance" future
   ( item 26 "Observe repository facts through a thin impure adapter." todo
   ∷ item 27 "Produce source-mapped governance diagnostics from the pure kernel." todo
-  ∷ item 28 "Define governed commit policy with a simplified Conventional Commits vocabulary; governance changes must use `gov(...)`." todo
+  ∷ item 28 "Define governed commit policy with a simplified Conventional Commits vocabulary; governance changes must use `gov(...)`, and every governed commit must reference its related roadmap subitem(s) using a `Refs: GV…` footer." todo
   ∷ item 29 "Validate the staged candidate repository state using the candidate governance before accepting a commit." todo
   ∷ item 30 "Enforce commit governance transparently through a Git hook; Stage 0 installs it through devenv, and Govenv later owns the integration directly." todo
   ∷ [] )

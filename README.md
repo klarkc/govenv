@@ -69,7 +69,7 @@
 
 - [ ] **GV26** Observe repository facts through a thin impure adapter.
 - [ ] **GV27** Produce source-mapped governance diagnostics from the pure kernel.
-- [ ] **GV28** Define governed commit policy with a simplified Conventional Commits vocabulary; governance changes must use `gov(...)`.
+- [ ] **GV28** Define governed commit policy with a simplified Conventional Commits vocabulary; governance changes must use `gov(...)`, and every governed commit must reference its related roadmap subitem(s) using a `Refs: GV…` footer.
 - [ ] **GV29** Validate the staged candidate repository state using the candidate governance before accepting a commit.
 - [ ] **GV30** Enforce commit governance transparently through a Git hook; Stage 0 installs it through devenv, and Govenv later owns the integration directly.
 
