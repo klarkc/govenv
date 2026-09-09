@@ -89,12 +89,13 @@ fi
 
 cp "${updated_changelog}" "${current_changelog}"
 if ! git -C "${worktree}" diff --quiet -- CHANGELOG.md; then
-  git -C "${worktree}" config user.name "github-actions[bot]"
-  git -C "${worktree}" config user.email \
-    "41898282+github-actions[bot]@users.noreply.github.com"
   git -C "${worktree}" add CHANGELOG.md
-  git -C "${worktree}" commit \
-    -m "chore(materialize): update release governance impact" >/dev/null
+  GIT_AUTHOR_NAME="github-actions[bot]" \
+  GIT_AUTHOR_EMAIL="41898282+github-actions[bot]@users.noreply.github.com" \
+  GIT_COMMITTER_NAME="github-actions[bot]" \
+  GIT_COMMITTER_EMAIL="41898282+github-actions[bot]@users.noreply.github.com" \
+    git -C "${worktree}" commit \
+      -m "chore(materialize): update release governance impact" >/dev/null
   git -C "${worktree}" push origin "HEAD:${head_ref}"
 fi
 
