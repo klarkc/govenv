@@ -1,17 +1,39 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+target="${GOVENV_RELEASE_TARGET:-pull-request}"
 release_pr="${GOVENV_RELEASE_PR:-${1:-}}"
+release_tag="${GOVENV_RELEASE_TAG:-}"
 base_ref="${GOVENV_RELEASE_BASE_REF:-${2:-}}"
 head_ref="${GOVENV_RELEASE_HEAD_REF:-${3:-HEAD}}"
 
-if [[ -z "${release_pr}" || ! "${release_pr}" =~ ^[0-9]+$ ]]; then
-  echo "GOVENV_RELEASE_PR or the first argument must be a pull request number." >&2
-  exit 2
-fi
+case "${target}" in
+  pull-request)
+    if [[ -z "${release_pr}" || ! "${release_pr}" =~ ^[0-9]+$ ]]; then
+      echo "GOVENV_RELEASE_PR or the first argument must be a pull request number." >&2
+      exit 2
+    fi
+    release_tag=""
+    ;;
+  github-release)
+    if [[ -z "${release_tag}" ]]; then
+      echo "GOVENV_RELEASE_TAG is required for a GitHub Release materialization." >&2
+      exit 2
+    fi
+    release_pr="0"
+    ;;
+  *)
+    echo "Unsupported GOVENV_RELEASE_TARGET: ${target}" >&2
+    exit 2
+    ;;
+esac
 
 if [[ -z "${base_ref}" ]]; then
-  base_ref="$(git describe --tags --abbrev=0 2>/dev/null || true)"
+  if [[ "${target}" == "github-release" ]]; then
+    base_ref="$(git describe --tags --abbrev=0 "${head_ref}^" 2>/dev/null || true)"
+  else
+    base_ref="$(git describe --tags --abbrev=0 2>/dev/null || true)"
+  fi
 fi
 if [[ -z "${base_ref}" ]]; then
   echo "A release base ref is required." >&2
@@ -150,18 +172,30 @@ baseRevision = "${base_revision}"
 
 headRevision : String
 headRevision = "${head_revision}"
+
+releaseTag : String
+releaseTag = "${release_tag}"
 EOF
 
-nix run github:cachix/devenv/v2.3 -- shell -- \
-  agda -i "${input_root}" -i . -i src --compile \
-  --compile-dir="${build_dir}" src/Govenv/Adapter/ReleaseGovernance/Body.agda >/dev/null
-nix run github:cachix/devenv/v2.3 -- shell -- \
-  agda -i "${input_root}" -i . -i src --compile \
-  --compile-dir="${build_dir}" src/Govenv/Adapter/ReleaseGovernance/Changelog.agda >/dev/null
+if [[ "${target}" == "pull-request" ]]; then
+  nix run github:cachix/devenv/v2.3 -- shell -- \
+    agda -i "${input_root}" -i . -i src --compile \
+    --compile-dir="${build_dir}" src/Govenv/Adapter/ReleaseGovernance/Body.agda >/dev/null
+  nix run github:cachix/devenv/v2.3 -- shell -- \
+    agda -i "${input_root}" -i . -i src --compile \
+    --compile-dir="${build_dir}" src/Govenv/Adapter/ReleaseGovernance/Changelog.agda >/dev/null
 
-body_output=".govenv/release-governance-body.md"
-changelog_output=".govenv/release-governance-changelog.md"
-"${build_dir}/Body" > "${body_output}"
-"${build_dir}/Changelog" > "${changelog_output}"
+  body_output=".govenv/release-governance-body.md"
+  changelog_output=".govenv/release-governance-changelog.md"
+  "${build_dir}/Body" > "${body_output}"
+  "${build_dir}/Changelog" > "${changelog_output}"
+  cat "${body_output}"
+else
+  nix run github:cachix/devenv/v2.3 -- shell -- \
+    agda -i "${input_root}" -i . -i src --compile \
+    --compile-dir="${build_dir}" src/Govenv/Adapter/ReleaseGovernance/Release.agda >/dev/null
 
-cat "${body_output}"
+  release_output=".govenv/release-governance-release.md"
+  "${build_dir}/Release" > "${release_output}"
+  cat "${release_output}"
+fi

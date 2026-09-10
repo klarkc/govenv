@@ -1,6 +1,6 @@
 # Release governance materialization
 
-This module owns the semantic governance-impact section projected into a Release Please pull request and its changelog. Release Please owns the surrounding artifacts; Govenv owns only this typed section.
+This module owns the typed release governance document shared by the canonical portable changelog entry and enriched GitHub pull-request/release projections. Release Please owns surrounding release artifacts; Govenv owns this semantic section and its target-specific materializations.
 
 ```agda
 {-# OPTIONS --safe #-}
@@ -143,5 +143,14 @@ changelog number baseRevision headRevision roadmap delta = materialized
   automatic
   repository
   pullRequestFileSectionEquality
+  (document baseRevision headRevision roadmap delta)
+
+githubRelease :
+  String → String → String → Roadmap → GovernanceDelta → Materialization ReleaseDocument
+githubRelease tag baseRevision headRevision roadmap delta = materialized
+  (githubReleaseBodySection tag releaseGovernanceImpactInRelease)
+  automatic
+  repository
+  githubReleaseBodySectionEquality
   (document baseRevision headRevision roadmap delta)
 ```

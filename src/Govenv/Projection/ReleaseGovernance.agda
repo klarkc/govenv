@@ -216,13 +216,26 @@ renderPhase document with phase document
 renderCount : ImpactGroup → String
 renderCount group = primShowNat (count group) ++ " " ++ label group
 
+hasImpact : List ImpactGroup → Bool
+hasImpact [] = false
+hasImpact (group ∷ rest) with items group
+... | [] = hasImpact rest
+... | values = true
+
+renderSummaryGroups : List ImpactGroup → String
+renderSummaryGroups [] = ""
+renderSummaryGroups (group ∷ rest) with items group | hasImpact rest
+... | [] | future = renderSummaryGroups rest
+... | values | true = renderCount group ++ " · " ++ renderSummaryGroups rest
+... | values | false = renderCount group
+
 renderSummary : ReleaseDocument → String
-renderSummary document =
-  renderCount (completedGroup document) ++ " · " ++
-  renderCount (advancedGroup document) ++ " · " ++
-  renderCount (introducedGroup document) ++ " · " ++
-  renderCount (cancelledGroup document) ++ " · " ++
-  renderCount (supersededGroup document)
+renderSummary document = renderSummaryGroups
+  (completedGroup document ∷
+   advancedGroup document ∷
+   introducedGroup document ∷
+   cancelledGroup document ∷
+   supersededGroup document ∷ [])
 
 renderCompactDescription : String → String
 renderCompactDescription description =
@@ -241,11 +254,23 @@ renderSingleHeader
   (impact itemId state (supersededProgress replacement)) =
     renderGovernanceId itemId ++ " ↪ " ++ renderGovernanceRef replacement
 
-renderSingleCard : ItemImpact → String
-renderSingleCard item@(impact itemId state progress) =
-  "| **" ++ renderSingleHeader item ++ "** |\n" ++
-  "| :---: |\n" ++
-  "| " ++ renderCompactDescription (renderDescription itemId) ++ " |\n\n"
+renderTableRow : ItemImpact → String
+renderTableRow item@(impact itemId state progress) =
+  "| **" ++ renderSingleHeader item ++ "** | " ++ renderDescription itemId ++ " |\n"
+
+renderTableRows : List ItemImpact → String
+renderTableRows [] = ""
+renderTableRows (item ∷ rest) = renderTableRow item ++ renderTableRows rest
+
+renderGithubTableGroup : String → ImpactGroup → String
+renderGithubTableGroup heading group with items group
+... | [] = ""
+... | values =
+  "#### " ++ heading ++ " · " ++ primShowNat (count group) ++ "\n\n" ++
+  "| GV | Proposition |\n" ++
+  "| :---: | --- |\n" ++
+  renderTableRows values ++ "\n"
+
 renderDiffRow : TokenStyle → DiffSide → List SemanticSpan → String
 renderDiffRow signStyle side spans =
   renderStyled signStyle (ifSign signStyle) ++ "&nbsp;" ++
@@ -256,67 +281,113 @@ renderDiffRow signStyle side spans =
   ifSign added = "+"
   ifSign plain = " "
 
-renderResolvedSupersededCard :
+renderResolvedGithubSupersededCard :
   SomeGovernanceId → SomeGovernanceId → String
-renderResolvedSupersededCard previous current
+renderResolvedGithubSupersededCard previous current
   with primStringEquality (renderDescription previous) (renderDescription current)
 ... | true =
+    "<div align=\"center\">\n\n" ++
     "| **" ++ renderGovernanceId previous ++ " ↪ " ++
       renderGovernanceId current ++ "** |\n" ++
     "| :---: |\n" ++
-    "| " ++ renderCompactDescription (renderDescription current) ++ " |\n\n"
+    "| *proposition unchanged* |\n" ++
+    "| " ++ renderCompactDescription (renderDescription current) ++ " |\n\n" ++
+    "</div>\n\n"
 ... | false =
+    "<div align=\"center\">\n\n" ++
     "| **" ++ renderGovernanceId previous ++ " ↪ " ++
       renderGovernanceId current ++ "** |\n" ++
     "| :---: |\n" ++
     "| " ++ renderDiffRow removed oldSide spans ++ " |\n" ++
-    "| " ++ renderDiffRow added newSide spans ++ " |\n\n"
+    "| " ++ renderDiffRow added newSide spans ++ " |\n\n" ++
+    "</div>\n\n"
   where
   spans : List SemanticSpan
   spans = semanticDiff (renderDescription previous) (renderDescription current)
 
-renderSupersededCard :
+renderGithubSupersededCard :
   ReleaseDocument → SomeGovernanceId → GovernanceRef → String
-renderSupersededCard document previous replacement
+renderGithubSupersededCard document previous replacement
   with lookupGovernanceRef replacement (roadmap document)
 ... | nothing =
-    renderSingleCard
-      (impact previous (superseded replacement) (supersededProgress replacement))
-... | just current = renderResolvedSupersededCard previous current
+  "<div align=\"center\">\n\n" ++
+  "| **" ++ renderGovernanceId previous ++ " ↪ " ++ renderGovernanceRef replacement ++ "** |\n" ++
+  "| :---: |\n" ++
+  "| " ++ renderDescription previous ++ " |\n\n" ++
+  "</div>\n\n"
+... | just current = renderResolvedGithubSupersededCard previous current
 
-renderImpact : ReleaseDocument → ItemImpact → String
-renderImpact document
-  (impact itemId state (supersededProgress replacement)) =
-    renderSupersededCard document itemId replacement
-renderImpact document item = renderSingleCard item
+renderGithubSupersededCards : ReleaseDocument → List ItemImpact → String
+renderGithubSupersededCards document [] = ""
+renderGithubSupersededCards document
+  (impact itemId state (supersededProgress replacement) ∷ rest) =
+    renderGithubSupersededCard document itemId replacement ++
+    renderGithubSupersededCards document rest
+renderGithubSupersededCards document (item ∷ rest) =
+  renderGithubSupersededCards document rest
 
-renderImpacts : ReleaseDocument → List ItemImpact → String
-renderImpacts document [] = ""
-renderImpacts document (item ∷ rest) =
-  renderImpact document item ++ renderImpacts document rest
-
-renderGroup : ReleaseDocument → String → ImpactGroup → String
-renderGroup document heading group with items group
+renderGithubSupersededGroup : ReleaseDocument → ImpactGroup → String
+renderGithubSupersededGroup document group with items group
 ... | [] = ""
 ... | values =
-    "<details>\n" ++
-    "<summary><strong>" ++ heading ++ "</strong> · " ++
-      primShowNat (count group) ++ "</summary>\n\n" ++
-    renderImpacts document values ++
-    "</details>\n\n"
+  "#### Superseded · " ++ primShowNat (count group) ++ "\n\n" ++
+  renderGithubSupersededCards document values
 
-renderDocument : String → ReleaseDocument → String
-renderDocument headingPrefix document =
+renderPortableSupersededCard :
+  ReleaseDocument → SomeGovernanceId → GovernanceRef → String
+renderPortableSupersededCard document previous replacement
+  with lookupGovernanceRef replacement (roadmap document)
+... | nothing =
+  "##### " ++ renderGovernanceId previous ++ " ↪ " ++ renderGovernanceRef replacement ++ "\n\n" ++
+  renderDescription previous ++ "\n\n"
+... | just current with primStringEquality (renderDescription previous) (renderDescription current)
+...   | true =
+    "##### " ++ renderGovernanceId previous ++ " ↪ " ++ renderGovernanceId current ++ "\n\n" ++
+    "*Proposition unchanged.* " ++ renderDescription current ++ "\n\n"
+...   | false =
+    "##### " ++ renderGovernanceId previous ++ " ↪ " ++ renderGovernanceId current ++ "\n\n" ++
+    "```diff\n- " ++ renderDescription previous ++ "\n+ " ++ renderDescription current ++ "\n```\n\n"
+
+renderPortableSupersededCards : ReleaseDocument → List ItemImpact → String
+renderPortableSupersededCards document [] = ""
+renderPortableSupersededCards document
+  (impact itemId state (supersededProgress replacement) ∷ rest) =
+    renderPortableSupersededCard document itemId replacement ++
+    renderPortableSupersededCards document rest
+renderPortableSupersededCards document (item ∷ rest) =
+  renderPortableSupersededCards document rest
+
+renderPortableSupersededGroup : ReleaseDocument → ImpactGroup → String
+renderPortableSupersededGroup document group with items group
+... | [] = ""
+... | values =
+  "#### Superseded · " ++ primShowNat (count group) ++ "\n\n" ++
+  renderPortableSupersededCards document values
+
+renderGithubRelease : String → ReleaseDocument → String
+renderGithubRelease headingPrefix document =
   headingPrefix ++ " " ++ heading document ++ "\n\n" ++
-  "**" ++ phaseLabel document ++ ":** " ++ renderPhase document ++ "  \n\n" ++
+  "**" ++ phaseLabel document ++ ":** " ++ renderPhase document ++ "  \n" ++
   "**" ++ itemsLabel document ++ ":** " ++ renderSummary document ++ "\n\n" ++
-  renderGroup document "Completed" (completedGroup document) ++
-  renderGroup document "Advanced" (advancedGroup document) ++
-  renderGroup document "Introduced" (introducedGroup document) ++
-  renderGroup document "Cancelled" (cancelledGroup document) ++
-  renderGroup document "Superseded" (supersededGroup document) ++
+  renderGithubTableGroup "Completed" (completedGroup document) ++
+  renderGithubTableGroup "Advanced" (advancedGroup document) ++
+  renderGithubTableGroup "Introduced" (introducedGroup document) ++
+  renderGithubTableGroup "Cancelled" (cancelledGroup document) ++
+  renderGithubSupersededGroup document (supersededGroup document) ++
   "<sub>" ++ footer document ++ " `" ++ baseRevision document ++
   ".." ++ headRevision document ++ "`.</sub>\n"
+
+renderPortableRelease : String → ReleaseDocument → String
+renderPortableRelease headingPrefix document =
+  headingPrefix ++ " " ++ heading document ++ "\n\n" ++
+  "**" ++ phaseLabel document ++ ":** " ++ renderPhase document ++ "  \n" ++
+  "**" ++ itemsLabel document ++ ":** " ++ renderSummary document ++ "\n\n" ++
+  renderGithubTableGroup "Completed" (completedGroup document) ++
+  renderGithubTableGroup "Advanced" (advancedGroup document) ++
+  renderGithubTableGroup "Introduced" (introducedGroup document) ++
+  renderGithubTableGroup "Cancelled" (cancelledGroup document) ++
+  renderPortableSupersededGroup document (supersededGroup document) ++
+  footer document ++ " `" ++ baseRevision document ++ ".." ++ headRevision document ++ "`.\n"
 
 startMarker : String
 startMarker = "<!-- govenv-governance-impact:start -->\n"
@@ -326,11 +397,15 @@ endMarker = "<!-- govenv-governance-impact:end -->\n"
 
 renderBodyMaterialization : Materialization ReleaseDocument → String
 renderBodyMaterialization materialization =
-  startMarker ++ renderDocument "###" (state materialization) ++ endMarker
+  startMarker ++ renderGithubRelease "###" (state materialization) ++ endMarker
 
 renderChangelogMaterialization : Materialization ReleaseDocument → String
 renderChangelogMaterialization materialization =
-  startMarker ++ renderDocument "###" (state materialization) ++ endMarker
+  startMarker ++ renderPortableRelease "###" (state materialization) ++ endMarker
+
+renderGithubReleaseMaterialization : Materialization ReleaseDocument → String
+renderGithubReleaseMaterialization materialization =
+  startMarker ++ renderGithubRelease "###" (state materialization) ++ endMarker
 
 renderError : GovernanceDeltaError → String
 renderError (itemRegressed itemId) =

@@ -22,6 +22,9 @@ data GithubRepositoryProperty : Set where
 data GithubPullRequestSection : Set where
   releaseGovernanceImpact : GithubPullRequestSection
 
+data GithubReleaseSection : Set where
+  releaseGovernanceImpactInRelease : GithubReleaseSection
+
 data GithubPullRequestBodyPlacement : Set where
   afterReleaseHeadingInBody : GithubPullRequestBodyPlacement
 
@@ -35,6 +38,7 @@ data Target : Set where
     Nat → GithubPullRequestSection → GithubPullRequestBodyPlacement → Target
   githubPullRequestFileSection :
     Nat → String → GithubPullRequestSection → GithubPullRequestFilePlacement → Target
+  githubReleaseBodySection : String → GithubReleaseSection → Target
 
 data Verification : Target → Set where
   trackedEquality : {path : String} → Verification (repositoryFile path)
@@ -48,6 +52,9 @@ data Verification : Target → Set where
     {number : Nat} {path : String} {section : GithubPullRequestSection}
     {placement : GithubPullRequestFilePlacement} →
     Verification (githubPullRequestFileSection number path section placement)
+  githubReleaseBodySectionEquality :
+    {tag : String} {section : GithubReleaseSection} →
+    Verification (githubReleaseBodySection tag section)
 
 record Materialization (State : Set) : Set where
   constructor materialized

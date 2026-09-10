@@ -68,3 +68,11 @@ jobs:
           fi
           export GOVENV_RELEASE_PR
           bash src/Govenv/Adapter/release-governance-pr.sh
+
+      - name: Materialize published release governance
+        if: steps.release.outputs.release_created == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GOVENV_RELEASE_TAG: ${{ steps.release.outputs.tag_name }}
+          GOVENV_RELEASE_SHA: ${{ steps.release.outputs.sha }}
+        run: bash src/Govenv/Adapter/release-governance-release.sh
