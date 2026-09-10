@@ -7,10 +7,11 @@ The roadmap is the governed project plan. Governance identities are append-only:
 
 module Govenv.Roadmap where
 
+open import Govenv.Assurance using (assurances)
 open import Govenv.Roadmap.DSL
 
 roadmap : Roadmap
-roadmap = roadmapOf (
+roadmap = roadmapOf assurances (
     (P 0 "Bootstrap and project shape" ■
     ┬ GV 0 "Literate `Govenv.lagda.md` closure root." ✓
     ├ GV 1 "Project governance under `Govenv/`; reusable kernel under `Govenv.Kernel.*`." ✓
@@ -56,6 +57,10 @@ roadmap = roadmapOf (
     ├ GV 48 "Project every release governance delta from typed roadmap state and commit references, distinguishing completed, advanced, and introduced items plus phase progression while keeping SemVer independent." ↪ GVR 70
     ├ GV 70 "Project release governance deltas from immutable typed roadmap snapshots and commit references, distinguishing introduced, advanced, completed, cancelled, and superseded items plus phase progression while rejecting identity mutation or removal and keeping SemVer independent." ✓
     ├ GV 54 "Preserve immutable governance identity across roadmap evolution: once introduced, a `GovernanceId`, its definition, and its owning phase may never be removed, reused, or modified; obsolete or corrected governance must remain represented as cancelled or superseded, with supersession explicitly identifying a newer replacement `GovernanceId`." ✓
+    ├ GV 71 "Restrict handwritten versioned repository content to Agda and Markdown only. Any generated or governed materialization may use its required target format. Until GV38 is completed, the only handwritten bootstrap escape hatch is root-level `devenv.nix`, `devenv.yaml`, and `devenv.lock`; all other implementation languages and handwritten configuration formats, including Nix elsewhere, are forbidden." ◇
+    ├ GV 72 "Require every versioned repository artifact not permitted as handwritten source by GV71, except the temporary root-level `devenv.nix`, `devenv.yaml`, and `devenv.lock` bootstrap escape hatch, to be produced by exactly one governed `Govenv.Materialization.*` definition and verified against its materialized state; transient `.govenv` state is forbidden from being versioned." ◇
+    ├ GV 73 "Require every persisted supporting artifact, including snapshots, fixtures, baselines, schemas, test vectors, and evidence, to be colocated with the module that semantically owns it; catch-all artifact directories are forbidden unless the artifact is genuinely project-global." ◇
+    ├ GV 74 "Make governance completion evidence-bearing and persistent: a governance item may transition to `done` only when governed evidence establishes its proposition for the candidate repository state, and every non-superseded `done` item, including items completed before this rule, must remain satisfied in every subsequent valid repository state." ◇
     ├ GV 7 "Roadmap release rule: every major or minor release must advance the roadmap by completing at least one unchecked item or moving `Current` to a later phase; patch releases are exempt." ↪ GVR 55
     ├ GV 55 "Model the governed release-progress policy: major and minor releases require governance progress by completing at least one pending item or advancing to a later phase; patch releases are exempt." ◇
     ├ GV 8 "Encode GV7 as Govenv's first self-governing repository rule." ↪ GVR 56
