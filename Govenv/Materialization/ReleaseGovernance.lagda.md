@@ -137,18 +137,18 @@ pullRequestBody number baseRevision headRevision roadmap delta = materialized
   (document baseRevision headRevision roadmap delta)
 
 changelog :
-  Nat → String → String → Roadmap → GovernanceDelta → Materialization ReleaseDocument
-changelog number baseRevision headRevision roadmap delta = materialized
-  (githubPullRequestFileSection number "CHANGELOG.md" releaseGovernanceImpact afterReleaseHeading)
+  String → String → Roadmap → GovernanceDelta → Materialization ReleaseDocument
+changelog baseRevision headRevision roadmap delta = materialized
+  (repositoryFileSection "CHANGELOG.md" releaseGovernanceImpactInChangelog afterReleaseHeadingInFile)
   automatic
   repository
-  pullRequestFileSectionEquality
+  repositoryFileSectionEquality
   (document baseRevision headRevision roadmap delta)
 
 githubRelease :
   String → String → String → Roadmap → GovernanceDelta → Materialization ReleaseDocument
 githubRelease tag baseRevision headRevision roadmap delta = materialized
-  (githubReleaseBodySection tag releaseGovernanceImpactInRelease)
+  (githubReleaseBodySection tag releaseGovernanceImpactInRelease replaceCarriedChangelogSection)
   automatic
   repository
   githubReleaseBodySectionEquality
