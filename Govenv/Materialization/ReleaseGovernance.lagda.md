@@ -11,6 +11,7 @@ open import Agda.Builtin.List using (List; []; _∷_)
 open import Agda.Builtin.Nat using (Nat; zero; suc)
 open import Agda.Builtin.String using (String)
 open import Govenv.Kernel.Release
+open import Govenv.Kernel.Roadmap using (Roadmap)
 open import Govenv.Materialization
 
 data ImpactKind : Set where
@@ -25,12 +26,6 @@ record ImpactGroup : Set where
     items : List ItemImpact
     count : Nat
 
-record ImpactLine : Set where
-  constructor impactLine
-  field
-    impactValue : ItemImpact
-    progressLabel : String
-
 record ReleaseDocument : Set where
   constructor releaseDocument
   field
@@ -42,8 +37,8 @@ record ReleaseDocument : Set where
     introducedGroup : ImpactGroup
     cancelledGroup : ImpactGroup
     supersededGroup : ImpactGroup
-    impactLines : List ImpactLine
     phase : PhaseProgress
+    roadmap : Roadmap
     noImpactLabel : String
     introducedPhaseLabel : String
     unchangedPhaseLabel : String
@@ -53,10 +48,6 @@ record ReleaseDocument : Set where
     headRevision : String
 
 private
-  _++_ : {A : Set} → List A → List A → List A
-  [] ++ ys = ys
-  (x ∷ xs) ++ ys = x ∷ (xs ++ ys)
-
   countItems : List ItemImpact → Nat
   countItems [] = zero
   countItems (item ∷ rest) = suc (countItems rest)
@@ -98,6 +89,7 @@ private
   cancelledItems (impact itemId state introduced ∷ rest) = cancelledItems rest
   cancelledItems (item@(impact itemId state cancelledProgress) ∷ rest) =
     item ∷ cancelledItems rest
+
   cancelledItems (impact itemId state (supersededProgress replacement) ∷ rest) =
     cancelledItems rest
 
@@ -114,13 +106,8 @@ private
   group : ImpactKind → String → List ItemImpact → ImpactGroup
   group kind label items = impactGroup kind label items (countItems items)
 
-  labelItems : String → List ItemImpact → List ImpactLine
-  labelItems label [] = []
-  labelItems label (item ∷ rest) =
-    impactLine item label ∷ labelItems label rest
-
-document : String → String → GovernanceDelta → ReleaseDocument
-document baseRevision headRevision (governanceDeltaValue impacts phase) =
+document : String → String → Roadmap → GovernanceDelta → ReleaseDocument
+document baseRevision headRevision roadmap (governanceDeltaValue impacts phase) =
   releaseDocument
     "Governance impact"
     "Phase"
@@ -130,12 +117,8 @@ document baseRevision headRevision (governanceDeltaValue impacts phase) =
     (group introducedImpact "introduced" (introducedItems impacts))
     (group cancelledImpact "cancelled" (cancelledItems impacts))
     (group supersededImpact "superseded" (supersededItems impacts))
-    ( labelItems "completed" (completedItems impacts) ++
-      (labelItems "advanced" (advancedItems impacts) ++
-       (labelItems "introduced" (introducedItems impacts) ++
-        (labelItems "cancelled" (cancelledItems impacts) ++
-         labelItems "superseded" (supersededItems impacts)))) )
     phase
+    roadmap
     "no roadmap item impact"
     "phase governance introduced"
     "unchanged"
@@ -145,20 +128,20 @@ document baseRevision headRevision (governanceDeltaValue impacts phase) =
     headRevision
 
 pullRequestBody :
-  Nat → String → String → GovernanceDelta → Materialization ReleaseDocument
-pullRequestBody number baseRevision headRevision delta = materialized
-  (githubPullRequestBodySection number releaseGovernanceImpact afterReleasePleaseBody)
+  Nat → String → String → Roadmap → GovernanceDelta → Materialization ReleaseDocument
+pullRequestBody number baseRevision headRevision roadmap delta = materialized
+  (githubPullRequestBodySection number releaseGovernanceImpact afterReleaseHeadingInBody)
   automatic
   repository
   pullRequestBodySectionEquality
-  (document baseRevision headRevision delta)
+  (document baseRevision headRevision roadmap delta)
 
 changelog :
-  Nat → String → String → GovernanceDelta → Materialization ReleaseDocument
-changelog number baseRevision headRevision delta = materialized
+  Nat → String → String → Roadmap → GovernanceDelta → Materialization ReleaseDocument
+changelog number baseRevision headRevision roadmap delta = materialized
   (githubPullRequestFileSection number "CHANGELOG.md" releaseGovernanceImpact afterReleaseHeading)
   automatic
   repository
   pullRequestFileSectionEquality
-  (document baseRevision headRevision delta)
+  (document baseRevision headRevision roadmap delta)
 ```

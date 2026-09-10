@@ -24,5 +24,5 @@ main : IO ⊤
 main with governanceDelta previous references roadmap
 ... | validDelta delta =
   putStr (renderBodyMaterialization
-    (pullRequestBody releasePullRequest baseRevision headRevision delta))
+    (pullRequestBody releasePullRequest baseRevision headRevision roadmap delta))
 ... | invalidDelta error = failWith (renderError error)

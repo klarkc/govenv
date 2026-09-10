@@ -4,6 +4,7 @@ module Govenv.Kernel.Roadmap where
 
 open import Agda.Builtin.Bool using (Bool; true; false)
 open import Agda.Builtin.List using (List; []; _∷_)
+open import Agda.Builtin.Maybe using (Maybe; just; nothing)
 open import Agda.Builtin.Nat using (Nat; zero; suc)
 open import Agda.Builtin.String using (String)
 open import Govenv.Kernel.Identifier
@@ -99,6 +100,26 @@ private
   ... | true = true
   ... | false = containsNat value xs
 
+  lookupMembership :
+    {phaseIdx : Nat} {phaseDescription : String}
+    {phase : PhaseId phaseIdx phaseDescription} →
+    Nat → List (Membership phase) → Maybe SomeGovernanceId
+  lookupMembership idx [] = nothing
+  lookupMembership idx (membership governanceId state relation ∷ rest)
+    with equalNat idx (indexOf governanceId)
+  ... | true = just (someIdentifier governanceId)
+  ... | false = lookupMembership idx rest
+
+  lookupPhase : {state : PhaseState} → Nat → PhaseNode state → Maybe SomeGovernanceId
+  lookupPhase idx (phaseNode phaseId items) = lookupMembership idx items
+
+  lookupPhases :
+    {state : PhaseState} → Nat → List (PhaseNode state) → Maybe SomeGovernanceId
+  lookupPhases idx [] = nothing
+  lookupPhases idx (phase ∷ rest) with lookupPhase idx phase
+  ... | just governanceId = just governanceId
+  ... | nothing = lookupPhases idx rest
+
   uniqueNats : List Nat → Bool
   uniqueNats [] = true
   uniqueNats (x ∷ xs) = not (containsNat x xs) and uniqueNats xs
@@ -117,6 +138,20 @@ attach :
 attach phase [] = []
 attach phase (governanceSpec governanceId governanceState ∷ rest) =
   membership governanceId governanceState belongs ∷ attach phase rest
+
+lookupGovernance : Nat → Roadmap → Maybe SomeGovernanceId
+lookupGovernance idx (progressing finishedPhases current futurePhases)
+  with lookupPhases idx finishedPhases
+... | just governanceId = just governanceId
+... | nothing with lookupPhase idx current
+...   | just governanceId = just governanceId
+...   | nothing = lookupPhases idx futurePhases
+lookupGovernance idx (complete finishedPhases) =
+  lookupPhases idx finishedPhases
+
+lookupGovernanceRef : GovernanceRef → Roadmap → Maybe SomeGovernanceId
+lookupGovernanceRef replacement =
+  lookupGovernance (IdentifierRef.referenceIndex replacement)
 
 data ChainShape : Set where
   finishedOnly activeAndFuture futureOnly progressingShape invalidShape : ChainShape

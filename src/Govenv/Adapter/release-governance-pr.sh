@@ -117,15 +117,22 @@ observed_body="${tmp}/body.observed.md"
 gh pr view "${release_pr}" --json body --jq '.body // ""' > "${current_body}"
 strip_section "${current_body}" > "${clean_body}"
 
-{
-  cat "${body_impact}"
-  if [[ -s "${clean_body}" ]]; then
-    body_content="$(cat "${clean_body}")"
-    if [[ -n "${body_content}" ]]; then
-      printf '\n%s\n' "${body_content}"
-    fi
-  fi
-} > "${updated_body}"
+awk -v section="${root}/${body_impact}" '
+  function emit_section( line) {
+    while ((getline line < section) > 0) print line
+    close(section)
+  }
+  !inserted && /^## \[/ {
+    print
+    print ""
+    emit_section()
+    print ""
+    inserted = 1
+    next
+  }
+  { print }
+  END { if (!inserted) exit 42 }
+' "${clean_body}" > "${updated_body}"
 
 gh pr edit "${release_pr}" --body-file "${updated_body}" >/dev/null
 gh pr view "${release_pr}" --json body --jq '.body // ""' > "${current_body}"

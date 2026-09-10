@@ -22,13 +22,15 @@ The `v0.1.0` baseline predates immutable governed roadmap snapshots and is there
 
 Phase progress is typed separately as introduced, unchanged, advanced, or roadmap-completed. GV55 will consume this delta: major and minor releases must contain governance progress according to the governed policy; patch releases are exempt.
 
-The governed `releaseGovernanceImpact` section is materialized independently into both the Release Please pull-request body and its `CHANGELOG.md`, with read-back equality verification. Rendered release artifacts reuse the roadmap vocabulary and add change glyphs. For example:
+The governed `releaseGovernanceImpact` section is materialized independently into both the Release Please pull-request body and its `CHANGELOG.md`, with read-back equality verification. Item projections are compact: lifecycle-only changes show the governance identity and transition once, while supersessions render the previous and replacement propositions as an aligned semantic diff whose unchanged context stays neutral and whose changed spans are visually distinguished. Long common context may be deterministically elided, and rendered rows use deterministic wrapping rather than browser-selected Markdown wrapping.
 
 ```text
-├ ✓ GV45  completed
-├ ◇ GV28  ↑ advanced
-├ × GV72  cancelled
-└ ↪ GV23  superseded → GV63
+GV60  ◇ → ✓
+Govern README.md as the canonical output …
+
+GV14 ↪ GV60
+- Govern the README as the canonical materialization of Govenv.Readme …
++ Govern README.md as the canonical output of Govenv.Materialization.Readme …
 ```
 
 ```agda

@@ -23,7 +23,7 @@ data GithubPullRequestSection : Set where
   releaseGovernanceImpact : GithubPullRequestSection
 
 data GithubPullRequestBodyPlacement : Set where
-  afterReleasePleaseBody : GithubPullRequestBodyPlacement
+  afterReleaseHeadingInBody : GithubPullRequestBodyPlacement
 
 data GithubPullRequestFilePlacement : Set where
   afterReleaseHeading : GithubPullRequestFilePlacement
