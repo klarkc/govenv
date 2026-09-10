@@ -118,13 +118,13 @@ gh pr view "${release_pr}" --json body --jq '.body // ""' > "${current_body}"
 strip_section "${current_body}" > "${clean_body}"
 
 {
+  cat "${body_impact}"
   if [[ -s "${clean_body}" ]]; then
     body_content="$(cat "${clean_body}")"
     if [[ -n "${body_content}" ]]; then
-      printf '%s\n\n' "${body_content}"
+      printf '\n%s\n' "${body_content}"
     fi
   fi
-  cat "${body_impact}"
 } > "${updated_body}"
 
 gh pr edit "${release_pr}" --body-file "${updated_body}" >/dev/null

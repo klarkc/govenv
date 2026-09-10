@@ -81,27 +81,39 @@ renderSummary document =
   renderCount (cancelledGroup document) ++ " · " ++
   renderCount (supersededGroup document)
 
-renderImpact : String → ImpactLine → String
-renderImpact branch line with impactValue line
+renderImpact : ImpactLine → String
+renderImpact line with impactValue line
 ... | impact itemId itemState progress =
-  branch ++ " " ++ renderItemMark itemState ++ " **" ++
-  renderGovernanceId itemId ++ "** — " ++ renderChangeMark progress ++
-  progressLabel line ++ renderStateTransition itemState ++
-  " — " ++ renderDescription itemId ++ "  \n"
+  renderItemMark itemState ++ " **" ++ renderGovernanceId itemId ++ "**" ++
+  renderStateTransition itemState ++ " · " ++ renderChangeMark progress ++
+  progressLabel line ++ "\n\n> " ++ renderDescription itemId ++ "\n\n"
 
-renderImpacts : String → List ImpactLine → String
-renderImpacts emptyLabel [] = "└ — " ++ emptyLabel ++ "\n"
-renderImpacts emptyLabel (line ∷ []) = renderImpact "└" line
-renderImpacts emptyLabel (line ∷ rest) =
-  renderImpact "├" line ++ renderImpacts emptyLabel rest
+renderImpacts : List ImpactLine → String
+renderImpacts [] = ""
+renderImpacts (line ∷ rest) = renderImpact line ++ renderImpacts rest
 
-renderDocument : String → ReleaseDocument → String
-renderDocument headingPrefix document =
+renderGroup : String → String → ImpactGroup → String
+renderGroup headingPrefix heading group with items group
+... | [] = ""
+... | values = headingPrefix ++ " " ++ heading ++ "\n\n" ++
+  renderImpacts (groupLines values)
+  where
+    groupLines : List ItemImpact → List ImpactLine
+    groupLines [] = []
+    groupLines (item ∷ rest) =
+      impactLine item (label group) ∷ groupLines rest
+
+renderDocument : String → String → ReleaseDocument → String
+renderDocument headingPrefix groupHeadingPrefix document =
   headingPrefix ++ " " ++ heading document ++ "\n\n" ++
   "**" ++ phaseLabel document ++ ":** " ++ renderPhase document ++ "  \n\n" ++
-  "**" ++ itemsLabel document ++ ":** " ++ renderSummary document ++ "  \n\n" ++
-  renderImpacts (noImpactLabel document) (impactLines document) ++
-  "\n<sub>" ++ footer document ++ " `" ++ baseRevision document ++
+  "**" ++ itemsLabel document ++ ":** " ++ renderSummary document ++ "\n\n" ++
+  renderGroup groupHeadingPrefix "Completed" (completedGroup document) ++
+  renderGroup groupHeadingPrefix "Advanced" (advancedGroup document) ++
+  renderGroup groupHeadingPrefix "Introduced" (introducedGroup document) ++
+  renderGroup groupHeadingPrefix "Cancelled" (cancelledGroup document) ++
+  renderGroup groupHeadingPrefix "Superseded" (supersededGroup document) ++
+  "<sub>" ++ footer document ++ " `" ++ baseRevision document ++
   ".." ++ headRevision document ++ "`.</sub>\n"
 
 startMarker : String
@@ -112,11 +124,11 @@ endMarker = "<!-- govenv-governance-impact:end -->\n"
 
 renderBodyMaterialization : Materialization ReleaseDocument → String
 renderBodyMaterialization materialization =
-  startMarker ++ renderDocument "##" (state materialization) ++ endMarker
+  startMarker ++ renderDocument "##" "###" (state materialization) ++ endMarker
 
 renderChangelogMaterialization : Materialization ReleaseDocument → String
 renderChangelogMaterialization materialization =
-  startMarker ++ renderDocument "###" (state materialization) ++ endMarker
+  startMarker ++ renderDocument "###" "####" (state materialization) ++ endMarker
 
 renderError : GovernanceDeltaError → String
 renderError (itemRegressed itemId) =
