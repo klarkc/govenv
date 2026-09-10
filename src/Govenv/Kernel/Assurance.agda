@@ -3,14 +3,17 @@
 module Govenv.Kernel.Assurance where
 
 open import Agda.Builtin.Bool using (Bool; true; false)
+open import Agda.Builtin.Equality using (_≡_)
 open import Agda.Builtin.List using (List; []; _∷_)
 open import Agda.Builtin.Nat using (Nat; zero; suc)
 open import Agda.Builtin.String using (String)
+open import Govenv.Kernel.Fact using (Facts)
 open import Govenv.Kernel.Identifier using (PhaseId; indexOf)
 open import Govenv.Kernel.Roadmap using
   ( Roadmap; progressing; complete; PhaseState; PhaseNode; phaseNode
   ; Membership; membership; done; todo; cancelled; superseded )
 open import Govenv.Kernel.Rule using (Rule)
+open import Govenv.Kernel.Verdict using (holds)
 
 record StaticEvidence (idx : Nat) : Set₁ where
   constructor staticEvidence
@@ -28,12 +31,29 @@ record ObservedEvidence (idx : Nat) : Set₁ where
     Obligation : Set
     rule : Rule Subject Observation dependencies Diagnostic Obligation
 
+record ObservedWitness {idx : Nat} (evidence : ObservedEvidence idx) : Set₁ where
+  open ObservedEvidence evidence
+  field
+    facts : Facts Subject Observation dependencies
+    established : Rule.check rule facts ≡ holds
+
 data CompletionAssurance
   (Legacy : Nat → Set)
   (idx : Nat) : Set₁ where
   inherited : Legacy idx → CompletionAssurance Legacy idx
   statically : StaticEvidence idx → CompletionAssurance Legacy idx
   checked : ObservedEvidence idx → CompletionAssurance Legacy idx
+
+data CandidateEvidence
+  {Legacy : Nat → Set} {idx : Nat} :
+  CompletionAssurance Legacy idx → Set₁ where
+  staticEstablished :
+    {evidence : StaticEvidence idx} →
+    CandidateEvidence (statically evidence)
+  checkedEstablished :
+    {evidence : ObservedEvidence idx} →
+    ObservedWitness evidence →
+    CandidateEvidence (checked evidence)
 
 record AssuranceSpec (Legacy : Nat → Set) : Set₁ where
   constructor assures
