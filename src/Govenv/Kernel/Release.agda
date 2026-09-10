@@ -279,7 +279,13 @@ private
       classifyKnownState item (SnapshotItem.snapshotItemState previous) references
 
   classifyAbsent : CurrentItem → List Nat → ItemDecision
-  classifyAbsent item@(currentItem governanceId phase state) references =
+  classifyAbsent (currentItem governanceId phase cancelled) references =
+    includeImpact (impact governanceId cancelled cancelledProgress)
+  classifyAbsent
+    (currentItem governanceId phase (superseded replacement)) references =
+      includeImpact
+        (impact governanceId (superseded replacement) (supersededProgress replacement))
+  classifyAbsent (currentItem governanceId phase state) references =
     includeImpact (impact governanceId state introduced)
 
   classifyItem :
