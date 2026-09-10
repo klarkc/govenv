@@ -6,7 +6,6 @@ open import Agda.Builtin.Bool using (Bool; true; false)
 open import Agda.Builtin.List using (List; []; _∷_)
 open import Agda.Builtin.Nat using (Nat; zero; suc)
 open import Agda.Builtin.String using (String)
-open import Govenv.Kernel.Assurance using (AssuranceSpec; assures)
 open import Govenv.Kernel.Identifier
 
 data ItemState : Set where
@@ -100,20 +99,6 @@ private
   ... | true = true
   ... | false = containsNat value xs
 
-  assuranceIndex :
-    {Legacy : Nat → Set} → AssuranceSpec Legacy → Nat
-  assuranceIndex (assures {idx} assurance) = idx
-
-  assuranceIndices :
-    {Legacy : Nat → Set} → List (AssuranceSpec Legacy) → List Nat
-  assuranceIndices [] = []
-  assuranceIndices (assurance ∷ rest) =
-    assuranceIndex assurance ∷ assuranceIndices rest
-
-  containsAssurance :
-    {Legacy : Nat → Set} → Nat → List (AssuranceSpec Legacy) → Bool
-  containsAssurance idx assurances = containsNat idx (assuranceIndices assurances)
-
   uniqueNats : List Nat → Bool
   uniqueNats [] = true
   uniqueNats (x ∷ xs) = not (containsNat x xs) and uniqueNats xs
@@ -185,33 +170,6 @@ private
   finishedPhasesDone (phaseNode phaseId items ∷ rest) =
     itemsDone items and finishedPhasesDone rest
 
-  doneItemsAssured :
-    {Legacy : Nat → Set}
-    {phaseIdx : Nat} {phaseDescription : String}
-    {phase : PhaseId phaseIdx phaseDescription} →
-    List (AssuranceSpec Legacy) → List (Membership phase) → Bool
-  doneItemsAssured assurances [] = true
-  doneItemsAssured assurances
-    (membership governanceId done relation ∷ rest) =
-      containsAssurance (indexOf governanceId) assurances and
-      doneItemsAssured assurances rest
-  doneItemsAssured assurances
-    (membership governanceId todo relation ∷ rest) =
-      doneItemsAssured assurances rest
-  doneItemsAssured assurances
-    (membership governanceId cancelled relation ∷ rest) =
-      doneItemsAssured assurances rest
-  doneItemsAssured assurances
-    (membership governanceId (superseded replacement) relation ∷ rest) =
-      doneItemsAssured assurances rest
-
-  phasesDoneAssured :
-    {Legacy : Nat → Set} {state : PhaseState} →
-    List (AssuranceSpec Legacy) → List (PhaseNode state) → Bool
-  phasesDoneAssured assurances [] = true
-  phasesDoneAssured assurances (phaseNode phaseId items ∷ rest) =
-    doneItemsAssured assurances items and phasesDoneAssured assurances rest
-
   chainPhaseIndices : {shape : ChainShape} → RoadmapChain shape → List Nat
   chainPhaseIndices (finishedChain phases) = phaseIndices phases
   chainPhaseIndices (activeChain current futures) =
@@ -243,23 +201,6 @@ private
   chainFinishedPhasesDone (progressingChain finishedPhases current futures) =
     finishedPhasesDone finishedPhases
   chainFinishedPhasesDone invalidChain = false
-
-  chainDoneAssured :
-    {Legacy : Nat → Set} {shape : ChainShape} →
-    List (AssuranceSpec Legacy) → RoadmapChain shape → Bool
-  chainDoneAssured assurances (finishedChain phases) =
-    phasesDoneAssured assurances phases
-  chainDoneAssured assurances (activeChain current futures) =
-    phasesDoneAssured assurances (current ∷ []) and
-    phasesDoneAssured assurances futures
-  chainDoneAssured assurances (futureChain futures) =
-    phasesDoneAssured assurances futures
-  chainDoneAssured assurances
-    (progressingChain finishedPhases current futures) =
-      phasesDoneAssured assurances finishedPhases and
-      (phasesDoneAssured assurances (current ∷ []) and
-       phasesDoneAssured assurances futures)
-  chainDoneAssured assurances invalidChain = false
 
   supersessionsValidItems :
     {phaseIdx : Nat} {phaseDescription : String}
@@ -304,15 +245,11 @@ private
      supersessionsValidPhases (chainGovernanceIndices chain) futures)
   chainSupersessionsValid invalidChain = false
 
-  integrity :
-    {Legacy : Nat → Set} {shape : ChainShape} →
-    List (AssuranceSpec Legacy) → RoadmapChain shape → Bool
-  integrity assurances chain =
-    uniqueNats (assuranceIndices assurances) and
-    (strictlyIncreasing (chainPhaseIndices chain) and
-     (uniqueNats (chainGovernanceIndices chain) and
-      (chainFinishedPhasesDone chain and
-       (chainSupersessionsValid chain and chainDoneAssured assurances chain))))
+  integrity : {shape : ChainShape} → RoadmapChain shape → Bool
+  integrity chain =
+    strictlyIncreasing (chainPhaseIndices chain) and
+    (uniqueNats (chainGovernanceIndices chain) and
+     (chainFinishedPhasesDone chain and chainSupersessionsValid chain))
 
   appendShape : ChainShape → ChainShape → ChainShape
   appendShape finishedOnly finishedOnly = finishedOnly
@@ -323,10 +260,8 @@ private
   appendShape progressingShape futureOnly = progressingShape
   appendShape _ _ = invalidShape
 
-completionCoverage :
-  {Legacy : Nat → Set} {shape : ChainShape} →
-  List (AssuranceSpec Legacy) → RoadmapChain shape → Bool
-completionCoverage = chainDoneAssured
+roadmapIntegrity : {shape : ChainShape} → RoadmapChain shape → Bool
+roadmapIntegrity = integrity
 
 infixr 5 _├_
 infixr 4 _┬_
@@ -432,32 +367,25 @@ IntegrityResult : Bool → Set
 IntegrityResult true = Roadmap
 IntegrityResult false = RoadmapChain invalidShape
 
-RoadmapResult :
-  {Legacy : Nat → Set} {shape : ChainShape} →
-  List (AssuranceSpec Legacy) → RoadmapChain shape → Set
-RoadmapResult {shape = finishedOnly} assurances chain =
-  IntegrityResult (integrity assurances chain)
-RoadmapResult {shape = activeAndFuture} assurances chain =
-  IntegrityResult (integrity assurances chain)
-RoadmapResult {shape = progressingShape} assurances chain =
-  IntegrityResult (integrity assurances chain)
-RoadmapResult {shape = futureOnly} assurances chain = RoadmapChain futureOnly
-RoadmapResult {shape = invalidShape} assurances chain = RoadmapChain invalidShape
+RoadmapResult : {shape : ChainShape} → RoadmapChain shape → Set
+RoadmapResult {finishedOnly} chain = IntegrityResult (integrity chain)
+RoadmapResult {activeAndFuture} chain = IntegrityResult (integrity chain)
+RoadmapResult {progressingShape} chain = IntegrityResult (integrity chain)
+RoadmapResult {futureOnly} chain = RoadmapChain futureOnly
+RoadmapResult {invalidShape} chain = RoadmapChain invalidShape
 
 roadmapOf :
-  {Legacy : Nat → Set} {shape : ChainShape} →
-  (assurances : List (AssuranceSpec Legacy)) →
+  {shape : ChainShape} →
   (chain : RoadmapChain shape) →
-  RoadmapResult assurances chain
-roadmapOf assurances chain@(finishedChain phases) with integrity assurances chain
+  RoadmapResult chain
+roadmapOf chain@(finishedChain phases) with integrity chain
 ... | true = complete phases
 ... | false = invalidChain
-roadmapOf assurances chain@(activeChain current futures) with integrity assurances chain
+roadmapOf chain@(activeChain current futures) with integrity chain
 ... | true = progressing [] current futures
 ... | false = invalidChain
-roadmapOf assurances chain@(progressingChain phases current futures)
-  with integrity assurances chain
+roadmapOf chain@(progressingChain phases current futures) with integrity chain
 ... | true = progressing phases current futures
 ... | false = invalidChain
-roadmapOf assurances chain@(futureChain _) = chain
-roadmapOf assurances invalidChain = invalidChain
+roadmapOf chain@(futureChain _) = chain
+roadmapOf invalidChain = invalidChain

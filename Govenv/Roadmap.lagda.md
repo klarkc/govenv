@@ -7,11 +7,10 @@ The roadmap is the governed project plan. Governance identities are append-only:
 
 module Govenv.Roadmap where
 
-open import Govenv.Assurance using (assurances)
 open import Govenv.Roadmap.DSL
 
 roadmap : Roadmap
-roadmap = roadmapOf assurances (
+roadmap = roadmapOf (
     (P 0 "Bootstrap and project shape" ■
     ┬ GV 0 "Literate `Govenv.lagda.md` closure root." ✓
     ├ GV 1 "Project governance under `Govenv/`; reusable kernel under `Govenv.Kernel.*`." ✓

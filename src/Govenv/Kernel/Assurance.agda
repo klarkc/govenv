@@ -4,7 +4,12 @@ module Govenv.Kernel.Assurance where
 
 open import Agda.Builtin.Bool using (Bool; true; false)
 open import Agda.Builtin.List using (List; []; _∷_)
-open import Agda.Builtin.Nat using (Nat)
+open import Agda.Builtin.Nat using (Nat; zero; suc)
+open import Agda.Builtin.String using (String)
+open import Govenv.Kernel.Identifier using (PhaseId; indexOf)
+open import Govenv.Kernel.Roadmap using
+  ( Roadmap; progressing; complete; PhaseState; PhaseNode; phaseNode
+  ; Membership; membership; done; todo; cancelled; superseded )
 open import Govenv.Kernel.Rule using (Rule)
 
 record StaticEvidence (idx : Nat) : Set₁ where
@@ -44,3 +49,86 @@ migrationComplete (assures (statically evidence) ∷ rest) =
   migrationComplete rest
 migrationComplete (assures (checked evidence) ∷ rest) =
   migrationComplete rest
+
+private
+  _and_ : Bool → Bool → Bool
+  true and right = right
+  false and right = false
+
+  equalNat : Nat → Nat → Bool
+  equalNat zero zero = true
+  equalNat zero (suc right) = false
+  equalNat (suc left) zero = false
+  equalNat (suc left) (suc right) = equalNat left right
+
+  containsNat : Nat → List Nat → Bool
+  containsNat value [] = false
+  containsNat value (x ∷ xs) with equalNat value x
+  ... | true = true
+  ... | false = containsNat value xs
+
+  assuranceIndex :
+    {Legacy : Nat → Set} → AssuranceSpec Legacy → Nat
+  assuranceIndex (assures {idx} assurance) = idx
+
+  assuranceIndices :
+    {Legacy : Nat → Set} → List (AssuranceSpec Legacy) → List Nat
+  assuranceIndices [] = []
+  assuranceIndices (assurance ∷ rest) =
+    assuranceIndex assurance ∷ assuranceIndices rest
+
+  containsAssurance :
+    {Legacy : Nat → Set} → Nat → List (AssuranceSpec Legacy) → Bool
+  containsAssurance idx assurances = containsNat idx (assuranceIndices assurances)
+
+  uniqueNats : List Nat → Bool
+  uniqueNats [] = true
+  uniqueNats (x ∷ xs) = notContains x xs and uniqueNats xs
+    where
+    notContains : Nat → List Nat → Bool
+    notContains value values with containsNat value values
+    ... | true = false
+    ... | false = true
+
+  doneItemsCovered :
+    {Legacy : Nat → Set}
+    {phaseIdx : Nat} {phaseDescription : String}
+    {phase : PhaseId phaseIdx phaseDescription} →
+    List (AssuranceSpec Legacy) → List (Membership phase) → Bool
+  doneItemsCovered assurances [] = true
+  doneItemsCovered assurances (membership governanceId done relation ∷ rest) =
+    containsAssurance (indexOf governanceId) assurances and
+    doneItemsCovered assurances rest
+  doneItemsCovered assurances (membership governanceId todo relation ∷ rest) =
+    doneItemsCovered assurances rest
+  doneItemsCovered assurances (membership governanceId cancelled relation ∷ rest) =
+    doneItemsCovered assurances rest
+  doneItemsCovered assurances
+    (membership governanceId (superseded replacement) relation ∷ rest) =
+      doneItemsCovered assurances rest
+
+  phaseCovered :
+    {Legacy : Nat → Set} {state : PhaseState} →
+    List (AssuranceSpec Legacy) → PhaseNode state → Bool
+  phaseCovered assurances (phaseNode phaseId items) =
+    doneItemsCovered assurances items
+
+  phasesCovered :
+    {Legacy : Nat → Set} {state : PhaseState} →
+    List (AssuranceSpec Legacy) → List (PhaseNode state) → Bool
+  phasesCovered assurances [] = true
+  phasesCovered assurances (phase ∷ rest) =
+    phaseCovered assurances phase and phasesCovered assurances rest
+
+  roadmapCovered :
+    {Legacy : Nat → Set} → List (AssuranceSpec Legacy) → Roadmap → Bool
+  roadmapCovered assurances (progressing finishedPhases current futurePhases) =
+    phasesCovered assurances finishedPhases and
+    (phaseCovered assurances current and phasesCovered assurances futurePhases)
+  roadmapCovered assurances (complete finishedPhases) =
+    phasesCovered assurances finishedPhases
+
+completionCoverage :
+  {Legacy : Nat → Set} → List (AssuranceSpec Legacy) → Roadmap → Bool
+completionCoverage assurances roadmap =
+  uniqueNats (assuranceIndices assurances) and roadmapCovered assurances roadmap
