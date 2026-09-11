@@ -178,14 +178,18 @@ private
   samePhase (someIdentifier previous) (someIdentifier current) =
     indexOf previous == indexOf current
 
+  phaseChangeBetween : SomePhaseId → SomePhaseId → Maybe PhaseChange
+  phaseChangeBetween previous current with samePhase previous current
+  ... | true = nothing
+  ... | false = just (phaseChange previous current)
+
   phaseChangeFor :
     Roadmap → SomeGovernanceId → SomeGovernanceId → Maybe PhaseChange
   phaseChangeFor roadmap previous current
     with lookupGovernancePhase (governanceIndex previous) roadmap
        | lookupGovernancePhase (governanceIndex current) roadmap
-  ... | just previousOwner | just currentOwner with samePhase previousOwner currentOwner
-  ...   | true = nothing
-  ...   | false = just (phaseChange previousOwner currentOwner)
+  ... | just previousOwner | just currentOwner =
+    phaseChangeBetween previousOwner currentOwner
   ... | _ | _ = nothing
 
   propositionChangeFor :
