@@ -22,7 +22,9 @@ The `v0.1.0` baseline predates immutable governed roadmap snapshots and is there
 
 Phase progress is typed separately as introduced, unchanged, advanced, or roadmap-completed. GV55 will consume this delta: major and minor releases must contain governance progress according to the governed policy; patch releases are exempt.
 
-The governed `releaseGovernanceImpact` section has one typed semantic document with three materialization targets. `CHANGELOG.md` is the canonical versioned repository-file section and uses a portable Markdown projection. The Release Please pull-request body uses an enriched GitHub projection of the same document. After Release Please publishes a GitHub Release, its body replaces the carried portable changelog section in place with that same enriched GitHub projection and verifies the external section by read-back equality. Item projections are compact: lifecycle-only changes show the governance identity and transition once, while supersessions align the previous and replacement propositions; GitHub projections visually distinguish changed spans, while the portable changelog uses standard Markdown diff fences.
+The governed `releaseGovernanceImpact` section has one typed semantic document with three materialization targets. `CHANGELOG.md` is the canonical versioned repository-file section and uses a portable Markdown projection. The Release Please pull-request body uses an enriched GitHub projection of the same document. After Release Please publishes a GitHub Release, its body replaces the carried portable changelog section in place with that same enriched GitHub projection and verifies the external section by read-back equality.
+
+Item projections are sparse. The typed release materialization determines which semantic dimensions changed and projections render only those dimensions; unchanged dimensions remain implicit. The governance identity or transition is retained as the minimum context needed to interpret the delta. For supersessions, phase ownership is shown only when the replacement belongs to a different phase, and the proposition diff is shown only when the replacement proposition differs. If both dimensions change, both are projected. GitHub proposition diffs visually distinguish changed spans, while the portable changelog uses standard Markdown diff fences.
 
 ```text
 GV60  ◇ → ✓
@@ -31,6 +33,9 @@ Govern README.md as the canonical output …
 GV14 ↪ GV60
 - Govern the README as the canonical materialization of Govenv.Readme …
 + Govern README.md as the canonical output of Govenv.Materialization.Readme …
+
+GV40 ↪ GV67
+Phase: P6 → P5
 ```
 
 ```agda
