@@ -68,7 +68,6 @@ record ReleaseDocument : Set where
     supersededGroup : ImpactGroup
     supersessions : List SupersessionDelta
     phase : PhaseProgress
-    roadmap : Roadmap
     noImpactLabel : String
     introducedPhaseLabel : String
     unchangedPhaseLabel : String
@@ -234,7 +233,6 @@ document baseRevision headRevision roadmap (governanceDeltaValue impacts phase) 
     (group supersededImpact "superseded" (supersededItems impacts))
     (supersessionDeltas roadmap impacts)
     phase
-    roadmap
     "no roadmap item impact"
     "phase governance introduced"
     "unchanged"
