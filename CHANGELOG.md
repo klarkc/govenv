@@ -1,5 +1,37 @@
 # Changelog
 
+## [0.2.1](https://github.com/klarkc/govenv/compare/v0.2.0...v0.2.1) (2026-09-11)
+
+
+### Bug Fixes
+
+* **release:** parse quoted roadmap snapshot strings ([ac963c3](https://github.com/klarkc/govenv/commit/ac963c3fad1f15f66dd73409564fbd2cb0480cb6))
+* **release:** simplify phase delta classification ([9c8e438](https://github.com/klarkc/govenv/commit/9c8e4387891f97cc090913999cbaa4b3c4fa9776))
+
+
+### Governance
+
+* **release:** model sparse supersession dimensions ([6928076](https://github.com/klarkc/govenv/commit/69280766b4504f5623f6234896759a0ede542348))
+* **release:** render only changed supersession dimensions ([bcf858f](https://github.com/klarkc/govenv/commit/bcf858f1f7a0ca1593d5723de0d6f6501189bea0))
+* **roadmap:** govern documentation references ([748d65d](https://github.com/klarkc/govenv/commit/748d65d4bf2f5ec158ffd5b1a45734c23b629684))
+* **roadmap:** govern sparse delta projection ([b01ad45](https://github.com/klarkc/govenv/commit/b01ad4540cad9485469d832d8d56698ddb4443d3))
+
+
+### Documentation
+
+* **release:** describe sparse governance deltas ([206dfb9](https://github.com/klarkc/govenv/commit/206dfb9af04c4def91371e6fb670a3e8a2880530))
+
+
+### Code Refactoring
+
+* **release:** close projection over typed delta ([e0b59aa](https://github.com/klarkc/govenv/commit/e0b59aafd2e56f753ce52e0fc790377fa70936e4))
+
+
+### Miscellaneous
+
+* **materialize:** update governed materializations ([cfa0ad3](https://github.com/klarkc/govenv/commit/cfa0ad36aa38e40a97fdafbbee639f0a6df2d830))
+* **materialize:** update governed materializations ([9fd6483](https://github.com/klarkc/govenv/commit/9fd648365791c892e4a0b1ed04890728cd21d813))
+
 ## [0.2.0](https://github.com/klarkc/govenv/compare/v0.1.0...v0.2.0) (2026-09-11)
 
 <!-- govenv-governance-impact:start -->
