@@ -88,9 +88,9 @@ while IFS= read -r line; do
       phase_expr="snapshotComplete ${value}"
       ;;
     "item "*)
-      if [[ "${line}" =~ ^item\ ([0-9]+)\ phase\ ([0-9]+)\ (done|todo|cancelled)\ (".*")$ ]]; then
+      if [[ "${line}" =~ ^item\ ([0-9]+)\ phase\ ([0-9]+)\ (done|todo|cancelled)\ (\".*\")$ ]]; then
         item_exprs+=("snapshotItem ${BASH_REMATCH[1]} ${BASH_REMATCH[2]} ${BASH_REMATCH[4]} ${BASH_REMATCH[3]}")
-      elif [[ "${line}" =~ ^item\ ([0-9]+)\ phase\ ([0-9]+)\ superseded\ ([0-9]+)\ (".*")$ ]]; then
+      elif [[ "${line}" =~ ^item\ ([0-9]+)\ phase\ ([0-9]+)\ superseded\ ([0-9]+)\ (\".*\")$ ]]; then
         item_exprs+=("snapshotItem ${BASH_REMATCH[1]} ${BASH_REMATCH[2]} ${BASH_REMATCH[4]} (superseded (GVR ${BASH_REMATCH[3]}))")
       else
         echo "Invalid roadmap snapshot item: ${line}" >&2
