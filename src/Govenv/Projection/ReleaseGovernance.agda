@@ -15,7 +15,7 @@ open import Govenv.Kernel.Release
 open GovernanceDelta
 open ItemImpact
 open import Govenv.Kernel.Roadmap using
-  ( ItemState; done; todo; cancelled; superseded; lookupGovernanceRef )
+  ( ItemState; done; todo; cancelled; superseded )
 open import Govenv.Materialization using (Materialization)
 open Materialization
 open import Govenv.Materialization.ReleaseGovernance
@@ -281,88 +281,90 @@ renderDiffRow signStyle side spans =
   ifSign added = "+"
   ifSign plain = " "
 
-renderResolvedGithubSupersededCard :
-  SomeGovernanceId → SomeGovernanceId → String
-renderResolvedGithubSupersededCard previous current
-  with primStringEquality (renderDescription previous) (renderDescription current)
-... | true =
-    "<div align=\"center\">\n\n" ++
-    "| **" ++ renderGovernanceId previous ++ " ↪ " ++
-      renderGovernanceId current ++ "** |\n" ++
-    "| :---: |\n" ++
-    "| *proposition unchanged* |\n" ++
-    "| " ++ renderCompactDescription (renderDescription current) ++ " |\n\n" ++
-    "</div>\n\n"
-... | false =
-    "<div align=\"center\">\n\n" ++
-    "| **" ++ renderGovernanceId previous ++ " ↪ " ++
-      renderGovernanceId current ++ "** |\n" ++
-    "| :---: |\n" ++
+renderGithubPhaseChange : Maybe PhaseChange → String
+renderGithubPhaseChange nothing = ""
+renderGithubPhaseChange (just (phaseChange previous current)) =
+  "| **Phase:** " ++ renderPhaseId previous ++ " → " ++ renderPhaseId current ++ " |\n"
+
+renderGithubPropositionChange : Maybe PropositionChange → String
+renderGithubPropositionChange nothing = ""
+renderGithubPropositionChange
+  (just (propositionChange previous current)) =
     "| " ++ renderDiffRow removed oldSide spans ++ " |\n" ++
-    "| " ++ renderDiffRow added newSide spans ++ " |\n\n" ++
-    "</div>\n\n"
+    "| " ++ renderDiffRow added newSide spans ++ " |\n"
   where
   spans : List SemanticSpan
-  spans = semanticDiff (renderDescription previous) (renderDescription current)
+  spans = semanticDiff previous current
 
-renderGithubSupersededCard :
-  ReleaseDocument → SomeGovernanceId → GovernanceRef → String
-renderGithubSupersededCard document previous replacement
-  with lookupGovernanceRef replacement (roadmap document)
-... | nothing =
+renderResolvedGithubSupersededCard :
+  SomeGovernanceId →
+  SomeGovernanceId →
+  Maybe PhaseChange →
+  Maybe PropositionChange →
+  String
+renderResolvedGithubSupersededCard previous current phaseDelta propositionDelta =
+  "<div align=\"center\">\n\n" ++
+  "| **" ++ renderGovernanceId previous ++ " ↪ " ++
+    renderGovernanceId current ++ "** |\n" ++
+  "| :---: |\n" ++
+  renderGithubPhaseChange phaseDelta ++
+  renderGithubPropositionChange propositionDelta ++
+  "\n</div>\n\n"
+
+renderGithubSupersededCard : SupersessionDelta → String
+renderGithubSupersededCard
+  (resolvedSupersession previous current phaseDelta propositionDelta) =
+    renderResolvedGithubSupersededCard
+      previous current phaseDelta propositionDelta
+renderGithubSupersededCard (unresolvedSupersession previous replacement) =
   "<div align=\"center\">\n\n" ++
   "| **" ++ renderGovernanceId previous ++ " ↪ " ++ renderGovernanceRef replacement ++ "** |\n" ++
-  "| :---: |\n" ++
-  "| " ++ renderDescription previous ++ " |\n\n" ++
+  "| :---: |\n\n" ++
   "</div>\n\n"
-... | just current = renderResolvedGithubSupersededCard previous current
 
-renderGithubSupersededCards : ReleaseDocument → List ItemImpact → String
-renderGithubSupersededCards document [] = ""
-renderGithubSupersededCards document
-  (impact itemId state (supersededProgress replacement) ∷ rest) =
-    renderGithubSupersededCard document itemId replacement ++
-    renderGithubSupersededCards document rest
-renderGithubSupersededCards document (item ∷ rest) =
-  renderGithubSupersededCards document rest
+renderGithubSupersededCards : List SupersessionDelta → String
+renderGithubSupersededCards [] = ""
+renderGithubSupersededCards (item ∷ rest) =
+  renderGithubSupersededCard item ++ renderGithubSupersededCards rest
 
 renderGithubSupersededGroup : ReleaseDocument → ImpactGroup → String
-renderGithubSupersededGroup document group with items group
+renderGithubSupersededGroup document group with supersessions document
 ... | [] = ""
 ... | values =
   "#### Superseded · " ++ primShowNat (count group) ++ "\n\n" ++
-  renderGithubSupersededCards document values
+  renderGithubSupersededCards values
 
-renderPortableSupersededCard :
-  ReleaseDocument → SomeGovernanceId → GovernanceRef → String
-renderPortableSupersededCard document previous replacement
-  with lookupGovernanceRef replacement (roadmap document)
-... | nothing =
-  "##### " ++ renderGovernanceId previous ++ " ↪ " ++ renderGovernanceRef replacement ++ "\n\n" ++
-  renderDescription previous ++ "\n\n"
-... | just current with primStringEquality (renderDescription previous) (renderDescription current)
-...   | true =
-    "##### " ++ renderGovernanceId previous ++ " ↪ " ++ renderGovernanceId current ++ "\n\n" ++
-    "*Proposition unchanged.* " ++ renderDescription current ++ "\n\n"
-...   | false =
-    "##### " ++ renderGovernanceId previous ++ " ↪ " ++ renderGovernanceId current ++ "\n\n" ++
-    "```diff\n- " ++ renderDescription previous ++ "\n+ " ++ renderDescription current ++ "\n```\n\n"
+renderPortablePhaseChange : Maybe PhaseChange → String
+renderPortablePhaseChange nothing = ""
+renderPortablePhaseChange (just (phaseChange previous current)) =
+  "**Phase:** " ++ renderPhaseId previous ++ " → " ++ renderPhaseId current ++ "\n\n"
 
-renderPortableSupersededCards : ReleaseDocument → List ItemImpact → String
-renderPortableSupersededCards document [] = ""
-renderPortableSupersededCards document
-  (impact itemId state (supersededProgress replacement) ∷ rest) =
-    renderPortableSupersededCard document itemId replacement ++
-    renderPortableSupersededCards document rest
-renderPortableSupersededCards document (item ∷ rest) =
-  renderPortableSupersededCards document rest
+renderPortablePropositionChange : Maybe PropositionChange → String
+renderPortablePropositionChange nothing = ""
+renderPortablePropositionChange
+  (just (propositionChange previous current)) =
+    "```diff\n- " ++ previous ++ "\n+ " ++ current ++ "\n```\n\n"
+
+renderPortableSupersededCard : SupersessionDelta → String
+renderPortableSupersededCard
+  (resolvedSupersession previous current phaseDelta propositionDelta) =
+    "##### " ++ renderGovernanceId previous ++ " ↪ " ++ renderGovernanceId current ++ "\n\n" ++
+    renderPortablePhaseChange phaseDelta ++
+    renderPortablePropositionChange propositionDelta
+renderPortableSupersededCard (unresolvedSupersession previous replacement) =
+  "##### " ++ renderGovernanceId previous ++ " ↪ " ++ renderGovernanceRef replacement ++ "\n\n"
+
+renderPortableSupersededCards : List SupersessionDelta → String
+renderPortableSupersededCards [] = ""
+renderPortableSupersededCards (item ∷ rest) =
+  renderPortableSupersededCard item ++ renderPortableSupersededCards rest
 
 renderPortableSupersededGroup : ReleaseDocument → ImpactGroup → String
-renderPortableSupersededGroup document group with items group
+renderPortableSupersededGroup document group with supersessions document
 ... | [] = ""
 ... | values =
   "#### Superseded · " ++ primShowNat (count group) ++ "\n\n" ++
-  renderPortableSupersededCards document values
+  renderPortableSupersededCards values
 
 renderGithubRelease : String → ReleaseDocument → String
 renderGithubRelease headingPrefix document =
