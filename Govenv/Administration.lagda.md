@@ -19,13 +19,13 @@ The repository predates step 4: the externally observed `admin-materialization` 
 
 - `github-description` — apply and read back the canonical repository description;
 - `admin-environment` — self-harden the administrative environment to `main`;
-- `materializer-environment` — create/verify the main-only `authorized-materialization` boundary and the exact name `GOVENV_MATERIALIZER_PRIVATE_KEY`;
+- `materializer-environment` — create/verify the main-only `authorized-materialization` boundary and the exact credential names `GOVENV_MATERIALIZER_PRIVATE_KEY` and `GOVENV_MATERIALIZER_CLIENT_ID`;
 - `authorized-effects-environment` — create/verify the main-only Release/Pages-build boundary;
 - `pages-environment` — create/verify the main-only `github-pages` deployment boundary.
 
 Every target is applied by an Agda adapter derived from a canonical `Govenv.Materialization.*` state, is read back after the effect, and fails unless the governed observable state equals the target. A successful workflow records the constitution SHA, target, repository, workflow run, and read-back-equality result as execution evidence.
 
-Credential values remain irreducibly external. In particular, the materializer environment can be created by Govenv before its private key exists, but that first application remains incomplete and therefore fails read-back equality until a human provisions `GOVENV_MATERIALIZER_PRIVATE_KEY`; rerunning the same target then verifies the complete governed boundary. No second semantic state is introduced for this bootstrap transition.
+Credential values remain irreducibly external. In particular, the materializer environment can be created by Govenv before its private key and client ID exist, but that first application remains incomplete and therefore fails read-back equality until a human provisions the `GOVENV_MATERIALIZER_PRIVATE_KEY` secret and the public `GOVENV_MATERIALIZER_CLIENT_ID` variable; rerunning the same target then verifies the complete governed name boundary. No second semantic state is introduced for this bootstrap transition.
 
 ## Candidate authoring boundary
 
@@ -35,14 +35,14 @@ Automated candidate authorship uses the dedicated `govenv-author` GitHub App rat
 
 GV90 introduces a separate non-admin capability boundary for deterministic post-merge repository materialization. The dedicated `govenv-materializer` GitHub App must be installed only on this repository and needs repository Contents write plus Workflows write capability, but no repository Administration capability. Its private key lives only in the `authorized-materialization` environment.
 
-The App's public `client_id` is not stored as configuration: Materialize resolves it from the governed `govenv-materializer` slug immediately before minting a short-lived token and then verifies that the token reports the same App slug. The environment is restricted to `main`, so candidate pull-request refs cannot obtain the App credential while code already accepted onto `main` may use it for deterministic materialization effects.
+The App remains private to the owning account. Because a private GitHub App cannot be resolved anonymously by slug before a token exists, its public `client_id` is supplied through the governed `GOVENV_MATERIALIZER_CLIENT_ID` environment variable while the private key remains in `GOVENV_MATERIALIZER_PRIVATE_KEY`. Materialize uses those two values only to mint a short-lived installation token, then verifies that the resulting App slug and capabilities match the governed `govenv-materializer` identity. The environment is restricted to `main`, so candidate pull-request refs cannot obtain the App credential while code already accepted onto `main` may use it for deterministic materialization effects.
 
 ## Monotonic authorization rollout
 
 GV91 forbids activating an enforcement before the execution path that must survive it is already authorized and verified. The GitHub rollout is therefore staged:
 
 1. **Stage A — administrative path:** merge the governed Admin Materialize/environment adapters while the legacy repository materializer remains usable; dispatch `admin-environment` from `main` and verify its read-back.
-2. **Credential boundary:** create/install `govenv-materializer` with only Contents write + Workflows write, dispatch `materializer-environment` to establish its main-only boundary, provision `GOVENV_MATERIALIZER_PRIVATE_KEY`, and rerun the target until read-back equality succeeds. Establish and verify `authorized-effects` and `github-pages` the same way. No automated candidate-authoring principal receives repository write capability during this stage.
+2. **Credential boundary:** create/install `govenv-materializer` with only Contents write + Workflows write, dispatch `materializer-environment` to establish its main-only boundary, provision `GOVENV_MATERIALIZER_PRIVATE_KEY` plus `GOVENV_MATERIALIZER_CLIENT_ID`, and rerun the target until read-back equality succeeds. Establish and verify `authorized-effects` and `github-pages` the same way. No automated candidate-authoring principal receives repository write capability during this stage.
 3. **Stage B — authorized workflows:** merge the governed Materialize/Test/Release/Pages workflows. Materialize now evaluates with a read-only `GITHUB_TOKEN` and obtains the Materializer App token only when deterministic tracked drift exists; Release and Pages can run only from the authorized post-Materialize path.
 4. **Stage C — main enforcement:** only after Stage B is present on an `AuthorizedRevision` and its prerequisite environments/App identity are read-back verified may the three main rulesets become executable targets and be activated. Their read-back equality must succeed before machine candidate authorship is enabled.
 5. **Stage D — candidate automation:** only after Stage C succeeds may `govenv-author` be installed/provisioned for automated agents. Its Contents + Pull requests write capability is then constrained by the already-active main authority ruleset, so it can propose pull requests but cannot directly create semantic authority.
@@ -78,6 +78,9 @@ materializerEnvironment = "authorized-materialization"
 
 materializerPrivateKeySecret : String
 materializerPrivateKeySecret = "GOVENV_MATERIALIZER_PRIVATE_KEY"
+
+materializerClientIdVariable : String
+materializerClientIdVariable = "GOVENV_MATERIALIZER_CLIENT_ID"
 
 materializerBranch : String
 materializerBranch = authorizedBranch
