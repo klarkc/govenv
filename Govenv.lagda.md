@@ -21,6 +21,10 @@ open import Govenv.Materialization.Github.Repository.MainAuthorization
 open import Govenv.Materialization.Github.Repository.MainAuthorityBoundary
 open import Govenv.Materialization.Github.Repository.MainIntegrity
 open import Govenv.Materialization.Github.Administration.Setup
+open import Govenv.Materialization.Github.Workflows.Materialize
+open import Govenv.Materialization.Github.Workflows.Test
+open import Govenv.Materialization.Github.Workflows.Release
+open import Govenv.Materialization.Github.Workflows.Pages
 open import Govenv.Materialization.Github.Workflows.AdminMaterialize
 open import Govenv.Materialization.Github.Actions.AdminEnvironment
 open import Govenv.Materialization.Github.Actions.AuthorizedEffectsEnvironment
