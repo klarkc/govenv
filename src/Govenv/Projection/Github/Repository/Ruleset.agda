@@ -39,9 +39,6 @@ data StatusCheckResolutions : List RequiredStatusCheck → Set where
 record AuthorizationResolution (ruleset : MainAuthorizationRuleset) : Set where
   constructor authorizationResolution
   field
-    bypassApp :
-      GithubAppResolution
-        (GithubAppBypass.slug (MainAuthorizationRuleset.bypass ruleset))
     statusApps :
       StatusCheckResolutions
         (StatusChecksRequirement.checks
@@ -55,10 +52,6 @@ record AuthorityBoundaryResolution
       GithubUserResolution
         (GithubUserBypass.login
           (MainAuthorityBoundaryRuleset.humanBypass ruleset))
-    materializer :
-      GithubAppResolution
-        (GithubAppBypass.slug
-          (MainAuthorityBoundaryRuleset.materializerBypass ruleset))
 
 appPlaceholder : String → String
 appPlaceholder slug = "@github-app-id:" ++ slug
@@ -166,17 +159,16 @@ renderAuthorizationRuleset :
   (ruleset : MainAuthorizationRuleset) → AuthorizationResolution ruleset → String
 renderAuthorizationRuleset
   (mainAuthorizationRuleset name enforcement target bypass pullRequest statusChecks)
-  (authorizationResolution bypassResolution statusResolutions) =
+  (authorizationResolution statusResolutions) =
   "{" ++
   "\"name\":" ++ primShowString name ++ "," ++
   "\"target\":\"branch\"," ++
   "\"enforcement\":" ++ primShowString (renderEnforcement enforcement) ++ "," ++
   "\"bypass_actors\":[{" ++
-    "\"actor_id\":" ++
-      renderAppResolution bypassResolution ++ "," ++
-    "\"actor_type\":\"Integration\"," ++
+    "\"actor_id\":null," ++
+    "\"actor_type\":\"DeployKey\"," ++
     "\"bypass_mode\":" ++
-      primShowString (renderBypassMode (GithubAppBypass.mode bypass)) ++
+      primShowString (renderBypassMode (DeployKeyBypass.mode bypass)) ++
   "}]," ++
   "\"conditions\":" ++ renderConditions target ++ "," ++
   "\"rules\":[" ++ renderPullRequest pullRequest ++ "," ++
@@ -212,8 +204,8 @@ renderAuthorityBoundaryRuleset :
   (ruleset : MainAuthorityBoundaryRuleset) →
   AuthorityBoundaryResolution ruleset → String
 renderAuthorityBoundaryRuleset
-  (mainAuthorityBoundaryRuleset name enforcement target humanBypass appBypass update)
-  (authorityBoundaryResolution humanResolution appResolution) =
+  (mainAuthorityBoundaryRuleset name enforcement target humanBypass deployKeyBypassState update)
+  (authorityBoundaryResolution humanResolution) =
   "{" ++
   "\"name\":" ++ primShowString name ++ "," ++
   "\"target\":\"branch\"," ++
@@ -225,11 +217,10 @@ renderAuthorityBoundaryRuleset
   "\"bypass_mode\":" ++
     primShowString (renderBypassMode (GithubUserBypass.mode humanBypass)) ++
   "},{" ++
-  "\"actor_id\":" ++
-    renderAppResolution appResolution ++ "," ++
-  "\"actor_type\":\"Integration\"," ++
+  "\"actor_id\":null," ++
+  "\"actor_type\":\"DeployKey\"," ++
   "\"bypass_mode\":" ++
-    primShowString (renderBypassMode (GithubAppBypass.mode appBypass)) ++
+    primShowString (renderBypassMode (DeployKeyBypass.mode deployKeyBypassState)) ++
   "}]," ++
   "\"conditions\":" ++ renderConditions target ++ "," ++
   "\"rules\":[" ++ renderUpdateRestriction update ++ "]" ++
@@ -254,15 +245,12 @@ authorizationProjection ruleset = rulesetProjection
   (MainAuthorizationRuleset.name ruleset)
   (renderAuthorizationRuleset ruleset
     (authorizationResolution
-      unresolvedGithubApp
       (unresolvedStatusChecks
         (StatusChecksRequirement.checks
           (MainAuthorizationRuleset.statusChecks ruleset)))))
-  (appRequest
-      (GithubAppBypass.slug (MainAuthorizationRuleset.bypass ruleset))
-    ∷ statusRequests
-      (StatusChecksRequirement.checks
-        (MainAuthorizationRuleset.statusChecks ruleset)))
+  (statusRequests
+    (StatusChecksRequirement.checks
+      (MainAuthorizationRuleset.statusChecks ruleset)))
   where
   statusRequests : List RequiredStatusCheck → List String
   statusRequests [] = []
@@ -274,12 +262,9 @@ authorityBoundaryProjection :
 authorityBoundaryProjection ruleset = rulesetProjection
   (MainAuthorityBoundaryRuleset.name ruleset)
   (renderAuthorityBoundaryRuleset ruleset
-    (authorityBoundaryResolution unresolvedGithubUser unresolvedGithubApp))
+    (authorityBoundaryResolution unresolvedGithubUser))
   (userRequest
       (GithubUserBypass.login (MainAuthorityBoundaryRuleset.humanBypass ruleset))
-    ∷ appRequest
-      (GithubAppBypass.slug
-        (MainAuthorityBoundaryRuleset.materializerBypass ruleset))
     ∷ [])
 
 integrityProjection : MainIntegrityRuleset → RulesetProjection

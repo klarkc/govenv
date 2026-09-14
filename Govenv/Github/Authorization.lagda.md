@@ -9,7 +9,7 @@ module Govenv.Github.Authorization where
 
 open import Agda.Builtin.String using (String)
 open import Govenv.Administration using
-  (candidateAuthorAppSlug; materializerAppSlug; adminEnvironment;
+  (candidateAuthorIdentity; materializerDeployKeyTitle; adminEnvironment;
    materializerEnvironment; authorizedEffectsEnvironment; pagesEnvironment)
 
 data Permission : Set where
@@ -35,18 +35,18 @@ record CredentialProfile : Set where
 
 candidateAuthoring : CredentialProfile
 candidateAuthoring = credentialProfile
-  candidateAuthorAppSlug
+  candidateAuthorIdentity
   (credentialCapabilities write write none none none none none none)
 
 materializer : CredentialProfile
 materializer = credentialProfile
-  materializerAppSlug
+  materializerDeployKeyTitle
   (credentialCapabilities write none none none write none none none)
 
 administrator : CredentialProfile
 administrator = credentialProfile
   adminEnvironment
-  (credentialCapabilities none none none none none write read none)
+  (credentialCapabilities none none none none none write write none)
 
 record WorkflowTokenCapabilities : Set where
   constructor workflowTokenCapabilities
