@@ -31,7 +31,7 @@ data RepositoryFileSection : Set where
   releaseGovernanceImpactInChangelog : RepositoryFileSection
 
 data RepositoryFileSectionPlacement : Set where
-  afterReleaseHeadingInFile : RepositoryFileSectionPlacement
+  afterReleaseHeadingInFile : String → RepositoryFileSectionPlacement
 
 data GithubPullRequestSection : Set where
   releaseGovernanceImpact : GithubPullRequestSection
@@ -40,7 +40,7 @@ data GithubReleaseSection : Set where
   releaseGovernanceImpactInRelease : GithubReleaseSection
 
 data GithubPullRequestBodyPlacement : Set where
-  afterReleaseHeadingInBody : GithubPullRequestBodyPlacement
+  afterReleaseHeadingInBody : String → GithubPullRequestBodyPlacement
 
 data GithubReleaseBodyPlacement : Set where
   replaceCarriedChangelogSection : GithubReleaseBodyPlacement

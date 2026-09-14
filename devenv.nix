@@ -37,6 +37,11 @@ let
     bash src/Govenv/Adapter/roadmap-evolution.sh
   '';
 
+  validateReleasePlacementRegression = ''
+    GOVENV_RELEASE_PLACEMENT_COUNTEREXAMPLE=Govenv/Materialization/ReleaseGovernance/placement-counterexample.md \
+      bash src/Govenv/Adapter/release-governance-pr.sh >/dev/null
+  '';
+
   checkMaterializations = ''
     ${buildMaterializers}
     ${validateRoadmapEvolution}
@@ -86,6 +91,7 @@ in
     agda -i . -i src Govenv.lagda.md
     ${checkMaterializations}
     ${checkAdminAdapters}
+    ${validateReleasePlacementRegression}
   '';
 
   tasks."govenv:docs".exec = ''
