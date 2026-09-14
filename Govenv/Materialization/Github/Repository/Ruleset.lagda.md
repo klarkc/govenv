@@ -24,10 +24,9 @@ data BypassMode : Set where
 data MergeMethod : Set where
   rebase : MergeMethod
 
-record GithubAppBypass : Set where
-  constructor githubAppBypass
+record DeployKeyBypass : Set where
+  constructor deployKeyBypass
   field
-    slug : String
     mode : BypassMode
 
 record GithubUserBypass : Set where
