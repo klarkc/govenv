@@ -91,7 +91,7 @@ state = workflow
   "Admin Materialize"
   (workflowDispatch [] ∷ [])
   nothing
-  (job "materialize" adminMaterializeJob (just mainDispatchOnly)
+  (job "materialize" adminMaterializeJob (just mainDispatchOnly) [] [] nothing
     "ubuntu-latest" 15 steps ∷ [])
 
 materialization : Materialization Workflow

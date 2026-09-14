@@ -6,7 +6,11 @@ let
     mkdir -p .govenv/materialize-build
     agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/Readme.agda >/dev/null
     agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/RoadmapSnapshot.agda >/dev/null
+    agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/Github/Workflows/Materialize.agda >/dev/null
     agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/Github/Workflows/AdminMaterialize.agda >/dev/null
+    agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/Github/Workflows/Test.agda >/dev/null
+    agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/Github/Workflows/Release.agda >/dev/null
+    agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/Github/Workflows/Pages.agda >/dev/null
   '';
 
   checkAdminAdapters = ''
@@ -53,10 +57,18 @@ let
     ${validateRoadmapEvolution}
     .govenv/materialize-build/Readme > .govenv/README.generated.md
     .govenv/materialize-build/RoadmapSnapshot > .govenv/roadmap.generated.snapshot
+    .govenv/materialize-build/Materialize > .govenv/materialize.generated.yml
     .govenv/materialize-build/AdminMaterialize > .govenv/admin-materialize.generated.yml
+    .govenv/materialize-build/Test > .govenv/test.generated.yml
+    .govenv/materialize-build/Release > .govenv/release.generated.yml
+    .govenv/materialize-build/Pages > .govenv/pages.generated.yml
     diff -u README.md .govenv/README.generated.md
     diff -u .govenv/roadmap.snapshot .govenv/roadmap.generated.snapshot
+    diff -u .github/workflows/materialize.yml .govenv/materialize.generated.yml
     diff -u .github/workflows/admin-materialize.yml .govenv/admin-materialize.generated.yml
+    diff -u .github/workflows/test.yml .govenv/test.generated.yml
+    diff -u .github/workflows/release.yml .govenv/release.generated.yml
+    diff -u .github/workflows/pages.yml .govenv/pages.generated.yml
   '';
 
   materializeGithubDescription = ''
@@ -85,7 +97,11 @@ in
     ${validateRoadmapEvolution}
     .govenv/materialize-build/Readme > README.md
     .govenv/materialize-build/RoadmapSnapshot > .govenv/roadmap.snapshot
+    .govenv/materialize-build/Materialize > .github/workflows/materialize.yml
     .govenv/materialize-build/AdminMaterialize > .github/workflows/admin-materialize.yml
+    .govenv/materialize-build/Test > .github/workflows/test.yml
+    .govenv/materialize-build/Release > .github/workflows/release.yml
+    .govenv/materialize-build/Pages > .github/workflows/pages.yml
   '';
 
   tasks."govenv:materialize:check".exec = checkMaterializations;

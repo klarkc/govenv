@@ -1,69 +1,60 @@
-name: Pages
+name: "Pages"
 
 on:
-  workflow_dispatch:
-  workflow_run:
-    workflows: [Materialize]
-    types: [completed]
-
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+  workflow_call:
+    inputs:
+      revision:
+        required: true
+        type: string
 
 concurrency:
-  group: pages
+  group: "pages"
   cancel-in-progress: true
 
 jobs:
   build:
-    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
-    runs-on: ubuntu-latest
+    environment: "authorized-effects"
+    permissions:
+      contents: read
+      pages: read
+    runs-on: "ubuntu-latest"
     timeout-minutes: 15
     steps:
-      - name: Checkout
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with:
-          ref: ${{ github.event_name == 'workflow_run' && 'main' || github.ref }}
-
-      - name: Install Nix
-        uses: DeterminateSystems/determinate-nix-action@021c8a1bd3570eb21f5c20a054812b0c4d9ca614 # v3.22.3
-        with:
-          extra-conf: |
-            accept-flake-config = true
-            substituters = https://devenv.cachix.org https://cachix.cachix.org https://cache.nixos.org
-            extra-trusted-public-keys = devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw= cachix.cachix.org-1:eWNHQldwUO7G2VkjpnjDbWwy4KQ/HNxht7H4SSoMckM=
-
-      - name: Cache Nix
-        uses: DeterminateSystems/magic-nix-cache-action@908b263ff629f4cc17666315b7fd3ec127c6244d # v14
-        with:
-          use-gha-cache: enabled
-          use-flakehub: disabled
-
-      - name: Materialize constitution
-        run: nix run github:cachix/devenv/v2.3 -- tasks run govenv:materialize
-
-      - name: Verify committed materializations
-        run: git diff --exit-code
-
-      - name: Build documentation
-        run: nix run github:cachix/devenv/v2.3 -- tasks run govenv:docs
-
-      - name: Configure Pages
-        uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
-        with:
-          path: _site
-
+    - name: "Checkout"
+      uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      with:
+        ref: ${{ inputs.revision }}
+        persist-credentials: "false"
+    - name: "Install Nix"
+      uses: DeterminateSystems/determinate-nix-action@021c8a1bd3570eb21f5c20a054812b0c4d9ca614 # v3.22.3
+      with:
+        extra-conf: "accept-flake-config = true\nsubstituters = https://devenv.cachix.org https://cachix.cachix.org https://cache.nixos.org\nextra-trusted-public-keys = devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw= cachix.cachix.org-1:eWNHQldwUO7G2VkjpnjDbWwy4KQ/HNxht7H4SSoMckM="
+    - name: "Cache Nix"
+      uses: DeterminateSystems/magic-nix-cache-action@908b263ff629f4cc17666315b7fd3ec127c6244d # v14
+      with:
+        use-gha-cache: "enabled"
+        use-flakehub: "disabled"
+    - name: "Check repository state"
+      run: "nix run github:cachix/devenv/v2.3 -- tasks run govenv:check"
+    - name: "Build documentation"
+      run: "nix run github:cachix/devenv/v2.3 -- tasks run govenv:docs"
+    - name: "Configure Pages"
+      uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
+    - name: "Upload Pages artifact"
+      uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
+      with:
+        path: "_site"
   deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
     needs: build
+    environment:
+      name: "github-pages"
+      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      pages: write
+      id-token: write
+    runs-on: "ubuntu-latest"
+    timeout-minutes: 15
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
+    - name: "Deploy to GitHub Pages"
+      id: deployment
+      uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
