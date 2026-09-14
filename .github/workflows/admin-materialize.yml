@@ -13,6 +13,9 @@ on:
           - "materializer-environment"
           - "authorized-effects-environment"
           - "pages-environment"
+          - "main-integrity-ruleset"
+          - "main-authorization-ruleset"
+          - "main-authority-ruleset"
 
 jobs:
   materialize:
@@ -42,7 +45,7 @@ jobs:
     - name: "Build admin adapters"
       run: "nix run github:cachix/devenv/v2.3 -- tasks run govenv:admin:build"
     - name: "Apply and verify target"
-      run: "case \"${{ inputs.target }}\" in\n  github-description) nix run github:cachix/devenv/v2.3 -- shell -- .govenv/admin-apply-build/DescriptionApplication ;;\n  admin-environment) nix run github:cachix/devenv/v2.3 -- shell -- .govenv/admin-apply-build/AdminEnvironment ;;\n  materializer-environment) nix run github:cachix/devenv/v2.3 -- shell -- .govenv/admin-apply-build/MaterializerEnvironment ;;\n  authorized-effects-environment) nix run github:cachix/devenv/v2.3 -- shell -- .govenv/admin-apply-build/AuthorizedEffectsEnvironment ;;\n  pages-environment) nix run github:cachix/devenv/v2.3 -- shell -- .govenv/admin-apply-build/PagesEnvironment ;;\n  *)\n    echo \"Unsupported admin materialization: ${{ inputs.target }}\" >&2\n    exit 64\n    ;;\nesac"
+      run: "case \"${{ inputs.target }}\" in\n  github-description) nix run github:cachix/devenv/v2.3 -- shell -- .govenv/admin-apply-build/DescriptionApplication ;;\n  admin-environment) nix run github:cachix/devenv/v2.3 -- shell -- .govenv/admin-apply-build/AdminEnvironment ;;\n  materializer-environment) nix run github:cachix/devenv/v2.3 -- shell -- .govenv/admin-apply-build/MaterializerEnvironment ;;\n  authorized-effects-environment) nix run github:cachix/devenv/v2.3 -- shell -- .govenv/admin-apply-build/AuthorizedEffectsEnvironment ;;\n  pages-environment) nix run github:cachix/devenv/v2.3 -- shell -- .govenv/admin-apply-build/PagesEnvironment ;;\n  main-integrity-ruleset) nix run github:cachix/devenv/v2.3 -- shell -- .govenv/admin-apply-build/MainIntegrity ;;\n  main-authorization-ruleset) nix run github:cachix/devenv/v2.3 -- shell -- .govenv/admin-apply-build/MainAuthorization ;;\n  main-authority-ruleset) nix run github:cachix/devenv/v2.3 -- shell -- .govenv/admin-apply-build/MainAuthorityBoundary ;;\n  *)\n    echo \"Unsupported admin materialization: ${{ inputs.target }}\" >&2\n    exit 64\n    ;;\nesac"
       env:
         GH_TOKEN: ${{ secrets.GOVENV_ADMIN_TOKEN }}
     - name: "Record evidence"

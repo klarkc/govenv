@@ -40,6 +40,15 @@ authorizedEffectsEnvironmentTarget = "authorized-effects-environment"
 pagesEnvironmentTarget : String
 pagesEnvironmentTarget = "pages-environment"
 
+mainIntegrityRulesetTarget : String
+mainIntegrityRulesetTarget = "main-integrity-ruleset"
+
+mainAuthorizationRulesetTarget : String
+mainAuthorizationRulesetTarget = "main-authorization-ruleset"
+
+mainAuthorityRulesetTarget : String
+mainAuthorityRulesetTarget = "main-authority-ruleset"
+
 checkout : ActionPin
 checkout = actionPin "actions/checkout" "d23441a48e516b6c34aea4fa41551a30e30af803" "v6"
 
@@ -67,6 +76,9 @@ applyTargetCommand =
   "  materializer-environment) nix run github:cachix/devenv/v2.3 -- shell -- .govenv/admin-apply-build/MaterializerEnvironment ;;\n" ++
   "  authorized-effects-environment) nix run github:cachix/devenv/v2.3 -- shell -- .govenv/admin-apply-build/AuthorizedEffectsEnvironment ;;\n" ++
   "  pages-environment) nix run github:cachix/devenv/v2.3 -- shell -- .govenv/admin-apply-build/PagesEnvironment ;;\n" ++
+  "  main-integrity-ruleset) nix run github:cachix/devenv/v2.3 -- shell -- .govenv/admin-apply-build/MainIntegrity ;;\n" ++
+  "  main-authorization-ruleset) nix run github:cachix/devenv/v2.3 -- shell -- .govenv/admin-apply-build/MainAuthorization ;;\n" ++
+  "  main-authority-ruleset) nix run github:cachix/devenv/v2.3 -- shell -- .govenv/admin-apply-build/MainAuthorityBoundary ;;\n" ++
   "  *)\n" ++
   "    echo \"Unsupported admin materialization: ${{ inputs.target }}\" >&2\n" ++
   "    exit 64\n" ++
@@ -116,6 +128,9 @@ state = workflow
       ∷ materializerEnvironmentTarget
       ∷ authorizedEffectsEnvironmentTarget
       ∷ pagesEnvironmentTarget
+      ∷ mainIntegrityRulesetTarget
+      ∷ mainAuthorizationRulesetTarget
+      ∷ mainAuthorityRulesetTarget
       ∷ []) ∷ [])
   ∷ [])
   nothing
