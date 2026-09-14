@@ -7,6 +7,8 @@ module Govenv where
 
 open import Agda.Builtin.Unit
 open import Govenv.Architecture
+open import Govenv.Authorization
+open import Govenv.Github.Authorization
 open import Govenv.Administration
 open import Govenv.Assurance
 open import Govenv.Materialization
@@ -14,6 +16,14 @@ open import Govenv.Materialization.Readme
 open import Govenv.Materialization.RoadmapSnapshot
 open import Govenv.Materialization.ReleaseGovernance
 open import Govenv.Materialization.Github.Repository.Description
+open import Govenv.Materialization.Github.Repository.MainAuthorization
+open import Govenv.Materialization.Github.Repository.MainAuthorityBoundary
+open import Govenv.Materialization.Github.Repository.MainIntegrity
+open import Govenv.Materialization.Github.Workflows.AdminMaterialize
+open import Govenv.Materialization.Github.Actions.AdminEnvironment
+open import Govenv.Materialization.Github.Actions.AuthorizedEffectsEnvironment
+open import Govenv.Materialization.Github.Actions.MaterializerEnvironment
+open import Govenv.Materialization.Github.Actions.PagesEnvironment
 open import Govenv.Project
 open import Govenv.Roadmap
 open import Govenv.Readme

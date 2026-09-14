@@ -69,6 +69,7 @@ materialization = materialized
   (repositoryFile "README.md")
   versionedApplication
   versionedPrivilege
+  versionedAuthority
   trackedEquality
   ( comment "Generated from Govenv.Materialization.Readme. Do not edit manually."
   ∷ heading title centered name
