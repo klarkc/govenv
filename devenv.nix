@@ -6,6 +6,31 @@ let
     mkdir -p .govenv/materialize-build
     agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/Readme.agda >/dev/null
     agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/RoadmapSnapshot.agda >/dev/null
+    agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/Github/Workflows/AdminMaterialize.agda >/dev/null
+  '';
+
+  checkAdminAdapters = ''
+    agda -i . -i src src/Govenv/Adapter/Github/Repository/DescriptionApplication.agda
+    agda -i . -i src src/Govenv/Adapter/Github/Actions/AdminEnvironment.agda
+    agda -i . -i src src/Govenv/Adapter/Github/Actions/MaterializerEnvironment.agda
+    agda -i . -i src src/Govenv/Adapter/Github/Actions/AuthorizedEffectsEnvironment.agda
+    agda -i . -i src src/Govenv/Adapter/Github/Actions/PagesEnvironment.agda
+    agda -i . -i src src/Govenv/Adapter/Github/Repository/MainAuthorization.agda
+    agda -i . -i src src/Govenv/Adapter/Github/Repository/MainAuthorityBoundary.agda
+    agda -i . -i src src/Govenv/Adapter/Github/Repository/MainIntegrity.agda
+  '';
+
+  buildAdminAdapters = ''
+    rm -rf .govenv/admin-apply-build
+    mkdir -p .govenv/admin-apply-build
+    agda -i . -i src --compile --compile-dir=.govenv/admin-apply-build src/Govenv/Adapter/Github/Repository/DescriptionApplication.agda >/dev/null
+    agda -i . -i src --compile --compile-dir=.govenv/admin-apply-build src/Govenv/Adapter/Github/Actions/AdminEnvironment.agda >/dev/null
+    agda -i . -i src --compile --compile-dir=.govenv/admin-apply-build src/Govenv/Adapter/Github/Actions/MaterializerEnvironment.agda >/dev/null
+    agda -i . -i src --compile --compile-dir=.govenv/admin-apply-build src/Govenv/Adapter/Github/Actions/AuthorizedEffectsEnvironment.agda >/dev/null
+    agda -i . -i src --compile --compile-dir=.govenv/admin-apply-build src/Govenv/Adapter/Github/Actions/PagesEnvironment.agda >/dev/null
+    agda -i . -i src --compile --compile-dir=.govenv/admin-apply-build src/Govenv/Adapter/Github/Repository/MainAuthorization.agda >/dev/null
+    agda -i . -i src --compile --compile-dir=.govenv/admin-apply-build src/Govenv/Adapter/Github/Repository/MainAuthorityBoundary.agda >/dev/null
+    agda -i . -i src --compile --compile-dir=.govenv/admin-apply-build src/Govenv/Adapter/Github/Repository/MainIntegrity.agda >/dev/null
   '';
 
   validateRoadmapEvolution = ''
@@ -17,8 +42,10 @@ let
     ${validateRoadmapEvolution}
     .govenv/materialize-build/Readme > .govenv/README.generated.md
     .govenv/materialize-build/RoadmapSnapshot > .govenv/roadmap.generated.snapshot
+    .govenv/materialize-build/AdminMaterialize > .govenv/admin-materialize.generated.yml
     diff -u README.md .govenv/README.generated.md
     diff -u .govenv/roadmap.snapshot .govenv/roadmap.generated.snapshot
+    diff -u .github/workflows/admin-materialize.yml .govenv/admin-materialize.generated.yml
   '';
 
   materializeGithubDescription = ''
@@ -35,7 +62,9 @@ in
   packages = [
     pkgs.agda
     pkgs.diffutils
+    pkgs.gh
     pkgs.ghc
+    pkgs.jq
     pkgs.pandoc
   ];
 
@@ -44,15 +73,19 @@ in
     ${validateRoadmapEvolution}
     .govenv/materialize-build/Readme > README.md
     .govenv/materialize-build/RoadmapSnapshot > .govenv/roadmap.snapshot
+    .govenv/materialize-build/AdminMaterialize > .github/workflows/admin-materialize.yml
   '';
 
   tasks."govenv:materialize:check".exec = checkMaterializations;
 
   tasks."govenv:materialize:admin:github-description".exec = materializeGithubDescription;
 
+  tasks."govenv:admin:build".exec = buildAdminAdapters;
+
   tasks."govenv:check".exec = ''
     agda -i . -i src Govenv.lagda.md
     ${checkMaterializations}
+    ${checkAdminAdapters}
   '';
 
   tasks."govenv:docs".exec = ''
