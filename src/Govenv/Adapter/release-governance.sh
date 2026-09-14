@@ -4,6 +4,7 @@ set -euo pipefail
 target="${GOVENV_RELEASE_TARGET:-pull-request}"
 release_pr="${GOVENV_RELEASE_PR:-${1:-}}"
 release_tag="${GOVENV_RELEASE_TAG:-}"
+release_version="${GOVENV_RELEASE_VERSION:-}"
 base_ref="${GOVENV_RELEASE_BASE_REF:-${2:-}}"
 head_ref="${GOVENV_RELEASE_HEAD_REF:-${3:-HEAD}}"
 
@@ -14,6 +15,15 @@ case "${target}" in
       exit 2
     fi
     release_tag=""
+    if [[ -z "${release_version}" ]]; then
+      repository="$(gh repo view --json nameWithOwner --jq '.nameWithOwner')"
+      release_head="$(gh pr view "${release_pr}" --json headRefName --jq '.headRefName')"
+      release_version="$(
+        gh api -H 'Accept: application/vnd.github.raw+json' --method GET \
+          "repos/${repository}/contents/.github/release-please/manifest.json" \
+          -f ref="${release_head}" | jq -r '.["."] // empty'
+      )"
+    fi
     ;;
   github-release)
     if [[ -z "${release_tag}" ]]; then
@@ -21,12 +31,20 @@ case "${target}" in
       exit 2
     fi
     release_pr="0"
+    if [[ -z "${release_version}" ]]; then
+      release_version="${release_tag#v}"
+    fi
     ;;
   *)
     echo "Unsupported GOVENV_RELEASE_TARGET: ${target}" >&2
     exit 2
     ;;
 esac
+
+if [[ -z "${release_version}" || ! "${release_version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+([+-][0-9A-Za-z.-]+)?$ ]]; then
+  echo "Could not resolve a safe Release Please version." >&2
+  exit 2
+fi
 
 if [[ -z "${base_ref}" ]]; then
   if [[ "${target}" == "github-release" ]]; then
@@ -166,6 +184,9 @@ references = ${references_expr}
 
 releasePullRequest : Nat
 releasePullRequest = ${release_pr}
+
+releaseVersion : String
+releaseVersion = "${release_version}"
 
 baseRevision : String
 baseRevision = "${base_revision}"

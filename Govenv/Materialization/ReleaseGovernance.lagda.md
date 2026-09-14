@@ -2,6 +2,8 @@
 
 This module owns the typed release governance document shared by the canonical portable changelog entry and enriched GitHub pull-request/release projections. Release Please owns surrounding release artifacts; Govenv owns this semantic section and its target-specific materializations.
 
+Release-section placement is version-specific. The target carries the exact Release Please version whose heading must own the governance section; read-back therefore verifies both section equality and placement. `ReleaseGovernance/placement-counterexample.md` preserves the PR #3 regression where the `0.2.1` heading existed while Governance Impact remained under `0.2.0`, and candidate validation must reject recurrence before release materialization can succeed.
+
 ```agda
 {-# OPTIONS --safe #-}
 
@@ -242,9 +244,10 @@ document baseRevision headRevision roadmap (governanceDeltaValue impacts phase) 
     headRevision
 
 pullRequestBody :
-  Nat → String → String → Roadmap → GovernanceDelta → Materialization ReleaseDocument
-pullRequestBody number baseRevision headRevision roadmap delta = materialized
-  (githubPullRequestBodySection number releaseGovernanceImpact afterReleaseHeadingInBody)
+  Nat → String → String → String → Roadmap → GovernanceDelta → Materialization ReleaseDocument
+pullRequestBody number releaseVersion baseRevision headRevision roadmap delta = materialized
+  (githubPullRequestBodySection number releaseGovernanceImpact
+    (afterReleaseHeadingInBody releaseVersion))
   automatic
   repository
   authorizedOnly
@@ -252,9 +255,10 @@ pullRequestBody number baseRevision headRevision roadmap delta = materialized
   (document baseRevision headRevision roadmap delta)
 
 changelog :
-  String → String → Roadmap → GovernanceDelta → Materialization ReleaseDocument
-changelog baseRevision headRevision roadmap delta = materialized
-  (repositoryFileSection "CHANGELOG.md" releaseGovernanceImpactInChangelog afterReleaseHeadingInFile)
+  String → String → String → Roadmap → GovernanceDelta → Materialization ReleaseDocument
+changelog releaseVersion baseRevision headRevision roadmap delta = materialized
+  (repositoryFileSection "CHANGELOG.md" releaseGovernanceImpactInChangelog
+    (afterReleaseHeadingInFile releaseVersion))
   automatic
   repository
   authorizedOnly
