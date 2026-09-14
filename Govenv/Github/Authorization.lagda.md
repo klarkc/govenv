@@ -89,6 +89,10 @@ pagesDeployToken : WorkflowTokenCapabilities
 pagesDeployToken = workflowTokenCapabilities
   none none none none write write
 
+pagesCallToken : WorkflowTokenCapabilities
+pagesCallToken = workflowTokenCapabilities
+  none read none none write write
+
 testJob : WorkflowSecurityProfile
 testJob = workflowSecurityProfile
   "Test/test" candidateSource ungatedCandidate readOnlyToken

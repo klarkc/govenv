@@ -48,6 +48,11 @@ renderWith [] = ""
 renderWith bindings =
   "      with:\n" ++ renderBindings "        " bindings
 
+renderJobWith : List Binding → String
+renderJobWith [] = ""
+renderJobWith bindings =
+  "    with:\n" ++ renderBindings "      " bindings
+
 renderEnv : List Binding → String
 renderEnv [] = ""
 renderEnv bindings =
@@ -56,6 +61,44 @@ renderEnv bindings =
 renderActionPin : ActionPin → String
 renderActionPin (actionPin repository revision versionLabel) =
   repository ++ "@" ++ revision ++ " # " ++ versionLabel
+
+
+permissionEntry : String → Permission → List String
+permissionEntry key none = []
+permissionEntry key level = (key ++ "=" ++ renderPermission level) ∷ []
+
+appendEntries : List String → List String → List String
+appendEntries [] right = right
+appendEntries (entry ∷ rest) right = entry ∷ appendEntries rest right
+
+credentialPermissionEntries : CredentialCapabilities → List String
+credentialPermissionEntries capabilities =
+  appendEntries (permissionEntry "actions" (CredentialCapabilities.actions capabilities))
+  (appendEntries (permissionEntry "administration" (CredentialCapabilities.administration capabilities))
+  (appendEntries (permissionEntry "contents" (CredentialCapabilities.contents capabilities))
+  (appendEntries (permissionEntry "environments" (CredentialCapabilities.environments capabilities))
+  (appendEntries (permissionEntry "issues" (CredentialCapabilities.issues capabilities))
+  (appendEntries (permissionEntry "pages" (CredentialCapabilities.pages capabilities))
+  (appendEntries (permissionEntry "pull_requests" (CredentialCapabilities.pullRequests capabilities))
+                 (permissionEntry "workflows" (CredentialCapabilities.workflows capabilities))))))))
+
+renderEntries : List String → String
+renderEntries [] = ""
+renderEntries (entry ∷ []) = entry
+renderEntries (entry ∷ rest) = entry ++ "," ++ renderEntries rest
+
+renderCredentialPermissions : CredentialProfile → String
+renderCredentialPermissions profile =
+  renderEntries
+    (credentialPermissionEntries (CredentialProfile.capabilities profile))
+
+verifyGithubAppProfileCommand : String
+verifyGithubAppProfileCommand =
+  "observed=\"$(gh api \"/apps/${EXPECTED_APP_SLUG}\" --jq '.permissions | del(.metadata) | to_entries | sort_by(.key) | map([.key,.value] | join(\"=\")) | join(\",\")')\"\nif [[ \"${observed}\" != \"${EXPECTED_PERMISSIONS}\" ]]; then\n  echo \"GitHub App capability mismatch for ${EXPECTED_APP_SLUG}.\" >&2\n  echo \"Expected: ${EXPECTED_PERMISSIONS}\" >&2\n  echo \"Observed: ${observed}\" >&2\n  exit 1\nfi"
+
+verifyGithubAppTokenScopeCommand : String
+verifyGithubAppTokenScopeCommand =
+  "observed=\"$(gh api /installation/repositories --paginate --jq '.repositories[].full_name' | sort -u | paste -sd, -)\"\nif [[ \"${observed}\" != \"${GITHUB_REPOSITORY}\" ]]; then\n  echo \"GitHub App token repository scope mismatch.\" >&2\n  echo \"Expected: ${GITHUB_REPOSITORY}\" >&2\n  echo \"Observed: ${observed}\" >&2\n  exit 1\nfi"
 
 renderStep : Step → String
 renderStep (usesStep name identifier condition action inputs) =
@@ -70,6 +113,21 @@ renderStep (runStep name identifier condition command environment) =
   renderMaybeCondition condition ++
   "      run: " ++ primShowString command ++ "\n" ++
   renderEnv environment
+renderStep (verifyGithubAppProfileStep name condition profile) =
+  "    - name: " ++ primShowString name ++ "\n" ++
+  renderMaybeCondition condition ++
+  "      run: " ++ primShowString verifyGithubAppProfileCommand ++ "\n" ++
+  renderEnv
+    (binding "EXPECTED_APP_SLUG" (literal (CredentialProfile.identity profile))
+    ∷ binding "EXPECTED_PERMISSIONS" (literal (renderCredentialPermissions profile))
+    ∷ binding "GH_TOKEN" (expression "github.token")
+    ∷ [])
+renderStep
+  (verifyGithubAppTokenScopeStep name condition token currentRepositoryOnly) =
+  "    - name: " ++ primShowString name ++ "\n" ++
+  renderMaybeCondition condition ++
+  "      run: " ++ primShowString verifyGithubAppTokenScopeCommand ++ "\n" ++
+  renderEnv (binding "GH_TOKEN" token ∷ [])
 
 renderSteps : List Step → String
 renderSteps [] = ""
@@ -91,10 +149,15 @@ renderTokenPermissions capabilities =
   renderPermissionLine "id-token" (WorkflowTokenCapabilities.idToken capabilities)
 
 renderEnvironmentGate :
-  {source : SourceAuthority} → EnvironmentGate source → String
-renderEnvironmentGate ungatedCandidate = ""
-renderEnvironmentGate (authorizedEnvironment environment) =
+  {source : SourceAuthority} → EnvironmentGate source → Maybe Value → String
+renderEnvironmentGate ungatedCandidate nothing = ""
+renderEnvironmentGate ungatedCandidate (just _) = ""
+renderEnvironmentGate (authorizedEnvironment environment) nothing =
   "    environment: " ++ primShowString environment ++ "\n"
+renderEnvironmentGate (authorizedEnvironment environment) (just url) =
+  "    environment:\n" ++
+  "      name: " ++ primShowString environment ++ "\n" ++
+  "      url: " ++ renderValue url ++ "\n"
 
 renderBranchesTail : List String → String
 renderBranchesTail [] = ""
@@ -127,20 +190,37 @@ renderDispatchInputs inputs = "    inputs:\n" ++ go inputs
   go [] = ""
   go (input ∷ rest) = renderDispatchInput input ++ go rest
 
+renderWorkflowCallInput : WorkflowCallInput → String
+renderWorkflowCallInput (stringCallInput identifier required) =
+  "      " ++ identifier ++ ":\n" ++
+  "        required: " ++ renderBool required ++ "\n" ++
+  "        type: string\n"
+
+renderWorkflowCallInputs : List WorkflowCallInput → String
+renderWorkflowCallInputs [] = ""
+renderWorkflowCallInputs inputs = "    inputs:\n" ++ go inputs
+  where
+  go : List WorkflowCallInput → String
+  go [] = ""
+  go (input ∷ rest) = renderWorkflowCallInput input ++ go rest
+
 renderTrigger : Trigger → String
 renderTrigger (pushBranches branches) =
   "  push:\n    branches: " ++ renderBranches branches ++ "\n"
 renderTrigger (workflowDispatch inputs) =
   "  workflow_dispatch:\n" ++ renderDispatchInputs inputs
+renderTrigger (workflowCall inputs) =
+  "  workflow_call:\n" ++ renderWorkflowCallInputs inputs
 renderTrigger pullRequest = "  pull_request:\n"
 
 renderTriggers : List Trigger → String
 renderTriggers [] = ""
 renderTriggers (trigger ∷ rest) = renderTrigger trigger ++ renderTriggers rest
 
-renderSecurity : WorkflowSecurityProfile → String
-renderSecurity security =
-  renderEnvironmentGate (WorkflowSecurityProfile.environmentGate security) ++
+renderSecurity : WorkflowSecurityProfile → Maybe Value → String
+renderSecurity security environmentUrl =
+  renderEnvironmentGate
+    (WorkflowSecurityProfile.environmentGate security) environmentUrl ++
   renderTokenPermissions (WorkflowSecurityProfile.githubToken security)
 
 renderJobCondition : Maybe String → String
@@ -148,14 +228,41 @@ renderJobCondition nothing = ""
 renderJobCondition (just condition) =
   "    if: ${{ " ++ condition ++ " }}\n"
 
+renderNeedsTail : List String → String
+renderNeedsTail [] = ""
+renderNeedsTail (identifier ∷ rest) =
+  ", " ++ identifier ++ renderNeedsTail rest
+
+renderNeeds : List String → String
+renderNeeds [] = ""
+renderNeeds (identifier ∷ []) = "    needs: " ++ identifier ++ "\n"
+renderNeeds (identifier ∷ rest) =
+  "    needs: [" ++ identifier ++ renderNeedsTail rest ++ "]\n"
+
+renderJobOutputs : List Binding → String
+renderJobOutputs [] = ""
+renderJobOutputs outputs =
+  "    outputs:\n" ++ renderBindings "      " outputs
+
 renderJob : Job → String
-renderJob (job identifier security condition runner timeout steps) =
+renderJob
+  (job identifier security condition needs outputs environmentUrl runner timeout steps) =
   "  " ++ identifier ++ ":\n" ++
   renderJobCondition condition ++
-  renderSecurity security ++
+  renderNeeds needs ++
+  renderJobOutputs outputs ++
+  renderSecurity security environmentUrl ++
   "    runs-on: " ++ primShowString runner ++ "\n" ++
   "    timeout-minutes: " ++ primShowNat timeout ++ "\n" ++
   "    steps:\n" ++ renderSteps steps
+renderJob
+  (reusableJob identifier condition needs permissions workflowPath inputs) =
+  "  " ++ identifier ++ ":\n" ++
+  renderJobCondition condition ++
+  renderNeeds needs ++
+  renderTokenPermissions permissions ++
+  "    uses: " ++ workflowPath ++ "\n" ++
+  renderJobWith inputs
 
 renderJobs : List Job → String
 renderJobs [] = ""
