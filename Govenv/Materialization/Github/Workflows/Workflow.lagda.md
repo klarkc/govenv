@@ -12,10 +12,7 @@ open import Agda.Builtin.List using (List)
 open import Agda.Builtin.Maybe using (Maybe)
 open import Agda.Builtin.Nat using (Nat)
 open import Agda.Builtin.String using (String)
-open import Govenv.Github.Authorization public using
-  (Permission; WorkflowSecurityProfile; WorkflowTokenCapabilities;
-   SourceAuthority; EnvironmentGate; none; read; write;
-   ungatedCandidate; authorizedEnvironment)
+open import Govenv.Github.Authorization public
 
 record DispatchInput : Set where
   constructor choiceInput
@@ -25,9 +22,16 @@ record DispatchInput : Set where
     required : Bool
     options : List String
 
+record WorkflowCallInput : Set where
+  constructor stringCallInput
+  field
+    identifier : String
+    required : Bool
+
 data Trigger : Set where
   pushBranches : List String → Trigger
   workflowDispatch : List DispatchInput → Trigger
+  workflowCall : List WorkflowCallInput → Trigger
   pullRequest : Trigger
 
 record ActionPin : Set where
@@ -53,15 +57,13 @@ data Step : Set where
   runStep :
     String → Maybe String → Maybe String → String → List Binding → Step
 
-record Job : Set where
-  constructor job
-  field
-    identifier : String
-    security : WorkflowSecurityProfile
-    condition : Maybe String
-    runner : String
-    timeoutMinutes : Nat
-    steps : List Step
+data Job : Set where
+  job :
+    String → WorkflowSecurityProfile → Maybe String → List String →
+    List Binding → Maybe Value → String → Nat → List Step → Job
+  reusableJob :
+    String → Maybe String → List String → WorkflowTokenCapabilities →
+    String → List Binding → Job
 
 record Concurrency : Set where
   constructor concurrency
