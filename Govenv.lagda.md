@@ -27,6 +27,7 @@ open import Govenv.Materialization.Github.Workflows.Release
 open import Govenv.Materialization.Github.Workflows.Pages
 open import Govenv.Materialization.Github.Workflows.AdminMaterialize
 open import Govenv.Materialization.Github.Actions.AdminEnvironment
+open import Govenv.Materialization.Github.Actions.WorkflowPermissions
 open import Govenv.Materialization.Github.Actions.AuthorizedEffectsEnvironment
 open import Govenv.Materialization.Github.Actions.MaterializerEnvironment
 open import Govenv.Materialization.Github.Actions.PagesEnvironment

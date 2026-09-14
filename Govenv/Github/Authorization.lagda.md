@@ -63,6 +63,7 @@ data SourceAuthority : Set where
 
 data EnvironmentGate : SourceAuthority → Set where
   ungatedCandidate : EnvironmentGate candidateSource
+  ungatedAuthorized : EnvironmentGate authorizedSource
   authorizedEnvironment : String → EnvironmentGate authorizedSource
 
 record WorkflowSecurityProfile : Set where
@@ -76,6 +77,10 @@ record WorkflowSecurityProfile : Set where
 readOnlyToken : WorkflowTokenCapabilities
 readOnlyToken = workflowTokenCapabilities
   none read none none none none
+
+candidateAuthorToken : WorkflowTokenCapabilities
+candidateAuthorToken = workflowTokenCapabilities
+  none write none write none none
 
 releaseToken : WorkflowTokenCapabilities
 releaseToken = workflowTokenCapabilities
@@ -96,6 +101,10 @@ pagesCallToken = workflowTokenCapabilities
 testJob : WorkflowSecurityProfile
 testJob = workflowSecurityProfile
   "Test/test" candidateSource ungatedCandidate readOnlyToken
+
+candidateAuthorJob : WorkflowSecurityProfile
+candidateAuthorJob = workflowSecurityProfile
+  "Candidate Author/author" authorizedSource ungatedAuthorized candidateAuthorToken
 
 materializeJob : WorkflowSecurityProfile
 materializeJob = workflowSecurityProfile

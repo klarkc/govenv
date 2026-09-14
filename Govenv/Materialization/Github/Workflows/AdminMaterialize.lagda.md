@@ -1,6 +1,6 @@
 # Admin Materialize workflow
 
-Administrative effects remain explicit and manual. The workflow is executable only through the main-only administrative environment, validates the governed repository state before exposing the administrative credential, and dispatches only named governed targets.
+This is the transitional GV91 recovery workflow retained while the GV92 single-`setup` adapter is incomplete. It remains executable only through the main-only administrative environment, validates the governed repository state before exposing the administrative credential, and restricts the legacy surface to named governed targets. It is not the final GV92 human interface: the multi-target dispatch must disappear only after the convergent `setup` execution path is present, authorized, and read-back verifiable.
 
 ```agda
 {-# OPTIONS --safe #-}

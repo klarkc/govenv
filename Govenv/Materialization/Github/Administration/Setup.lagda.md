@@ -2,7 +2,7 @@
 
 The administrative setup is modeled as the single future human-facing operation. Its ordered plan is governed state: adapters may interpret these steps, but they may not choose, omit, reorder, or introduce administrative effects independently.
 
-This Stage C plan extends the prerequisite setup only after the Stage B execution path is present in an `AuthorizedRevision`. It activates the main rulesets monotonically in the GV91 order: integrity first, authorization second, authority last. Each step must reach read-back equality before the following step may execute. The plan remains governed preparatory state until the single `setup` adapter can interpret it without introducing manual credential provisioning.
+This Stage D plan preserves the GV91 order established by Stage C: integrity first, authorization second, authority last. Only after those boundaries reach read-back equality may setup enable the repository Actions policy required by platform-issued candidate authorship. Candidate automation therefore becomes available only after `github-actions` is already unable to create semantic authority on `main`. The plan remains governed preparatory state until the single `setup` adapter can interpret it without introducing manual credential provisioning.
 
 ```agda
 {-# OPTIONS --safe #-}
@@ -22,6 +22,7 @@ data AdminSetupStep : Set where
   mainIntegrityRulesetStep : AdminSetupStep
   mainAuthorizationRulesetStep : AdminSetupStep
   mainAuthorityRulesetStep : AdminSetupStep
+  actionsWorkflowPermissionsStep : AdminSetupStep
 
 setupTarget : String
 setupTarget = "setup"
@@ -37,5 +38,6 @@ plan =
   ∷ mainIntegrityRulesetStep
   ∷ mainAuthorizationRulesetStep
   ∷ mainAuthorityRulesetStep
+  ∷ actionsWorkflowPermissionsStep
   ∷ []
 ```

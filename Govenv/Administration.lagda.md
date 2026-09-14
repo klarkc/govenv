@@ -24,7 +24,9 @@ The materializer credential creates no semantic authority: it may apply only det
 
 ## Candidate authoring
 
-Automated candidate authorship remains a distinct, unprivileged identity with ordinary content and pull-request capabilities but no authority to merge, bypass `main`, mutate persistent governed external state, or alter executable automation. GV92 forbids solving this boundary with another manually provisioned credential. The concrete platform mechanism remains intentionally abstract until those constraints are mechanically established.
+Automated candidate authorship uses the platform-issued per-job `GITHUB_TOKEN` acting as the `github-actions` principal. It receives only ordinary content and pull-request write capabilities for proposing candidate branches and pull requests. The GitHub Actions App does not expose the separate `workflows` permission required to update `.github/workflows`, and Stage C prevents the principal from updating `main`; it receives no administrative, environment, release, Pages, or materializer credential.
+
+No candidate-author secret is provisioned. GitHub mints the ephemeral token for the governed job, so GV92 introduces no second human credential or independent authority. Pull requests created or updated by this token produce `pull_request` validation runs in GitHub's approval-required state; a human may allow those unprivileged validation runs, but that approval is not authorization and creates no `AuthorizedRevision`. Repository Actions workflow permissions remain a governed administrative setting and must be read-back verified before candidate automation is enabled.
 
 ## Monotonic rollout
 
@@ -69,7 +71,7 @@ materializerDeployKeyTitle : String
 materializerDeployKeyTitle = DerivedCredential.identity materializerCredential
 
 candidateAuthorIdentity : String
-candidateAuthorIdentity = "candidate-author"
+candidateAuthorIdentity = "github-actions"
 
 materializerEnvironment : String
 materializerEnvironment = "authorized-materialization"

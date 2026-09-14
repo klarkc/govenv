@@ -52,6 +52,7 @@ data Target : Set where
   githubRepository : GithubRepositoryProperty → Target
   githubRepositoryRuleset : String → Target
   githubRepositoryDeployKeys : Target
+  githubActionsWorkflowPermissions : Target
   githubActionsEnvironment : String → Target
   githubPullRequestBodySection :
     Nat → GithubPullRequestSection → GithubPullRequestBodyPlacement → Target
@@ -69,6 +70,7 @@ data Verification : Target → Set where
   rulesetReadBackEquality : {name : String} →
     Verification (githubRepositoryRuleset name)
   deployKeySetReadBackEquality : Verification githubRepositoryDeployKeys
+  actionsWorkflowPermissionsReadBackEquality : Verification githubActionsWorkflowPermissions
   environmentBoundaryReadBackEquality : {name : String} →
     Verification (githubActionsEnvironment name)
   pullRequestBodySectionEquality :

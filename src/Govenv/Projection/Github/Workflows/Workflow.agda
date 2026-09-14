@@ -99,6 +99,8 @@ renderEnvironmentGate :
   {source : SourceAuthority} → EnvironmentGate source → Maybe Value → String
 renderEnvironmentGate ungatedCandidate nothing = ""
 renderEnvironmentGate ungatedCandidate (just _) = ""
+renderEnvironmentGate ungatedAuthorized nothing = ""
+renderEnvironmentGate ungatedAuthorized (just _) = ""
 renderEnvironmentGate (authorizedEnvironment environment) nothing =
   "    environment: " ++ primShowString environment ++ "\n"
 renderEnvironmentGate (authorizedEnvironment environment) (just url) =
