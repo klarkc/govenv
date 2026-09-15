@@ -52,6 +52,11 @@ let
       bash src/Govenv/Adapter/release-governance-pr.sh >/dev/null
   '';
 
+  validateReleasePushAuthorizationRegression = ''
+    GOVENV_RELEASE_PUSH_AUTH_COUNTEREXAMPLE=Govenv/Materialization/ReleaseGovernance/push-auth-counterexample.md \
+      bash src/Govenv/Adapter/release-governance-pr.sh >/dev/null
+  '';
+
   checkMaterializations = ''
     ${buildMaterializers}
     ${validateRoadmapEvolution}
@@ -115,6 +120,7 @@ in
     ${checkMaterializations}
     ${checkAdminAdapters}
     ${validateReleasePlacementRegression}
+    ${validateReleasePushAuthorizationRegression}
   '';
 
   tasks."govenv:docs".exec = ''
