@@ -1,5 +1,47 @@
 # Changelog
 
+## [0.2.1](https://github.com/klarkc/govenv/compare/v0.2.0...v0.2.1) (2026-09-15)
+
+
+### Bug Fixes
+
+* **authorization:** support private materializer app ([346aee0](https://github.com/klarkc/govenv/commit/346aee0928d29bb385c7fc37c21eacc2e34b9259))
+* **release:** parse quoted roadmap snapshot strings ([ac963c3](https://github.com/klarkc/govenv/commit/ac963c3fad1f15f66dd73409564fbd2cb0480cb6))
+* **release:** simplify phase delta classification ([9c8e438](https://github.com/klarkc/govenv/commit/9c8e4387891f97cc090913999cbaa4b3c4fa9776))
+
+
+### Governance
+
+* **administration:** materialize single setup ([47707f8](https://github.com/klarkc/govenv/commit/47707f86031b8a3a4c865ff5a7dc272f29704a22))
+* **administration:** model single-root authority ([9742d9a](https://github.com/klarkc/govenv/commit/9742d9ae21d697c6c7ff819a47698ccc4e1a645a))
+* **administration:** normalize deploy key readback ([328cc1c](https://github.com/klarkc/govenv/commit/328cc1cb4a6fd34c331d67ca275347cb1f0a502c))
+* **assurance:** define regression closure policy ([ca6c2ed](https://github.com/klarkc/govenv/commit/ca6c2ed539968c34791f95d44e249faba0d04ccf))
+* **authorization:** bind post-merge effects to exact revision ([b3ffd02](https://github.com/klarkc/govenv/commit/b3ffd02a67c7cb0e091e5f28ab80362859d19ede))
+* **authorization:** stage monotonic authority bootstrap ([6e35290](https://github.com/klarkc/govenv/commit/6e35290ae3219d4f36d414a7a368416e2fbeda32))
+* **release:** bind governance impact to release version ([95c4ceb](https://github.com/klarkc/govenv/commit/95c4cebaa6dbadd470b02df0b84df8184d2916fd))
+* **release:** close release push authorization regression ([30fc755](https://github.com/klarkc/govenv/commit/30fc755bb47fc30ebe5b53f601177f635ff48594))
+* **release:** model sparse supersession dimensions ([6928076](https://github.com/klarkc/govenv/commit/69280766b4504f5623f6234896759a0ede542348))
+* **release:** render only changed supersession dimensions ([bcf858f](https://github.com/klarkc/govenv/commit/bcf858f1f7a0ca1593d5723de0d6f6501189bea0))
+* **roadmap:** govern documentation references ([748d65d](https://github.com/klarkc/govenv/commit/748d65d4bf2f5ec158ffd5b1a45734c23b629684))
+* **roadmap:** govern sparse delta projection ([b01ad45](https://github.com/klarkc/govenv/commit/b01ad4540cad9485469d832d8d56698ddb4443d3))
+
+
+### Documentation
+
+* **release:** describe sparse governance deltas ([206dfb9](https://github.com/klarkc/govenv/commit/206dfb9af04c4def91371e6fb670a3e8a2880530))
+
+
+### Code Refactoring
+
+* **materialization:** project deploy key set ([6cebdee](https://github.com/klarkc/govenv/commit/6cebdeeacad4bec4ca10d1e24a0d9d156661aded))
+* **release:** close projection over typed delta ([e0b59aa](https://github.com/klarkc/govenv/commit/e0b59aafd2e56f753ce52e0fc790377fa70936e4))
+
+
+### Miscellaneous
+
+* **materialize:** update governed materializations ([cfa0ad3](https://github.com/klarkc/govenv/commit/cfa0ad36aa38e40a97fdafbbee639f0a6df2d830))
+* **materialize:** update governed materializations ([9fd6483](https://github.com/klarkc/govenv/commit/9fd648365791c892e4a0b1ed04890728cd21d813))
+
 ## [0.2.0](https://github.com/klarkc/govenv/compare/v0.1.0...v0.2.0) (2026-09-11)
 
 <!-- govenv-governance-impact:start -->
