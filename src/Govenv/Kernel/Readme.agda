@@ -11,7 +11,6 @@ record Readme : Set where
     agdaVersion : String
     releaseUrl : String
     licenseName : String
-    currentSummary : String
     roadmapNote : String
     roadmap : Roadmap
     gettingStartedTitle : String
