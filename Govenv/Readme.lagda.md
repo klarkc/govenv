@@ -16,7 +16,6 @@ readme = record
   ; agdaVersion = "2.8.0"
   ; releaseUrl = "https://github.com/klarkc/govenv/releases"
   ; licenseName = "Apache-2.0"
-  ; currentSummary = "`Verdict`, typed `Fact`, dependency-indexed `Rule`, typed roadmap structure, materialization closure, roadmap integrity, immutable governance identity, and typed release governance are in place; GV55 release-progress policy and its GV56 self-governing `Rule` are next."
   ; roadmapNote = "Governance IDs are immutable historical references. Definitions and owning phases never change after introduction; abandoned work is cancelled, while corrections or changed intent require a newer GV and explicit supersession."
   ; roadmap = roadmap
   ; gettingStartedTitle = "Getting started"

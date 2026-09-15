@@ -112,10 +112,16 @@ renderBadges : List Badge → String
 renderBadges [] = ""
 renderBadges (x ∷ xs) = "  " ++ renderBadge x ++ "\n" ++ renderBadges xs
 
+renderNext : List SomeGovernanceId → String
+renderNext [] = ""
+renderNext (someIdentifier governanceId ∷ rest) =
+  " Next: **" ++ renderGovernanceId governanceId ++ "** — " ++
+  descriptionOf governanceId
+
 renderCurrent : Current → String
-renderCurrent (activeCurrent label (someIdentifier phaseId) summary) =
+renderCurrent (activeCurrent label (someIdentifier phaseId) pending) =
   "**" ++ label ++ ":** ▣ " ++ renderPhaseId phaseId ++ " — " ++
-  descriptionOf phaseId ++ ". " ++ summary ++ "\n\n"
+  descriptionOf phaseId ++ "." ++ renderNext pending ++ "\n\n"
 renderCurrent (roadmapComplete label message) =
   "**" ++ label ++ ":** ■ " ++ message ++ "\n\n"
 
