@@ -51,6 +51,17 @@ observedLines =
   map Text.strip .
   Text.lines
 
+publicKeyIdentity :: Text.Text -> Text.Text
+publicKeyIdentity = Text.unwords . take 2 . Text.words
+
+normalizeDeployKeyObservation :: Text.Text -> Text.Text
+normalizeDeployKeyObservation line =
+  case Text.splitOn "\t" line of
+    [observedTitle, observedReadOnly, observedKey] ->
+      observedTitle <> "\t" <> observedReadOnly <> "\t" <>
+      publicKeyIdentity observedKey
+    _ -> line
+
 removeIfPresent :: FilePath -> IO ()
 removeIfPresent path = do
   exists <- Directory.doesFileExist path
@@ -104,13 +115,16 @@ provisionMaterializerCredentialImpl
         [ "api", keyEndpoint, "--paginate", "--jq"
         , ".[] | [.title, (.read_only|tostring), .key] | @tsv"
         ]
-      let expected = [title <> "\t" <> readOnly <> "\t" <> publicKey]
-      if observedLines observed == List.sort expected
+      let expected =
+            [title <> "\t" <> readOnly <> "\t" <> publicKeyIdentity publicKey]
+          observedNormalized =
+            List.sort (map normalizeDeployKeyObservation (observedLines observed))
+      if observedNormalized == List.sort expected
         then pure ()
         else Exit.die
           ("Materializer deploy-key read-back verification failed.\n" ++
            "Expected: " ++ show (map Text.unpack expected) ++
-           "\nObserved: " ++ show (map Text.unpack (observedLines observed))))
+           "\nObserved: " ++ show (map Text.unpack observedNormalized)))
       `Exception.finally` cleanup
 #-}
 
