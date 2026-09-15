@@ -1,8 +1,8 @@
 # Administrative setup plan
 
-The administrative setup is modeled as the single future human-facing operation. Its ordered plan is governed state: adapters may interpret these steps, but they may not choose, omit, reorder, or introduce administrative effects independently.
+The administrative setup is the single human-facing administrative operation. Its ordered plan is governed state: adapters may interpret these steps, but they may not choose, omit, reorder, or introduce administrative effects independently.
 
-The current plan prepares every prerequisite that is sound before main-ruleset activation. GV91 intentionally keeps the three main rulesets out of this revision's setup plan until the authorized Stage B execution path exists. This plan is governed preparatory state; the legacy multi-target workflow remains materialized until a complete adapter can interpret the plan without introducing manual credential provisioning.
+The current plan prepares every prerequisite that is sound before main-ruleset activation. GV91 intentionally keeps the three main rulesets out of this revision's setup plan until the authorized Stage B execution path exists. The materializer environment boundary is applied before cryptographic material is provisioned, so the private key is never introduced into an unrestricted environment. The final materializer-environment step performs complete read-back after credential provisioning.
 
 ```agda
 {-# OPTIONS --safe #-}
@@ -15,6 +15,7 @@ open import Agda.Builtin.String using (String)
 data AdminSetupStep : Set where
   repositoryDescriptionStep : AdminSetupStep
   adminEnvironmentStep : AdminSetupStep
+  materializerEnvironmentBoundaryStep : AdminSetupStep
   materializerCredentialStep : AdminSetupStep
   materializerEnvironmentStep : AdminSetupStep
   authorizedEffectsEnvironmentStep : AdminSetupStep
@@ -27,6 +28,7 @@ plan : List AdminSetupStep
 plan =
   adminEnvironmentStep
   ∷ repositoryDescriptionStep
+  ∷ materializerEnvironmentBoundaryStep
   ∷ materializerCredentialStep
   ∷ materializerEnvironmentStep
   ∷ authorizedEffectsEnvironmentStep

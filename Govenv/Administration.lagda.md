@@ -16,7 +16,7 @@ Every externally observable step retains apply → read-back → equality semant
 
 ## Authorized materializer
 
-The GV92/GV93 materializer design uses one repository-scoped write deploy key named `govenv-materializer`. `Admin Materialize` must generate its keypair when provisioning or rotation is required, install the public key as the repository deploy key, and provision the corresponding runtime credential directly into the `authorized-materialization` environment as `GOVENV_MATERIALIZER_SSH_KEY`.
+The GV92/GV93 materializer design uses one repository-scoped write deploy key named `govenv-materializer`. The current convergent setup rotates this keypair on every successful execution: it first hardens `authorized-materialization` to `main`, generates an ephemeral Ed25519 keypair, replaces the complete repository deploy-key set with the governed public key, streams the private key into the environment secret `GOVENV_MATERIALIZER_SSH_KEY`, and deletes the runner-local key material. Rotation is used because GitHub does not expose environment secret values for read-back; each successful setup therefore re-establishes the private/public correspondence from one generated pair rather than trusting an unreadable prior value.
 
 GitHub rulesets grant bypass to the `DeployKey` actor class rather than to one deploy key identifier. Therefore the repository deploy-key set is governed as a closed set containing only the materializer key. Setup removes stale or unauthorized deploy keys and verifies the complete observed set before any DeployKey bypass may become active.
 
