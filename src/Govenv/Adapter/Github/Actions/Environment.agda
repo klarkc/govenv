@@ -7,6 +7,8 @@ open import Agda.Builtin.Unit using (⊤)
 open import Govenv.Projection.Github.Actions.Environment using (EnvironmentProjection)
 
 postulate
+  applyEnvironmentBoundaryRaw :
+    String → String → List String → List String → List String → IO ⊤
   applyEnvironmentRaw :
     String → String → List String → List String → List String →
     List String → List String → IO ⊤
@@ -54,23 +56,15 @@ verifyLines label expected observed =
           ".\nExpected: " ++ show (map Text.unpack expectedSorted) ++
           "\nObserved: " ++ show (map Text.unpack observedSorted))
 
-applyEnvironmentImpl
+applyEnvironmentBoundaryImpl
   :: Text.Text
   -> Text.Text
   -> [Text.Text]
   -> [Text.Text]
   -> [Text.Text]
-  -> [Text.Text]
-  -> [Text.Text]
   -> IO ()
-applyEnvironmentImpl
-  environmentName
-  request
-  branchRequests
-  expectedBoundary
-  expectedBranches
-  expectedSecrets
-  expectedVariables = do
+applyEnvironmentBoundaryImpl
+  environmentName request branchRequests expectedBoundary expectedBranches = do
     repository <- Text.pack <$> Environment.getEnv "GITHUB_REPOSITORY"
     let endpoint =
           "repos/" <> repository <> "/environments/" <> environmentName
@@ -104,6 +98,24 @@ applyEnvironmentImpl
       ["api", branchEndpoint, "--jq", ".branch_policies[].name"]
     verifyLines "deployment branch policies" expectedBranches branches
 
+applyEnvironmentImpl
+  :: Text.Text
+  -> Text.Text
+  -> [Text.Text]
+  -> [Text.Text]
+  -> [Text.Text]
+  -> [Text.Text]
+  -> [Text.Text]
+  -> IO ()
+applyEnvironmentImpl
+  environmentName request branchRequests expectedBoundary expectedBranches
+  expectedSecrets expectedVariables = do
+    applyEnvironmentBoundaryImpl
+      environmentName request branchRequests expectedBoundary expectedBranches
+    repository <- Text.pack <$> Environment.getEnv "GITHUB_REPOSITORY"
+    let endpoint =
+          "repos/" <> repository <> "/environments/" <> environmentName
+
     secrets <- runGh
       ["api", endpoint <> "/secrets", "--jq", ".secrets[].name"]
     verifyLines "environment secret names" expectedSecrets secrets
@@ -113,7 +125,17 @@ applyEnvironmentImpl
     verifyLines "environment variable names" expectedVariables variables
 #-}
 
+{-# COMPILE GHC applyEnvironmentBoundaryRaw = applyEnvironmentBoundaryImpl #-}
 {-# COMPILE GHC applyEnvironmentRaw = applyEnvironmentImpl #-}
+
+applyEnvironmentBoundary : EnvironmentProjection → IO ⊤
+applyEnvironmentBoundary projection =
+  applyEnvironmentBoundaryRaw
+    (EnvironmentProjection.name projection)
+    (EnvironmentProjection.request projection)
+    (EnvironmentProjection.branchRequests projection)
+    (EnvironmentProjection.boundaryObservation projection)
+    (EnvironmentProjection.governedBranchNames projection)
 
 applyEnvironment : EnvironmentProjection → IO ⊤
 applyEnvironment projection =

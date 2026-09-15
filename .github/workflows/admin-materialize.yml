@@ -2,17 +2,6 @@ name: "Admin Materialize"
 
 on:
   workflow_dispatch:
-    inputs:
-      target:
-        description: "Governed admin materialization to apply"
-        required: true
-        type: choice
-        options:
-          - "github-description"
-          - "admin-environment"
-          - "materializer-environment"
-          - "authorized-effects-environment"
-          - "pages-environment"
 
 jobs:
   materialize:
@@ -41,9 +30,9 @@ jobs:
       run: "nix run github:cachix/devenv/v2.3 -- tasks run govenv:check"
     - name: "Build admin adapters"
       run: "nix run github:cachix/devenv/v2.3 -- tasks run govenv:admin:build"
-    - name: "Apply and verify target"
-      run: "case \"${{ inputs.target }}\" in\n  github-description) nix run github:cachix/devenv/v2.3 -- shell -- .govenv/admin-apply-build/DescriptionApplication ;;\n  admin-environment) nix run github:cachix/devenv/v2.3 -- shell -- .govenv/admin-apply-build/AdminEnvironment ;;\n  materializer-environment) nix run github:cachix/devenv/v2.3 -- shell -- .govenv/admin-apply-build/MaterializerEnvironment ;;\n  authorized-effects-environment) nix run github:cachix/devenv/v2.3 -- shell -- .govenv/admin-apply-build/AuthorizedEffectsEnvironment ;;\n  pages-environment) nix run github:cachix/devenv/v2.3 -- shell -- .govenv/admin-apply-build/PagesEnvironment ;;\n  *)\n    echo \"Unsupported admin materialization: ${{ inputs.target }}\" >&2\n    exit 64\n    ;;\nesac"
+    - name: "Apply and verify setup"
+      run: "nix run github:cachix/devenv/v2.3 -- shell -- .govenv/admin-apply-build/Setup"
       env:
         GH_TOKEN: ${{ secrets.GOVENV_ADMIN_TOKEN }}
     - name: "Record evidence"
-      run: "{\n  printf '%s\\n' '### Admin materialization evidence'\n  printf '%s\\n' \"- Constitution: \\`${GITHUB_SHA}\\`\"\n  printf '%s\\n' \"- Target: \\`${{ inputs.target }}\\`\"\n  printf '%s\\n' \"- Repository: \\`${GITHUB_REPOSITORY}\\`\"\n  printf '%s\\n' \"- Workflow run: \\`${GITHUB_RUN_ID}\\`\"\n  printf '%s\\n' \"- Assurance: \\`expected == observed\\`\"\n} >> \"${GITHUB_STEP_SUMMARY}\""
+      run: "{\n  printf '%s\\n' '### Admin materialization evidence'\n  printf '%s\\n' \"- Constitution: \\`${GITHUB_SHA}\\`\"\n  printf '%s\\n' \"- Target: \\`setup\\`\"\n  printf '%s\\n' \"- Repository: \\`${GITHUB_REPOSITORY}\\`\"\n  printf '%s\\n' \"- Workflow run: \\`${GITHUB_RUN_ID}\\`\"\n  printf '%s\\n' \"- Actor: \\`${GITHUB_ACTOR}\\`\"\n  printf '%s\\n' '- Expected: `Govenv.Materialization.Github.Administration.Setup.plan`'\n  printf '%s\\n' '- Observed: `all setup steps read-back equal`'\n  printf '%s\\n' \"- Assurance: \\`expected == observed\\`\"\n} >> \"${GITHUB_STEP_SUMMARY}\""

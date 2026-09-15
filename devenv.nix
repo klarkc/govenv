@@ -12,12 +12,15 @@ let
   checkAdminAdapters = ''
     agda -i . -i src src/Govenv/Adapter/Github/Repository/DescriptionApplication.agda
     agda -i . -i src src/Govenv/Adapter/Github/Actions/AdminEnvironment.agda
+    agda -i . -i src src/Govenv/Adapter/Github/Actions/MaterializerEnvironmentBoundary.agda
+    agda -i . -i src src/Govenv/Adapter/Github/Repository/MaterializerCredential.agda
     agda -i . -i src src/Govenv/Adapter/Github/Actions/MaterializerEnvironment.agda
     agda -i . -i src src/Govenv/Adapter/Github/Actions/AuthorizedEffectsEnvironment.agda
     agda -i . -i src src/Govenv/Adapter/Github/Actions/PagesEnvironment.agda
     agda -i . -i src src/Govenv/Adapter/Github/Repository/MainAuthorization.agda
     agda -i . -i src src/Govenv/Adapter/Github/Repository/MainAuthorityBoundary.agda
     agda -i . -i src src/Govenv/Adapter/Github/Repository/MainIntegrity.agda
+    agda -i . -i src src/Govenv/Adapter/Github/Administration/Setup.agda
   '';
 
   buildAdminAdapters = ''
@@ -25,12 +28,15 @@ let
     mkdir -p .govenv/admin-apply-build
     agda -i . -i src --compile --compile-dir=.govenv/admin-apply-build src/Govenv/Adapter/Github/Repository/DescriptionApplication.agda >/dev/null
     agda -i . -i src --compile --compile-dir=.govenv/admin-apply-build src/Govenv/Adapter/Github/Actions/AdminEnvironment.agda >/dev/null
+    agda -i . -i src --compile --compile-dir=.govenv/admin-apply-build src/Govenv/Adapter/Github/Actions/MaterializerEnvironmentBoundary.agda >/dev/null
+    agda -i . -i src --compile --compile-dir=.govenv/admin-apply-build src/Govenv/Adapter/Github/Repository/MaterializerCredential.agda >/dev/null
     agda -i . -i src --compile --compile-dir=.govenv/admin-apply-build src/Govenv/Adapter/Github/Actions/MaterializerEnvironment.agda >/dev/null
     agda -i . -i src --compile --compile-dir=.govenv/admin-apply-build src/Govenv/Adapter/Github/Actions/AuthorizedEffectsEnvironment.agda >/dev/null
     agda -i . -i src --compile --compile-dir=.govenv/admin-apply-build src/Govenv/Adapter/Github/Actions/PagesEnvironment.agda >/dev/null
     agda -i . -i src --compile --compile-dir=.govenv/admin-apply-build src/Govenv/Adapter/Github/Repository/MainAuthorization.agda >/dev/null
     agda -i . -i src --compile --compile-dir=.govenv/admin-apply-build src/Govenv/Adapter/Github/Repository/MainAuthorityBoundary.agda >/dev/null
     agda -i . -i src --compile --compile-dir=.govenv/admin-apply-build src/Govenv/Adapter/Github/Repository/MainIntegrity.agda >/dev/null
+    agda -i . -i src --compile --compile-dir=.govenv/admin-apply-build src/Govenv/Adapter/Github/Administration/Setup.agda >/dev/null
   '';
 
   validateRoadmapEvolution = ''
@@ -70,6 +76,7 @@ in
     pkgs.gh
     pkgs.ghc
     pkgs.jq
+    pkgs.openssh
     pkgs.pandoc
   ];
 
