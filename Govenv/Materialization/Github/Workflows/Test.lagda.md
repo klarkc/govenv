@@ -40,7 +40,7 @@ nixExtraConf : String
 nixExtraConf = "accept-flake-config = true\nsubstituters = https://devenv.cachix.org https://cachix.cachix.org https://cache.nixos.org\nextra-trusted-public-keys = devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw= cachix.cachix.org-1:eWNHQldwUO7G2VkjpnjDbWwy4KQ/HNxht7H4SSoMckM="
 
 checkoutRef : String
-checkoutRef = "github.event_name == 'workflow_call' && inputs.revision || github.sha"
+checkoutRef = "github.event_name == 'workflow_call' && inputs.revision || github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha"
 
 checkCommand : String
 checkCommand = "nix run github:cachix/devenv/v2.3 -- tasks run govenv:check"
