@@ -1,6 +1,6 @@
 # Materialize workflow
 
-The Materialize workflow runs from an exact authorized revision on `main`. Its job is gated by the main-only `authorized-materialization` environment, evaluates with a read-only `GITHUB_TOKEN`, and uses only the governed materializer repository credential for Git transport. It derives at most one deterministic materialization commit whose immediate Git parent is its exact causal revision, making provenance stable under rebase rewriting, and passes the resulting effective revision explicitly to post-materialization reusable workflows.
+The Materialize workflow runs from an exact authorized revision on `main`. Its job is gated by the main-only `authorized-materialization` environment, evaluates with a read-only `GITHUB_TOKEN`, and uses only the governed materializer repository credential for Git transport. It derives at most one deterministic materialization commit whose immediate Git parent is its exact causal revision, making provenance stable under rebase rewriting, and passes the resulting effective revision explicitly to post-materialization reusable workflows. Because release publication can advance the latest immutable release boundary after the initial materialization has already been checked, the parent workflow records that boundary before Release, then re-enters the same materializer authority after Release. Only an observed boundary advance enables post-release rematerialization; if that rematerialization changes `main`, Release is invoked once more against the derived revision so the next candidate is reconciled with the newly canonical `Unreleased` state.
 
 ```agda
 {-# OPTIONS --safe #-}
@@ -58,6 +58,15 @@ checkCommand =
 detectDriftCommand : String
 detectDriftCommand =
   "if [[ -z \"$(git status --porcelain)\" ]]; then\n  changed=false\nelse\n  changed=true\nfi\necho \"changed=${changed}\" >> \"${GITHUB_OUTPUT}\""
+
+recordReleaseBoundaryCommand : String
+recordReleaseBoundaryCommand =
+  "release_boundary=\"$(git describe --tags --abbrev=0 2>/dev/null || true)\"\necho \"tag=${release_boundary}\" >> \"${GITHUB_OUTPUT}\""
+
+detectReleaseBoundaryAdvanceCommand : String
+detectReleaseBoundaryAdvanceCommand =
+  "current_boundary=\"$(git describe --tags --abbrev=0 2>/dev/null || true)\"\nif [[ \"${current_boundary}\" == \"${GOVENV_PREVIOUS_RELEASE_BOUNDARY}\" ]]; then\n  advanced=false\nelse\n  advanced=true\nfi\necho \"advanced=${advanced}\" >> \"${GITHUB_OUTPUT}\""
+
 commitCommand : String
 commitCommand =
   "git config user.name \"govenv-materializer\"\n" ++
@@ -70,6 +79,20 @@ commitCommand =
 
 changed : String
 changed = "steps.drift.outputs.changed == 'true'"
+
+boundaryAdvanced : String
+boundaryAdvanced = "steps.boundary.outputs.advanced == 'true'"
+
+postReleaseChanged : String
+postReleaseChanged = boundaryAdvanced ++ " && " ++ changed
+
+postReleaseJobCondition : String
+postReleaseJobCondition =
+  "github.event_name == 'push' && always() && needs.materialize.result == 'success'"
+
+reconcileReleaseCondition : String
+reconcileReleaseCondition =
+  "needs.post-release-materialize.outputs.changed == 'true'"
 
 mainDispatchOnly : String
 mainDispatchOnly =
@@ -101,7 +124,39 @@ steps =
   ∷ runStep "Detect materialization drift" (just "drift") nothing detectDriftCommand []
   ∷ runStep "Commit derived materializations" nothing (just changed)
       commitCommand []
+  ∷ runStep "Record release boundary" (just "release-boundary") nothing
+      recordReleaseBoundaryCommand []
   ∷ runStep "Record effective materialized revision" (just "effective") nothing
+      effectiveRevisionCommand []
+  ∷ []
+
+postReleaseSteps : List Step
+postReleaseSteps =
+  usesStep "Checkout authorized revision after Release" nothing nothing checkout
+    (binding "ref" (expression "needs.materialize.outputs.effective-sha")
+    ∷ binding "fetch-depth" (literal "0")
+    ∷ binding "persist-credentials" (literal "true")
+    ∷ binding "ssh-key" (expression ("secrets." ++ materializerCredentialName))
+    ∷ [])
+  ∷ runStep "Detect published release boundary advancement" (just "boundary")
+      nothing detectReleaseBoundaryAdvanceCommand
+      (binding "GOVENV_PREVIOUS_RELEASE_BOUNDARY"
+        (expression "needs.materialize.outputs.release-boundary") ∷ [])
+  ∷ usesStep "Install Nix" nothing (just boundaryAdvanced) installNix
+      (binding "extra-conf" (literal nixExtraConf) ∷ [])
+  ∷ usesStep "Cache Nix" nothing (just boundaryAdvanced) cacheNix
+      (binding "use-gha-cache" (literal "enabled")
+      ∷ binding "use-flakehub" (literal "disabled")
+      ∷ [])
+  ∷ runStep "Materialize post-release constitution" nothing
+      (just boundaryAdvanced) materializeCommand []
+  ∷ runStep "Check post-release materialized state" nothing
+      (just boundaryAdvanced) checkCommand []
+  ∷ runStep "Detect post-release materialization drift" (just "drift")
+      (just boundaryAdvanced) detectDriftCommand []
+  ∷ runStep "Commit post-release derived materializations" nothing
+      (just postReleaseChanged) commitCommand []
+  ∷ runStep "Record post-release effective revision" (just "effective") nothing
       effectiveRevisionCommand []
   ∷ []
 
@@ -111,7 +166,10 @@ state = workflow
   (pushBranches (authorizedBranch ∷ []) ∷ workflowDispatch [] ∷ [])
   (just (concurrency "materialize-${{ github.event_name }}" true))
   (job "materialize" materializeJob (just mainDispatchOnly) []
-    (binding "effective-sha" (expression "steps.effective.outputs.sha") ∷ [])
+    (binding "effective-sha" (expression "steps.effective.outputs.sha")
+    ∷ binding "release-boundary"
+        (expression "steps.release-boundary.outputs.tag")
+    ∷ [])
     nothing "ubuntu-latest" 15 steps
   ∷ reusableJob "test" (just publishOnly) ("materialize" ∷ []) readOnlyToken
       "./.github/workflows/test.yml"
@@ -122,6 +180,17 @@ state = workflow
   ∷ reusableJob "pages" (just publishOnly) ("materialize" ∷ "test" ∷ []) pagesCallToken
       "./.github/workflows/pages.yml"
       (binding "revision" (expression "needs.materialize.outputs.effective-sha") ∷ [])
+  ∷ job "post-release-materialize" materializeJob
+      (just postReleaseJobCondition) ("materialize" ∷ "release" ∷ [])
+      (binding "effective-sha" (expression "steps.effective.outputs.sha")
+      ∷ binding "changed" (expression "steps.drift.outputs.changed")
+      ∷ [])
+      nothing "ubuntu-latest" 15 postReleaseSteps
+  ∷ reusableJob "release-reconcile" (just reconcileReleaseCondition)
+      ("post-release-materialize" ∷ []) releaseToken
+      "./.github/workflows/release.yml"
+      (binding "revision"
+        (expression "needs.post-release-materialize.outputs.effective-sha") ∷ [])
   ∷ [])
 
 materialization : Materialization Workflow
