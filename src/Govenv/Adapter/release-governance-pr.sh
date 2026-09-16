@@ -4,10 +4,12 @@ set -euo pipefail
 placement_counterexample="${GOVENV_RELEASE_PLACEMENT_COUNTEREXAMPLE:-}"
 history_counterexample="${GOVENV_RELEASE_HISTORY_COUNTEREXAMPLE:-}"
 push_auth_counterexample="${GOVENV_RELEASE_PUSH_AUTH_COUNTEREXAMPLE:-}"
+rebase_provenance_counterexample="${GOVENV_RELEASE_REBASE_PROVENANCE_COUNTEREXAMPLE:-}"
 release_pr="${GOVENV_RELEASE_PR:-${1:-}}"
 if [[ -z "${placement_counterexample}" ]] &&
    [[ -z "${history_counterexample}" ]] &&
    [[ -z "${push_auth_counterexample}" ]] &&
+   [[ -z "${rebase_provenance_counterexample}" ]] &&
    [[ -z "${release_pr}" || ! "${release_pr}" =~ ^[0-9]+$ ]]; then
   echo "GOVENV_RELEASE_PR or the first argument must be a pull request number." >&2
   exit 2
@@ -15,6 +17,7 @@ fi
 
 root="$(git rev-parse --show-toplevel)"
 cd "${root}"
+source src/Govenv/Adapter/revision-provenance.sh
 
 write_git_askpass() {
   local target="$1"
@@ -255,6 +258,69 @@ verify_section_at_release() {
     return 5
   fi
 }
+
+if [[ -n "${rebase_provenance_counterexample}" ]]; then
+  if [[ ! -f "${rebase_provenance_counterexample}" ]]; then
+    echo "Release rebase provenance counterexample does not exist: ${rebase_provenance_counterexample}" >&2
+    exit 2
+  fi
+  if ! grep -Fq 'Materialize run #39' "${rebase_provenance_counterexample}" ||
+     ! grep -Fq 'f86ee5870abf527b4f065f827277be701f131441' "${rebase_provenance_counterexample}"; then
+    echo "Release rebase provenance fixture no longer preserves the observed regression." >&2
+    exit 3
+  fi
+
+  regression_tmp="$(mktemp -d)"
+  trap 'rm -rf "${regression_tmp}"' EXIT
+  git -C "${regression_tmp}" init -q
+  git -C "${regression_tmp}" config user.name counterexample
+  git -C "${regression_tmp}" config user.email counterexample@example.invalid
+  printf '%s\n' base > "${regression_tmp}/state"
+  git -C "${regression_tmp}" add state
+  git -C "${regression_tmp}" commit -q -m 'base'
+  regression_base="$(git -C "${regression_tmp}" rev-parse HEAD)"
+
+  printf '%s\n' semantic >> "${regression_tmp}/state"
+  git -C "${regression_tmp}" add state
+  git -C "${regression_tmp}" commit -q \
+    -m 'fix(release): semantic authority' \
+    -m 'Refs: GV90 GV95'
+  regression_semantic="$(git -C "${regression_tmp}" rev-parse HEAD)"
+
+  printf '%s\n' materialized >> "${regression_tmp}/state"
+  git -C "${regression_tmp}" add state
+  git -C "${regression_tmp}" commit -q \
+    -m 'chore(materialize): update governed materializations' \
+    -m 'Derived-From-Revision: c31bfa531c8c63d73631a406e3e6ae4be0ac7e23' \
+    -m 'Refs: GV18 GV19 GV51 GV90 GV95'
+  regression_derived="$(git -C "${regression_tmp}" rev-parse HEAD)"
+
+  printf '%s\n' rematerialized >> "${regression_tmp}/state"
+  git -C "${regression_tmp}" add state
+  git -C "${regression_tmp}" commit -q \
+    -m 'chore(materialize): update governed materializations' \
+    -m 'Derived-From-Parent: true' \
+    -m 'Refs: GV18 GV19 GV51 GV90 GV95'
+  regression_followup="$(git -C "${regression_tmp}" rev-parse HEAD)"
+
+  observed_cause="$(cd "${regression_tmp}" && resolve_causal_revision "${regression_followup}")"
+  if [[ "${observed_cause}" != "${regression_semantic}" ]]; then
+    echo "Rebase-stable causal provenance did not resolve to the materialization parent." >&2
+    exit 5
+  fi
+
+  mapfile -t observed_refs < <(
+    cd "${regression_tmp}" &&
+      emit_governance_references "${regression_base}" "${regression_followup}"
+  )
+  if [[ "${observed_refs[*]}" != 'GV90 GV95' ]]; then
+    echo "Derived materialization references leaked independent semantic authority: ${observed_refs[*]}." >&2
+    exit 5
+  fi
+
+  printf 'Release rebase provenance counterexample closed by parent-edge causality.\n'
+  exit 0
+fi
 
 if [[ -n "${history_counterexample}" ]]; then
   if [[ ! -f "${history_counterexample}" ]]; then

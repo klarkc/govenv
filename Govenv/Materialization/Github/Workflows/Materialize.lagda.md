@@ -1,6 +1,6 @@
 # Materialize workflow
 
-The Materialize workflow runs from an exact authorized revision on `main`. Its job is gated by the main-only `authorized-materialization` environment, evaluates with a read-only `GITHUB_TOKEN`, and uses only the governed materializer repository credential for Git transport. It derives at most one deterministic materialization commit, records the exact authorizing revision, and passes the resulting effective revision explicitly to post-materialization reusable workflows.
+The Materialize workflow runs from an exact authorized revision on `main`. Its job is gated by the main-only `authorized-materialization` environment, evaluates with a read-only `GITHUB_TOKEN`, and uses only the governed materializer repository credential for Git transport. It derives at most one deterministic materialization commit whose immediate Git parent is its exact causal revision, making provenance stable under rebase rewriting, and passes the resulting effective revision explicitly to post-materialization reusable workflows.
 
 ```agda
 {-# OPTIONS --safe #-}
@@ -63,7 +63,7 @@ commitCommand =
   "git config user.name \"govenv-materializer\"\n" ++
   "git config user.email \"govenv-materializer@users.noreply.github.com\"\n" ++
   "git add --all\n" ++
-  "printf '%s\\n' \\\n  'chore(materialize): update governed materializations' \\\n  '' \\\n  '' \\\n  \"Derived-From-Authorized-Revision: ${GITHUB_SHA}\" \\\n  'Refs: GV44 GV51 GV90 GV92 GV93' \\\n  'skip-checks: true' > .govenv/materialization-commit-message\n" ++
+  "printf '%s\\n' \\\n  'chore(materialize): update governed materializations' \\\n  '' \\\n  '' \\\n  \"Derived-From-Parent: true\" \\\n  'Refs: GV44 GV51 GV90 GV92 GV93' \\\n  'skip-checks: true' > .govenv/materialization-commit-message\n" ++
   "git commit --cleanup=verbatim -F .govenv/materialization-commit-message\n" ++
   "rm .govenv/materialization-commit-message\n" ++
   "git push origin HEAD:main"
