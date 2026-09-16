@@ -141,6 +141,48 @@ let
     fi
   '';
 
+  validateReleasePostPublicationConvergenceRegression = ''
+    fixture=Govenv/Materialization/ReleaseGovernance/post-publication-unreleased-counterexample.md
+    grep -Fq 'Materialize run #49' "$fixture"
+    grep -Fq 'e76acb119c6514e93ef90312f1c956f308a42a42' "$fixture"
+    grep -Fq '8dddae741144a242a4a5211cc5d44a1c2cfb338c' "$fixture"
+    grep -Fq 'e76acb1..8dddae7' "$fixture"
+    grep -Fq 'release-boundary:' .govenv/materialize.generated.yml
+    grep -Fq 'steps.release-boundary.outputs.tag' .govenv/materialize.generated.yml
+    grep -Fq 'Record release boundary' .govenv/materialize.generated.yml
+
+    post_release_job="$(awk '
+      /^  post-release-materialize:/ { capture = 1 }
+      capture && /^  [^ ]+:/ && $0 !~ /^  post-release-materialize:/ { exit }
+      capture { print }
+    ' .govenv/materialize.generated.yml)"
+    printf '%s\n' "$post_release_job" | grep -Fq 'needs: [materialize, release]'
+    printf '%s\n' "$post_release_job" | grep -Fq 'environment: "authorized-materialization"'
+    printf '%s\n' "$post_release_job" | grep -Fq 'contents: read'
+    printf '%s\n' "$post_release_job" | grep -Fq 'needs.materialize.outputs.effective-sha'
+    printf '%s\n' "$post_release_job" | grep -Fq 'needs.materialize.outputs.release-boundary'
+    printf '%s\n' "$post_release_job" | grep -Fq "steps.boundary.outputs.advanced == 'true'"
+    printf '%s\n' "$post_release_job" | grep -Fq 'secrets.GOVENV_MATERIALIZER_SSH_KEY'
+    if printf '%s\n' "$post_release_job" | grep -Eq 'contents: write|pull-requests: write|issues: write|actions: write'; then
+      echo 'Post-release materialization must retain the read-only workflow token boundary.' >&2
+      exit 5
+    fi
+
+    reconcile_job="$(awk '
+      /^  release-reconcile:/ { capture = 1 }
+      capture && /^  [^ ]+:/ && $0 !~ /^  release-reconcile:/ { exit }
+      capture { print }
+    ' .govenv/materialize.generated.yml)"
+    printf '%s\n' "$reconcile_job" | grep -Fq 'needs: post-release-materialize'
+    printf '%s\n' "$reconcile_job" | grep -Fq 'needs.post-release-materialize.outputs.changed'
+    printf '%s\n' "$reconcile_job" | grep -Fq 'uses: ./.github/workflows/release.yml'
+    printf '%s\n' "$reconcile_job" | grep -Fq 'needs.post-release-materialize.outputs.effective-sha'
+    if printf '%s\n' "$reconcile_job" | grep -Fq 'actions: write'; then
+      echo 'Release reconciliation must not gain generic Actions write authority.' >&2
+      exit 5
+    fi
+  '';
+
   validateReleasePushAuthorizationRegression = ''
     GOVENV_RELEASE_PUSH_AUTH_COUNTEREXAMPLE=Govenv/Materialization/ReleaseGovernance/push-auth-counterexample.md \
       bash src/Govenv/Adapter/release-governance-pr.sh >/dev/null
@@ -218,6 +260,7 @@ in
     ${validateReleaseCandidateValidationRegression}
     ${validateTestExplicitRevisionRegression}
     ${validateReleasePostMergeFreezeRegression}
+    ${validateReleasePostPublicationConvergenceRegression}
     ${validateReleasePushAuthorizationRegression}
   '';
 
