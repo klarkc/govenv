@@ -45,7 +45,7 @@ jobs:
       run: "if [[ -z \"$(git status --porcelain)\" ]]; then\n  changed=false\nelse\n  changed=true\nfi\necho \"changed=${changed}\" >> \"${GITHUB_OUTPUT}\""
     - name: "Commit derived materializations"
       if: ${{ steps.drift.outputs.changed == 'true' }}
-      run: "git config user.name \"govenv-materializer\"\ngit config user.email \"govenv-materializer@users.noreply.github.com\"\ngit add --all\nprintf '%s\\n' \\\n  'chore(materialize): update governed materializations' \\\n  '' \\\n  '' \\\n  \"Derived-From-Authorized-Revision: ${GITHUB_SHA}\" \\\n  'Refs: GV44 GV51 GV90 GV92 GV93' \\\n  'skip-checks: true' > .govenv/materialization-commit-message\ngit commit --cleanup=verbatim -F .govenv/materialization-commit-message\nrm .govenv/materialization-commit-message\ngit push origin HEAD:main"
+      run: "git config user.name \"govenv-materializer\"\ngit config user.email \"govenv-materializer@users.noreply.github.com\"\ngit add --all\nprintf '%s\\n' \\\n  'chore(materialize): update governed materializations' \\\n  '' \\\n  '' \\\n  \"Derived-From-Parent: true\" \\\n  'Refs: GV44 GV51 GV90 GV92 GV93' \\\n  'skip-checks: true' > .govenv/materialization-commit-message\ngit commit --cleanup=verbatim -F .govenv/materialization-commit-message\nrm .govenv/materialization-commit-message\ngit push origin HEAD:main"
     - name: "Record effective materialized revision"
       id: effective
       run: "echo \"sha=$(git rev-parse HEAD)\" >> \"${GITHUB_OUTPUT}\""
