@@ -13,6 +13,8 @@ concurrency:
 
 jobs:
   release-please:
+    outputs:
+      candidate-revision: ${{ steps.candidate.outputs.sha }}
     environment: "authorized-effects"
     permissions:
       contents: write
@@ -51,6 +53,13 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GOVENV_RELEASE_PR_JSON: ${{ steps.release.outputs.pr }}
+    - name: "Resolve release candidate revision"
+      id: candidate
+      if: ${{ steps.release.outputs.prs_created == 'true' }}
+      run: "GOVENV_RELEASE_PR=\"$(jq -r '.number' <<< \"${GOVENV_RELEASE_PR_JSON}\")\"\nif [[ ! \"${GOVENV_RELEASE_PR}\" =~ ^[0-9]+$ ]]; then\n  echo \"Release Please did not return a valid pull request number.\" >&2\n  exit 2\nfi\ncandidate_revision=\"$(gh pr view \"${GOVENV_RELEASE_PR}\" --json headRefOid --jq '.headRefOid')\"\nif [[ ! \"${candidate_revision}\" =~ ^[0-9a-f]{40}$ ]]; then\n  echo \"Release candidate head is not a full Git revision.\" >&2\n  exit 4\nfi\necho \"sha=${candidate_revision}\" >> \"${GITHUB_OUTPUT}\""
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GOVENV_RELEASE_PR_JSON: ${{ steps.release.outputs.pr }}
     - name: "Materialize published release governance"
       if: ${{ steps.release.outputs.release_created == 'true' }}
       run: "bash src/Govenv/Adapter/release-governance-release.sh"
@@ -58,3 +67,11 @@ jobs:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GOVENV_RELEASE_TAG: ${{ steps.release.outputs.tag_name }}
         GOVENV_RELEASE_SHA: ${{ steps.release.outputs.sha }}
+  candidate-test:
+    if: ${{ needs.release-please.outputs.candidate-revision != '' }}
+    needs: release-please
+    permissions:
+      contents: read
+    uses: ./.github/workflows/test.yml
+    with:
+      revision: ${{ needs.release-please.outputs.candidate-revision }}
