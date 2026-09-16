@@ -48,8 +48,14 @@ let
   '';
 
   materializeChangelog = output: ''
-    GOVENV_RELEASE_TARGET=changelog \
-      bash src/Govenv/Adapter/release-governance.sh > ${output}
+    changelog_tmp="${output}.tmp.$$"
+    trap 'rm -f "$changelog_tmp"' EXIT
+    if ! GOVENV_RELEASE_TARGET=changelog \
+      bash src/Govenv/Adapter/release-governance.sh > "$changelog_tmp"; then
+      exit 1
+    fi
+    mv "$changelog_tmp" ${output}
+    trap - EXIT
   '';
 
   validateReleasePlacementRegression = ''
@@ -113,6 +119,24 @@ let
     grep -Fq '&& inputs.revision || github.event_name' .govenv/test.generated.yml
     if grep -Fq "github.event_name == 'workflow_call' && inputs.revision" .govenv/test.generated.yml; then
       echo 'Reusable Test revision must not depend on the inherited event name.' >&2
+      exit 5
+    fi
+  '';
+
+  validateReleasePostMergeFreezeRegression = ''
+    fixture=Govenv/Materialization/ReleaseGovernance/post-merge-freeze-counterexample.md
+    grep -Fq 'Materialize run #48' "$fixture"
+    grep -Fq 'e76acb119c6514e93ef90312f1c956f308a42a42' "$fixture"
+    grep -Fq 'Release 0.2.2 must have exactly one governed freeze boundary.' "$fixture"
+    changelog_materializer="$(awk '
+      /materializeChangelog = output:/ { capture = 1 }
+      capture { print }
+      capture && /trap - EXIT/ { exit }
+    ' devenv.nix)"
+    printf '%s\n' "$changelog_materializer" | grep -Fq 'changelog_tmp='
+    printf '%s\n' "$changelog_materializer" | grep -Fq 'mv "$changelog_tmp"'
+    if printf '%s\n' "$changelog_materializer" | grep -Eq 'release-governance\.sh[[:space:]]*>[[:space:]]*.*output'; then
+      echo 'Canonical changelog materialization must not truncate its governed input before read-back.' >&2
       exit 5
     fi
   '';
@@ -193,6 +217,7 @@ in
     ${validatePagesHistoryRegression}
     ${validateReleaseCandidateValidationRegression}
     ${validateTestExplicitRevisionRegression}
+    ${validateReleasePostMergeFreezeRegression}
     ${validateReleasePushAuthorizationRegression}
   '';
 
