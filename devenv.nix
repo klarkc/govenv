@@ -104,6 +104,19 @@ let
     fi
   '';
 
+  validateTestExplicitRevisionRegression = ''
+    fixture=Govenv/Materialization/Github/Workflows/test-revision-counterexample.md
+    grep -Fq 'Materialize run #45' "$fixture"
+    grep -Fq 'revision: 4e35ba5e9fc29414c3aa495b94ca76683793d5b9' "$fixture"
+    grep -Fq 'ref: 1d8350e0891b6f9685f52063386475b03255d4d5' "$fixture"
+    grep -Fq 'inputs.revision !=' .govenv/test.generated.yml
+    grep -Fq '&& inputs.revision || github.event_name' .govenv/test.generated.yml
+    if grep -Fq "github.event_name == 'workflow_call' && inputs.revision" .govenv/test.generated.yml; then
+      echo 'Reusable Test revision must not depend on the inherited event name.' >&2
+      exit 5
+    fi
+  '';
+
   validateReleasePushAuthorizationRegression = ''
     GOVENV_RELEASE_PUSH_AUTH_COUNTEREXAMPLE=Govenv/Materialization/ReleaseGovernance/push-auth-counterexample.md \
       bash src/Govenv/Adapter/release-governance-pr.sh >/dev/null
@@ -179,6 +192,7 @@ in
     ${validateReleaseRebaseProvenanceRegression}
     ${validatePagesHistoryRegression}
     ${validateReleaseCandidateValidationRegression}
+    ${validateTestExplicitRevisionRegression}
     ${validateReleasePushAuthorizationRegression}
   '';
 

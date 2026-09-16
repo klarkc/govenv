@@ -1,6 +1,6 @@
 # Test workflow
 
-The Test workflow is the only workflow intentionally allowed to execute candidate repository state. Its token is read-only, it has no privileged environment, and post-materialization confirmation receives the exact materialized revision explicitly from Materialize.
+The Test workflow is the only workflow intentionally allowed to execute candidate repository state. Its token is read-only and it has no privileged environment. Whenever a reusable caller supplies an explicit revision, that revision takes precedence over the inherited GitHub event context; direct pull-request execution otherwise checks the exact pull-request head, and standalone dispatch falls back to the triggering revision.
 
 ```agda
 {-# OPTIONS --safe #-}
@@ -40,7 +40,7 @@ nixExtraConf : String
 nixExtraConf = "accept-flake-config = true\nsubstituters = https://devenv.cachix.org https://cachix.cachix.org https://cache.nixos.org\nextra-trusted-public-keys = devenv.cachix.org-1:w1cLUi8dv3hnoSPGAuibQv+f9TZLr6cv/Hm9XgU50cw= cachix.cachix.org-1:eWNHQldwUO7G2VkjpnjDbWwy4KQ/HNxht7H4SSoMckM="
 
 checkoutRef : String
-checkoutRef = "github.event_name == 'workflow_call' && inputs.revision || github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha"
+checkoutRef = "inputs.revision != '' && inputs.revision || github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha"
 
 checkCommand : String
 checkCommand = "nix run github:cachix/devenv/v2.3 -- tasks run govenv:check"
