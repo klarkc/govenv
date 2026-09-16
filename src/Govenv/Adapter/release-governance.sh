@@ -21,35 +21,10 @@ candidate_authorized_revision=""
 root="$(git rev-parse --show-toplevel)"
 cd "${root}"
 
-resolve_causal_revision() {
-  local revision="$1"
-  local message
-  local derived
-  local subject
-
-  message="$(git show -s --format=%B "${revision}")"
-  derived="$(printf '%s\n' "${message}" | awk '
-    /^Derived-From-Authorized-Revision: [0-9a-f]{40}$/ { print $2; exit }
-    /^Derived-From-Revision: [0-9a-f]{40}$/ { print $2; exit }
-  ')"
-  if [[ -n "${derived}" ]]; then
-    git rev-parse --verify "${derived}^{commit}" >/dev/null
-    if ! git merge-base --is-ancestor "${derived}" "${revision}"; then
-      echo "Derived materialization provenance is not an ancestor of ${revision}." >&2
-      return 3
-    fi
-    printf '%s\n' "${derived}"
-    return 0
-  fi
-
-  subject="$(git show -s --format=%s "${revision}")"
-  if [[ "${subject}" == 'chore(materialize): update governed materializations' ]]; then
-    git rev-parse "${revision}^"
-    return 0
-  fi
-
-  git rev-parse "${revision}^{commit}"
-}
+# Derived materializations are causally bound to their immediate Git parent.
+# The parent edge is content-addressed by Git and survives rebase rewriting,
+# unlike a copied SHA trailer from the pre-rebase candidate branch.
+source src/Govenv/Adapter/revision-provenance.sh
 
 load_candidate_boundary() {
   local document="$1"
@@ -343,26 +318,7 @@ fi
 references=()
 while IFS= read -r value; do
   [[ -n "${value}" ]] && references+=("${value#GV}")
-done < <(
-  while IFS= read -r commit; do
-    message="$(git show -s --format=%B "${commit}")"
-    if printf '%s\n' "${message}" |
-       grep -Eq '^Derived-From-(Authorized-)?Revision: [0-9a-f]{40}$'; then
-      continue
-    fi
-    printf '%s\n' "${message}"
-  done < <(git rev-list --reverse "${base_ref}..${head_ref}") |
-    awk '
-      /^Refs:/ {
-        line = $0
-        while (match(line, /GV[0-9]+/)) {
-          print substr(line, RSTART, RLENGTH)
-          line = substr(line, RSTART + RLENGTH)
-        }
-      }
-    ' |
-    sort -uV
-)
+done < <(emit_governance_references "${base_ref}" "${head_ref}")
 
 agda_list() {
   local expression="[]"
