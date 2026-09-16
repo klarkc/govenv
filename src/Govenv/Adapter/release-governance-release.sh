@@ -26,8 +26,19 @@ trap 'rm -rf "${tmp}"' EXIT
 current="${tmp}/release.current.md"
 updated="${tmp}/release.updated.md"
 observed="${tmp}/release.observed.md"
+observed_body="${tmp}/release.observed-body.md"
 
 gh release view "${release_tag}" --json body --jq '.body // ""' > "${current}"
+shape="$(awk '
+  /<!-- govenv-governance-impact:start -->/ { starts++ }
+  /<!-- govenv-governance-impact:end -->/ { ends++ }
+  END { printf "%d:%d\n", starts + 0, ends + 0 }
+' "${current}")"
+if [[ "${shape}" != "1:1" ]]; then
+  echo "GitHub Release must carry exactly one governance section before materialization; observed ${shape}." >&2
+  exit 4
+fi
+
 awk -v section="${root}/${expected}" '
   function emit_section( line) {
     while ((getline line < section) > 0) print line
@@ -55,12 +66,18 @@ awk -v section="${root}/${expected}" '
 
 gh release edit "${release_tag}" --notes-file "${updated}" >/dev/null
 
-gh release view "${release_tag}" --json body --jq '.body // ""' |
-  awk '
+gh release view "${release_tag}" --json body --jq '.body // ""' > "${observed_body}"
+if [[ "$(cat "${updated}")" != "$(cat "${observed_body}")" ]]; then
+  echo "GitHub Release whole-body read-back verification failed." >&2
+  diff -u "${updated}" "${observed_body}" >&2 || true
+  exit 5
+fi
+
+awk '
     /<!-- govenv-governance-impact:start -->/ { capture = 1 }
     capture { print }
     /<!-- govenv-governance-impact:end -->/ { exit }
-  ' > "${observed}"
+  ' "${observed_body}" > "${observed}"
 
 if ! cmp -s "${expected}" "${observed}"; then
   echo "GitHub Release governance read-back verification failed." >&2

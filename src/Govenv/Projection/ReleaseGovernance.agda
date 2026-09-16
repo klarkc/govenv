@@ -21,6 +21,8 @@ open Materialization
 open import Govenv.Materialization.ReleaseGovernance
 open ImpactGroup
 open ReleaseDocument
+open CandidateBoundary
+open ChangelogDocument
 open import Govenv.Projection.SemanticDiff
 
 infixr 5 _++_
@@ -401,9 +403,44 @@ renderBodyMaterialization : Materialization ReleaseDocument → String
 renderBodyMaterialization materialization =
   startMarker ++ renderGithubRelease "###" (state materialization) ++ endMarker
 
-renderChangelogMaterialization : Materialization ReleaseDocument → String
+renderPortableSection : ReleaseDocument → String
+renderPortableSection document =
+  startMarker ++ renderPortableRelease "###" document ++ endMarker
+
+renderHistoricalEntries : List String → String
+renderHistoricalEntries [] = ""
+renderHistoricalEntries (entry ∷ rest) =
+  entry ++ renderHistoricalEntries rest
+
+renderObservedNotes : String → String
+renderObservedNotes "" = ""
+renderObservedNotes notes = "\n\n" ++ notes
+
+renderCandidateBoundary : CandidateBoundary → String
+renderCandidateBoundary boundary =
+  "<!-- govenv-release-freeze: version=" ++ candidateVersion boundary ++
+  " base=" ++ candidateBaseRef boundary ++
+  " authorized=" ++ candidateAuthorizedRevision boundary ++ " -->\n"
+
+renderChangelogCurrent : ChangelogCurrent → String
+renderChangelogCurrent emptyUnreleased = "## [Unreleased]\n"
+renderChangelogCurrent (unreleased document) =
+  "## [Unreleased]\n\n" ++ renderPortableSection document
+renderChangelogCurrent (frozenCandidate boundary document notes) =
+  "## [Unreleased]\n\n" ++
+  candidateHeading boundary ++ "\n" ++
+  renderCandidateBoundary boundary ++ "\n" ++
+  renderPortableSection document ++
+  renderObservedNotes notes
+
+renderChangelogMaterialization : Materialization ChangelogDocument → String
 renderChangelogMaterialization materialization =
-  startMarker ++ renderPortableRelease "###" (state materialization) ++ endMarker
+  "# Changelog\n\n" ++
+  renderChangelogCurrent (current changelogState) ++ "\n" ++
+  renderHistoricalEntries (historicalEntries changelogState)
+  where
+  changelogState : ChangelogDocument
+  changelogState = state materialization
 
 renderGithubReleaseMaterialization : Materialization ReleaseDocument → String
 renderGithubReleaseMaterialization materialization =

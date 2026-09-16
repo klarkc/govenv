@@ -47,8 +47,18 @@ let
     bash src/Govenv/Adapter/roadmap-evolution.sh
   '';
 
+  materializeChangelog = output: ''
+    GOVENV_RELEASE_TARGET=changelog \
+      bash src/Govenv/Adapter/release-governance.sh > ${output}
+  '';
+
   validateReleasePlacementRegression = ''
     GOVENV_RELEASE_PLACEMENT_COUNTEREXAMPLE=Govenv/Materialization/ReleaseGovernance/placement-counterexample.md \
+      bash src/Govenv/Adapter/release-governance-pr.sh >/dev/null
+  '';
+
+  validateReleaseHistoryRegression = ''
+    GOVENV_RELEASE_HISTORY_COUNTEREXAMPLE=Govenv/Materialization/ReleaseGovernance/history-preservation-counterexample.md \
       bash src/Govenv/Adapter/release-governance-pr.sh >/dev/null
   '';
 
@@ -67,7 +77,9 @@ let
     .govenv/materialize-build/Test > .govenv/test.generated.yml
     .govenv/materialize-build/Release > .govenv/release.generated.yml
     .govenv/materialize-build/Pages > .govenv/pages.generated.yml
+    ${materializeChangelog ".govenv/CHANGELOG.generated.md"}
     diff -u README.md .govenv/README.generated.md
+    diff -u CHANGELOG.md .govenv/CHANGELOG.generated.md
     diff -u .govenv/roadmap.snapshot .govenv/roadmap.generated.snapshot
     diff -u .github/workflows/materialize.yml .govenv/materialize.generated.yml
     diff -u .github/workflows/admin-materialize.yml .govenv/admin-materialize.generated.yml
@@ -107,6 +119,7 @@ in
     .govenv/materialize-build/Test > .github/workflows/test.yml
     .govenv/materialize-build/Release > .github/workflows/release.yml
     .govenv/materialize-build/Pages > .github/workflows/pages.yml
+    ${materializeChangelog "CHANGELOG.md"}
   '';
 
   tasks."govenv:materialize:check".exec = checkMaterializations;
@@ -120,6 +133,7 @@ in
     ${checkMaterializations}
     ${checkAdminAdapters}
     ${validateReleasePlacementRegression}
+    ${validateReleaseHistoryRegression}
     ${validateReleasePushAuthorizationRegression}
   '';
 
