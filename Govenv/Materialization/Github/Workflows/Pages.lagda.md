@@ -1,6 +1,6 @@
 # Pages workflow
 
-Pages is reusable only from governed callers and receives the exact materialized revision explicitly. Build runs behind the authorized-effects boundary with read-only repository access plus Pages metadata read; deployment is a separate job gated by the `github-pages` environment with only Pages and OIDC write capabilities.
+Pages is reusable only from governed callers and receives the exact materialized revision explicitly. Because its build executes the canonical repository check and release governance reconstructs immutable history from published tags, checkout observes full Git history before validation. Build runs behind the authorized-effects boundary with read-only repository access plus Pages metadata read; deployment is a separate job gated by the `github-pages` environment with only Pages and OIDC write capabilities.
 
 ```agda
 {-# OPTIONS --safe #-}
@@ -50,6 +50,7 @@ buildSteps : List Step
 buildSteps =
   usesStep "Checkout" nothing nothing checkout
     (binding "ref" (expression "inputs.revision")
+    ∷ binding "fetch-depth" (literal "0")
     ∷ binding "persist-credentials" (literal "false")
     ∷ [])
   ∷ usesStep "Install Nix" nothing nothing installNix

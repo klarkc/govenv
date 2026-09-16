@@ -67,6 +67,21 @@ let
       bash src/Govenv/Adapter/release-governance-pr.sh >/dev/null
   '';
 
+  validatePagesHistoryRegression = ''
+    fixture=Govenv/Materialization/Github/Workflows/pages-history-counterexample.md
+    grep -Fq 'Materialize run #41' "$fixture"
+    grep -Fq 'Canonical changelog materialization requires a published release tag.' "$fixture"
+    if ! awk '
+      /- name: "Checkout"/ { checkout = 1; next }
+      checkout && /- name:/ { exit }
+      checkout && /fetch-depth: "0"/ { found = 1 }
+      END { exit found ? 0 : 1 }
+    ' .govenv/pages.generated.yml; then
+      echo 'Pages checkout must fetch full Git history before govenv:check.' >&2
+      exit 5
+    fi
+  '';
+
   validateReleasePushAuthorizationRegression = ''
     GOVENV_RELEASE_PUSH_AUTH_COUNTEREXAMPLE=Govenv/Materialization/ReleaseGovernance/push-auth-counterexample.md \
       bash src/Govenv/Adapter/release-governance-pr.sh >/dev/null
@@ -140,6 +155,7 @@ in
     ${validateReleasePlacementRegression}
     ${validateReleaseHistoryRegression}
     ${validateReleaseRebaseProvenanceRegression}
+    ${validatePagesHistoryRegression}
     ${validateReleasePushAuthorizationRegression}
   '';
 
