@@ -157,6 +157,11 @@ let
       capture { print }
     ' .govenv/materialize.generated.yml)"
     printf '%s\n' "$post_release_job" | grep -Fq 'needs: [materialize, release]'
+    printf '%s\n' "$post_release_job" | grep -Fq "needs.release.result == 'success'"
+    if printf '%s\n' "$post_release_job" | grep -Fq 'always()'; then
+      echo 'Post-release materialization must not advance an unverified release boundary.' >&2
+      exit 5
+    fi
     printf '%s\n' "$post_release_job" | grep -Fq 'environment: "authorized-materialization"'
     printf '%s\n' "$post_release_job" | grep -Fq 'contents: read'
     printf '%s\n' "$post_release_job" | grep -Fq 'needs.materialize.outputs.effective-sha'

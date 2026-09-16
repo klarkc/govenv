@@ -1,6 +1,6 @@
 # Materialize workflow
 
-The Materialize workflow runs from an exact authorized revision on `main`. Its job is gated by the main-only `authorized-materialization` environment, evaluates with a read-only `GITHUB_TOKEN`, and uses only the governed materializer repository credential for Git transport. It derives at most one deterministic materialization commit whose immediate Git parent is its exact causal revision, making provenance stable under rebase rewriting, and passes the resulting effective revision explicitly to post-materialization reusable workflows. Because release publication can advance the latest immutable release boundary after the initial materialization has already been checked, the parent workflow records that boundary before Release, then re-enters the same materializer authority after Release. Only an observed boundary advance enables post-release rematerialization; if that rematerialization changes `main`, Release is invoked once more against the derived revision so the next candidate is reconciled with the newly canonical `Unreleased` state.
+The Materialize workflow runs from an exact authorized revision on `main`. Its job is gated by the main-only `authorized-materialization` environment, evaluates with a read-only `GITHUB_TOKEN`, and uses only the governed materializer repository credential for Git transport. It derives at most one deterministic materialization commit whose immediate Git parent is its exact causal revision, making provenance stable under rebase rewriting, and passes the resulting effective revision explicitly to post-materialization reusable workflows. Because release publication can advance the latest immutable release boundary after the initial materialization has already been checked, the parent workflow records that boundary before Release, then re-enters the same materializer authority only after Release has completed successfully. Only a boundary advance observed after that verified Release enables post-release rematerialization; if that rematerialization changes `main`, Release is invoked once more against the derived revision so the next candidate is reconciled with the newly canonical `Unreleased` state.
 
 ```agda
 {-# OPTIONS --safe #-}
@@ -88,7 +88,7 @@ postReleaseChanged = boundaryAdvanced ++ " && " ++ changed
 
 postReleaseJobCondition : String
 postReleaseJobCondition =
-  "github.event_name == 'push' && always() && needs.materialize.result == 'success'"
+  "github.event_name == 'push' && needs.materialize.result == 'success' && needs.release.result == 'success'"
 
 reconcileReleaseCondition : String
 reconcileReleaseCondition =
