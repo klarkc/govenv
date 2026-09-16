@@ -52,6 +52,7 @@ steps : List Step
 steps =
   usesStep "Checkout" nothing nothing checkout
     (binding "ref" (expression checkoutRef)
+    ∷ binding "fetch-depth" (literal "0")
     ∷ binding "persist-credentials" (literal "false")
     ∷ [])
   ∷ usesStep "Install Nix" nothing nothing installNix

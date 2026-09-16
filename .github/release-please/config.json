@@ -21,5 +21,6 @@
     { "type": "build", "section": "Build System" },
     { "type": "ci", "section": "Continuous Integration" },
     { "type": "chore", "section": "Miscellaneous" }
-  ]
+  ],
+  "skip-changelog": true
 }

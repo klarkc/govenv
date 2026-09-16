@@ -2,9 +2,11 @@
 set -euo pipefail
 
 placement_counterexample="${GOVENV_RELEASE_PLACEMENT_COUNTEREXAMPLE:-}"
+history_counterexample="${GOVENV_RELEASE_HISTORY_COUNTEREXAMPLE:-}"
 push_auth_counterexample="${GOVENV_RELEASE_PUSH_AUTH_COUNTEREXAMPLE:-}"
 release_pr="${GOVENV_RELEASE_PR:-${1:-}}"
 if [[ -z "${placement_counterexample}" ]] &&
+   [[ -z "${history_counterexample}" ]] &&
    [[ -z "${push_auth_counterexample}" ]] &&
    [[ -z "${release_pr}" || ! "${release_pr}" =~ ^[0-9]+$ ]]; then
   echo "GOVENV_RELEASE_PR or the first argument must be a pull request number." >&2
@@ -43,14 +45,6 @@ git_with_github_token() {
   return "${status}"
 }
 
-strip_section() {
-  awk '
-    /<!-- govenv-governance-impact:start -->/ { skip = 1; next }
-    /<!-- govenv-governance-impact:end -->/ { skip = 0; next }
-    !skip { print }
-  ' "$1"
-}
-
 extract_section() {
   awk '
     /<!-- govenv-governance-impact:start -->/ { capture = 1 }
@@ -66,30 +60,166 @@ extract_section_release_heading() {
   ' "$1"
 }
 
+extract_section_at_release() {
+  local document="$1"
+  local version="$2"
+
+  awk -v version="${version}" '
+    BEGIN { heading = "## [" version "]" }
+    /^## \[/ { in_target = index($0, heading) == 1 }
+    in_target && /<!-- govenv-governance-impact:start -->/ { capture = 1 }
+    in_target && capture { print }
+    in_target && capture && /<!-- govenv-governance-impact:end -->/ { exit }
+  ' "${document}"
+}
+
+
+extract_release_entry() {
+  local document="$1"
+  local version="$2"
+
+  awk -v version="${version}" '
+    BEGIN { heading = "## [" version "]" }
+    /^## \[/ {
+      if (capture) exit
+      if (index($0, heading) == 1) capture = 1
+    }
+    capture { print }
+  ' "${document}"
+}
+
+extract_candidate_notes() {
+  local document="$1"
+  local version="$2"
+
+  awk -v version="${version}" '
+    BEGIN { heading = "## [" version "]" }
+    /^## \[/ {
+      if (in_target) exit
+      if (index($0, heading) == 1) {
+        in_target = 1
+        next
+      }
+    }
+    !in_target { next }
+    /^---$/ { exit }
+    /<!-- govenv-governance-impact:start -->/ { governance = 1; next }
+    governance && /<!-- govenv-governance-impact:end -->/ { governance = 0; next }
+    governance { next }
+    { lines[++count] = $0 }
+    END {
+      first = 1
+      while (first <= count && lines[first] == "") first++
+      last = count
+      while (last >= first && lines[last] == "") last--
+      for (i = first; i <= last; i++) print lines[i]
+    }
+  ' "${document}"
+}
+
+release_section_shape() {
+  local document="$1"
+  local version="$2"
+
+  awk -v version="${version}" '
+    BEGIN { heading = "## [" version "]" }
+    /^## \[/ {
+      in_target = index($0, heading) == 1
+      if (in_target) headings++
+      next
+    }
+    in_target && /<!-- govenv-governance-impact:start -->/ { starts++ }
+    in_target && /<!-- govenv-governance-impact:end -->/ { ends++ }
+    END { printf "%d:%d:%d\n", headings, starts, ends }
+  ' "${document}"
+}
+
 materialize_section_at_release() {
   local input="$1"
   local section="$2"
   local version="$3"
   local output="$4"
 
-  strip_section "${input}" |
-    awk -v section="${section}" -v version="${version}" '
-      function emit_section( line) {
-        while ((getline line < section) > 0) print line
-        close(section)
+  awk -v section="${section}" -v version="${version}" '
+    function load_section( line) {
+      while ((getline line < section) > 0) desired = desired line "\n"
+      close(section)
+    }
+    function emit_section() {
+      printf "%s", desired
+    }
+    BEGIN {
+      heading = "## [" version "]"
+      load_section()
+    }
+    {
+      if (!capture && $0 ~ /^## \[/) {
+        in_target = index($0, heading) == 1
+        if (in_target) {
+          target_headings++
+          if (!inserted) {
+            print
+            print ""
+            emit_section()
+            print ""
+            inserted = 1
+            next
+          }
+        }
       }
-      BEGIN { heading = "## [" version "]" }
-      !inserted && index($0, heading) == 1 {
-        print
-        print ""
-        emit_section()
-        print ""
-        inserted = 1
+
+      if (!capture && $0 ~ /<!-- govenv-governance-impact:start -->/) {
+        capture = 1
+        captured_in_target = in_target
+        block = $0 "\n"
         next
       }
-      { print }
-      END { if (!inserted) exit 42 }
-    ' > "${output}"
+
+      if (capture) {
+        block = block $0 "\n"
+        if ($0 ~ /<!-- govenv-governance-impact:end -->/) {
+          if (!captured_in_target && block != desired) printf "%s", block
+          capture = 0
+          captured_in_target = 0
+          block = ""
+        }
+        next
+      }
+
+      print
+    }
+    END {
+      if (capture) exit 43
+      if (!inserted || target_headings != 1) exit 42
+    }
+  ' "${input}" > "${output}"
+}
+
+matching_section_count() {
+  local document="$1"
+  local section="$2"
+
+  awk -v section="${section}" '
+    function load_section( line) {
+      while ((getline line < section) > 0) desired = desired line "\n"
+      close(section)
+    }
+    BEGIN { load_section() }
+    /<!-- govenv-governance-impact:start -->/ {
+      capture = 1
+      block = $0 "\n"
+      next
+    }
+    capture {
+      block = block $0 "\n"
+      if ($0 ~ /<!-- govenv-governance-impact:end -->/) {
+        if (block == desired) matches++
+        capture = 0
+        block = ""
+      }
+    }
+    END { print matches + 0 }
+  ' "${document}"
 }
 
 verify_section_at_release() {
@@ -97,34 +227,88 @@ verify_section_at_release() {
   local section="$2"
   local version="$3"
   local label="$4"
+  local matching_count
   local observed
-  local observed_heading
-  local marker_count
+  local shape
+
+  shape="$(release_section_shape "${document}" "${version}")"
+  if [[ "${shape}" != "1:1:1" ]]; then
+    echo "${label} governance release-section shape verification failed: ${shape}." >&2
+    echo "Expected release ${version} to contain exactly one heading and one marker pair." >&2
+    return 5
+  fi
 
   observed="$(mktemp)"
-  extract_section "${document}" > "${observed}"
+  extract_section_at_release "${document}" "${version}" > "${observed}"
   if ! cmp -s "${section}" "${observed}"; then
-    echo "${label} governance read-back verification failed." >&2
+    echo "${label} governance read-back verification failed for release ${version}." >&2
     diff -u "${section}" "${observed}" >&2 || true
     rm -f "${observed}"
     return 5
   fi
   rm -f "${observed}"
 
-  marker_count="$(grep -c '<!-- govenv-governance-impact:start -->' "${document}" || true)"
-  if [[ "${marker_count}" != "1" ]]; then
-    echo "${label} governance marker cardinality verification failed: ${marker_count}." >&2
-    return 5
-  fi
-
-  observed_heading="$(extract_section_release_heading "${document}")"
-  if [[ "${observed_heading}" != "## [${version}]"* ]]; then
-    echo "${label} governance placement verification failed." >&2
-    echo "Expected release: ${version}" >&2
-    echo "Observed heading: ${observed_heading}" >&2
+  matching_count="$(matching_section_count "${document}" "${section}")"
+  if [[ "${matching_count}" != "1" ]]; then
+    echo "${label} governance target-section cardinality verification failed: ${matching_count}." >&2
+    echo "Expected the release-specific governance section exactly once in the document." >&2
     return 5
   fi
 }
+
+if [[ -n "${history_counterexample}" ]]; then
+  if [[ ! -f "${history_counterexample}" ]]; then
+    echo "Release history counterexample does not exist: ${history_counterexample}" >&2
+    exit 2
+  fi
+  if ! grep -Fq '733c8126375b9b322de505fae7b5471f796af1fb' "${history_counterexample}"; then
+    echo "Release history fixture no longer records the observed main revision." >&2
+    exit 3
+  fi
+
+  generated_changelog="${GOVENV_RELEASE_GENERATED_CHANGELOG:-.govenv/CHANGELOG.generated.md}"
+  if [[ ! -s "${generated_changelog}" ]]; then
+    echo "Generated canonical changelog is required for history regression validation." >&2
+    exit 3
+  fi
+
+  mapfile -t regression_versions < <(
+    awk '/^## \[/{ line=$0; sub(/^## \[/, "", line); sub(/\].*$/, "", line); print line }' \
+      "${history_counterexample}"
+  )
+  if [[ "${#regression_versions[@]}" -lt 2 ]]; then
+    echo "Release history fixture must contain at least two release entries." >&2
+    exit 3
+  fi
+
+  regression_tmp="$(mktemp -d)"
+  trap 'rm -rf "${regression_tmp}"' EXIT
+  for version in "${regression_versions[@]}"; do
+    tag="v${version}"
+    published_document="${regression_tmp}/${version}.published.md"
+    expected_entry="${regression_tmp}/${version}.expected.md"
+    observed_entry="${regression_tmp}/${version}.observed.md"
+    if ! git show "${tag}:CHANGELOG.md" > "${published_document}" 2>/dev/null; then
+      echo "Historical release tag ${tag} is not reconstructible." >&2
+      exit 3
+    fi
+    extract_release_entry "${published_document}" "${version}" > "${expected_entry}"
+    extract_release_entry "${generated_changelog}" "${version}" > "${observed_entry}"
+    if [[ ! -s "${expected_entry}" || ! -s "${observed_entry}" ]]; then
+      echo "Historical release ${version} is missing from canonical reconstruction." >&2
+      exit 5
+    fi
+    if ! cmp -s "${expected_entry}" "${observed_entry}"; then
+      echo "Historical release ${version} changed during canonical reconstruction." >&2
+      diff -u "${expected_entry}" "${observed_entry}" >&2 || true
+      exit 5
+    fi
+  done
+
+  printf 'Release governance history reconstruction preserves %s historical entries exactly.\n' \
+    "${#regression_versions[@]}"
+  exit 0
+fi
 
 if [[ -n "${placement_counterexample}" ]]; then
   if [[ ! -f "${placement_counterexample}" ]]; then
@@ -219,19 +403,26 @@ if [[ -z "${release_version}" || ! "${release_version}" =~ ^[0-9]+\.[0-9]+\.[0-9
   exit 4
 fi
 
+current_body="${tmp}/body.current.md"
+updated_body="${tmp}/body.updated.md"
+release_notes="${tmp}/release-notes.md"
+gh pr view "${release_pr}" --json body --jq '.body // ""' > "${current_body}"
+release_heading="$(awk -v version="${release_version}" 'index($0, "## [" version "]") == 1 { print; exit }' "${current_body}")"
+if [[ -z "${release_heading}" ]]; then
+  echo "Release pull request has no heading for ${release_version}." >&2
+  exit 4
+fi
+extract_candidate_notes "${current_body}" "${release_version}" > "${release_notes}"
+
 GOVENV_RELEASE_VERSION="${release_version}" \
+GOVENV_RELEASE_HEADING="${release_heading}" \
+GOVENV_RELEASE_NOTES_FILE="${release_notes}" \
   bash src/Govenv/Adapter/release-governance.sh "${release_pr}" >/dev/null
 body_impact=".govenv/release-governance-body.md"
-changelog_impact=".govenv/release-governance-changelog.md"
+canonical_changelog=".govenv/release-governance-changelog.md"
 
 current_changelog="${worktree}/CHANGELOG.md"
-updated_changelog="${tmp}/CHANGELOG.updated.md"
-
-materialize_section_at_release \
-  "${current_changelog}" "${root}/${changelog_impact}" \
-  "${release_version}" "${updated_changelog}"
-
-cp "${updated_changelog}" "${current_changelog}"
+cp "${root}/${canonical_changelog}" "${current_changelog}"
 if ! git -C "${worktree}" diff --quiet -- CHANGELOG.md; then
   git -C "${worktree}" add CHANGELOG.md
   GIT_AUTHOR_NAME="github-actions[bot]" \
@@ -239,20 +430,18 @@ if ! git -C "${worktree}" diff --quiet -- CHANGELOG.md; then
   GIT_COMMITTER_NAME="github-actions[bot]" \
   GIT_COMMITTER_EMAIL="41898282+github-actions[bot]@users.noreply.github.com" \
     git -C "${worktree}" commit \
-      -m "chore(materialize): update release governance impact" >/dev/null
+      -m "chore(materialize): freeze canonical release changelog" >/dev/null
   git_with_github_token "${worktree}" push origin "HEAD:${head_ref}"
 fi
 
 git fetch origin "+refs/heads/${head_ref}:refs/remotes/origin/${head_ref}"
 remote_changelog="${tmp}/CHANGELOG.remote.md"
 git show "origin/${head_ref}:CHANGELOG.md" > "${remote_changelog}"
-verify_section_at_release \
-  "${remote_changelog}" "${root}/${changelog_impact}" \
-  "${release_version}" "Release changelog"
-
-current_body="${tmp}/body.current.md"
-updated_body="${tmp}/body.updated.md"
-gh pr view "${release_pr}" --json body --jq '.body // ""' > "${current_body}"
+if ! cmp -s "${root}/${canonical_changelog}" "${remote_changelog}"; then
+  echo "Release changelog whole-file read-back verification failed." >&2
+  diff -u "${root}/${canonical_changelog}" "${remote_changelog}" >&2 || true
+  exit 5
+fi
 
 materialize_section_at_release \
   "${current_body}" "${root}/${body_impact}" \

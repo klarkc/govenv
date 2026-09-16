@@ -1,8 +1,8 @@
 # Release governance materialization
 
-This module owns the typed release governance document shared by the canonical portable changelog entry and enriched GitHub pull-request/release projections. Release Please owns surrounding release artifacts; Govenv owns this semantic section and its target-specific materializations.
+This module owns the typed release governance document and the canonical changelog state. `CHANGELOG.md` is a whole-file materialization owned by Govenv: on an ordinary authorized revision its governed `Unreleased` state is derived from the latest published release boundary; derived materialization commits resolve back to their causal source/authorized revision so the changelog never becomes self-referential; on a Release Please candidate that exact governed state is frozen beneath an empty `Unreleased` heading under the candidate SemVer. The freeze records its published-base tag and full authorizing revision, so the exact approved candidate remains reconstructible during the interval after human merge and before tag publication; once the tag exists, the same frozen entry becomes immutable release history. Release Please remains the observer for SemVer and Conventional Commit analysis, so its candidate heading and rendered conventional notes may enter the typed document as observational input, but they never own file structure, governance semantics, history, or authorization. Historical release entries are observed only from immutable revision-addressable release boundaries and are carried as reconstruction inputs, never trusted from the surviving mutable changelog.
 
-Release-section placement is version-specific. The target carries the exact Release Please version whose heading must own the governance section; read-back therefore verifies both section equality and placement. `ReleaseGovernance/placement-counterexample.md` preserves the PR #3 placement regression. `ReleaseGovernance/push-auth-counterexample.md` preserves the Stage B release-branch mutation regression from run #35. Candidate validation must reject recurrence of either counterexample before release materialization can succeed.
+The pull-request and GitHub Release projections share the same typed release document. `ReleaseGovernance/placement-counterexample.md` preserves the PR #3 placement regression, `ReleaseGovernance/history-preservation-counterexample.md` preserves the observed loss of the 0.2.0 governance history, and `ReleaseGovernance/push-auth-counterexample.md` preserves the Stage B release-branch mutation regression from run #35. Candidate validation must reject recurrence before release materialization can succeed.
 
 ```agda
 {-# OPTIONS --safe #-}
@@ -77,6 +77,25 @@ record ReleaseDocument : Set where
     footer : String
     baseRevision : String
     headRevision : String
+
+record CandidateBoundary : Set where
+  constructor candidateBoundary
+  field
+    candidateVersion : String
+    candidateHeading : String
+    candidateBaseRef : String
+    candidateAuthorizedRevision : String
+
+data ChangelogCurrent : Set where
+  emptyUnreleased : ChangelogCurrent
+  unreleased : ReleaseDocument → ChangelogCurrent
+  frozenCandidate : CandidateBoundary → ReleaseDocument → String → ChangelogCurrent
+
+record ChangelogDocument : Set where
+  constructor changelogDocument
+  field
+    current : ChangelogCurrent
+    historicalEntries : List String
 
 private
   countItems : List ItemImpact → Nat
@@ -254,16 +273,14 @@ pullRequestBody number releaseVersion baseRevision headRevision roadmap delta = 
   pullRequestBodySectionEquality
   (document baseRevision headRevision roadmap delta)
 
-changelog :
-  String → String → String → Roadmap → GovernanceDelta → Materialization ReleaseDocument
-changelog releaseVersion baseRevision headRevision roadmap delta = materialized
-  (repositoryFileSection "CHANGELOG.md" releaseGovernanceImpactInChangelog
-    (afterReleaseHeadingInFile releaseVersion))
+changelog : ChangelogCurrent → List String → Materialization ChangelogDocument
+changelog current history = materialized
+  (repositoryFile "CHANGELOG.md")
   automatic
   repository
   authorizedOnly
-  repositoryFileSectionEquality
-  (document baseRevision headRevision roadmap delta)
+  trackedEquality
+  (changelogDocument current history)
 
 githubRelease :
   String → String → String → Roadmap → GovernanceDelta → Materialization ReleaseDocument

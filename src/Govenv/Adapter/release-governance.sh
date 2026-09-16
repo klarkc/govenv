@@ -6,7 +6,126 @@ release_pr="${GOVENV_RELEASE_PR:-${1:-}}"
 release_tag="${GOVENV_RELEASE_TAG:-}"
 release_version="${GOVENV_RELEASE_VERSION:-}"
 base_ref="${GOVENV_RELEASE_BASE_REF:-${2:-}}"
-head_ref="${GOVENV_RELEASE_HEAD_REF:-${3:-HEAD}}"
+head_ref="${GOVENV_RELEASE_HEAD_REF:-${3:-}}"
+head_ref_explicit=true
+if [[ -z "${head_ref}" ]]; then
+  head_ref="HEAD"
+  head_ref_explicit=false
+fi
+release_heading="${GOVENV_RELEASE_HEADING:-}"
+release_notes_file="${GOVENV_RELEASE_NOTES_FILE:-}"
+release_notes=""
+candidate_base_ref=""
+candidate_authorized_revision=""
+
+root="$(git rev-parse --show-toplevel)"
+cd "${root}"
+
+resolve_causal_revision() {
+  local revision="$1"
+  local message
+  local derived
+  local subject
+
+  message="$(git show -s --format=%B "${revision}")"
+  derived="$(printf '%s\n' "${message}" | awk '
+    /^Derived-From-Authorized-Revision: [0-9a-f]{40}$/ { print $2; exit }
+    /^Derived-From-Revision: [0-9a-f]{40}$/ { print $2; exit }
+  ')"
+  if [[ -n "${derived}" ]]; then
+    git rev-parse --verify "${derived}^{commit}" >/dev/null
+    if ! git merge-base --is-ancestor "${derived}" "${revision}"; then
+      echo "Derived materialization provenance is not an ancestor of ${revision}." >&2
+      return 3
+    fi
+    printf '%s\n' "${derived}"
+    return 0
+  fi
+
+  subject="$(git show -s --format=%s "${revision}")"
+  if [[ "${subject}" == 'chore(materialize): update governed materializations' ]]; then
+    git rev-parse "${revision}^"
+    return 0
+  fi
+
+  git rev-parse "${revision}^{commit}"
+}
+
+load_candidate_boundary() {
+  local document="$1"
+  local version="$2"
+  local marker_open marker_name version_field base_field authorized_field marker_close
+
+  mapfile -t freeze_lines < <(
+    grep -F "<!-- govenv-release-freeze: version=${version} " "${document}" || true
+  )
+  if [[ "${#freeze_lines[@]}" -ne 1 ]]; then
+    echo "Release ${version} must have exactly one governed freeze boundary." >&2
+    return 3
+  fi
+
+  read -r marker_open marker_name version_field base_field authorized_field marker_close <<< "${freeze_lines[0]}"
+  candidate_base_ref="${base_field#base=}"
+  candidate_authorized_revision="${authorized_field#authorized=}"
+  if [[ "${marker_open}" != '<!--' || "${marker_name}" != 'govenv-release-freeze:' ||
+        "${version_field}" != "version=${version}" || "${marker_close}" != '-->' ||
+        ! "${candidate_base_ref}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+([+-][0-9A-Za-z.-]+)?$ ||
+        ! "${candidate_authorized_revision}" =~ ^[0-9a-f]{40}$ ]]; then
+    echo "Release ${version} freeze boundary is malformed." >&2
+    return 3
+  fi
+}
+
+validate_candidate_boundary() {
+  local expected_base="$1"
+  local containing_revision="$2"
+  local expected_version="${expected_base#v}"
+  local authorized_manifest_version
+
+  if [[ "${candidate_base_ref}" != "${expected_base}" ]]; then
+    echo "Release freeze base ${candidate_base_ref} does not match expected base ${expected_base}." >&2
+    return 3
+  fi
+  git rev-parse --verify "${candidate_authorized_revision}^{commit}" >/dev/null
+  if ! git merge-base --is-ancestor "${candidate_authorized_revision}" "${containing_revision}"; then
+    echo "Release freeze authority is not an ancestor of ${containing_revision}." >&2
+    return 3
+  fi
+  authorized_manifest_version="$(
+    git show "${candidate_authorized_revision}:.github/release-please/manifest.json" |
+      jq -r '.["."] // empty'
+  )"
+  if [[ "${authorized_manifest_version}" != "${expected_version}" ]]; then
+    echo "Release freeze authority is not based on ${expected_base}." >&2
+    return 3
+  fi
+}
+
+extract_candidate_notes() {
+  local document="$1"
+  local version="$2"
+
+  awk -v version="${version}" '
+    BEGIN { heading = "## [" version "]" }
+    /^## \[/ {
+      if (in_target) exit
+      if (index($0, heading) == 1) { in_target = 1; next }
+    }
+    !in_target { next }
+    /^<!-- govenv-release-freeze:/ { next }
+    /<!-- govenv-governance-impact:start -->/ { governance = 1; next }
+    governance && /<!-- govenv-governance-impact:end -->/ { governance = 0; next }
+    governance { next }
+    { lines[++count] = $0 }
+    END {
+      first = 1
+      while (first <= count && lines[first] == "") first++
+      last = count
+      while (last >= first && lines[last] == "") last--
+      for (i = first; i <= last; i++) print lines[i]
+    }
+  ' "${document}"
+}
 
 case "${target}" in
   pull-request)
@@ -24,6 +143,44 @@ case "${target}" in
           -f ref="${release_head}" | jq -r '.["."] // empty'
       )"
     fi
+    if [[ "${head_ref_explicit}" == false ]]; then
+      head_ref="$(resolve_causal_revision HEAD)"
+    fi
+    ;;
+  changelog)
+    release_pr="0"
+    release_tag=""
+    if [[ -z "${release_version}" ]]; then
+      latest_tag="$(git describe --tags --abbrev=0 2>/dev/null || true)"
+      if [[ -z "${latest_tag}" ]]; then
+        echo "Canonical changelog materialization requires a published release tag." >&2
+        exit 2
+      fi
+      latest_version="${latest_tag#v}"
+      manifest_version="$(jq -r '.["."] // empty' .github/release-please/manifest.json)"
+      if [[ -z "${manifest_version}" ]]; then
+        echo "Release Please manifest has no root version." >&2
+        exit 2
+      fi
+
+      if [[ "${manifest_version}" == "${latest_version}" ]]; then
+        release_version="Unreleased"
+        base_ref="${latest_tag}"
+        if [[ "${head_ref_explicit}" == false ]]; then
+          head_ref="$(resolve_causal_revision HEAD)"
+        fi
+      else
+        release_version="${manifest_version}"
+        load_candidate_boundary CHANGELOG.md "${release_version}"
+        validate_candidate_boundary "${latest_tag}" HEAD
+        base_ref="${candidate_base_ref}"
+        head_ref="${candidate_authorized_revision}"
+        release_heading="$(
+          awk -v version="${release_version}" 'index($0, "## [" version "]") == 1 { print; exit }' CHANGELOG.md
+        )"
+        release_notes="$(extract_candidate_notes CHANGELOG.md "${release_version}")"
+      fi
+    fi
     ;;
   github-release)
     if [[ -z "${release_tag}" ]]; then
@@ -34,6 +191,24 @@ case "${target}" in
     if [[ -z "${release_version}" ]]; then
       release_version="${release_tag#v}"
     fi
+    published_revision="${head_ref}"
+    published_changelog="$(mktemp)"
+    if ! git show "${published_revision}:CHANGELOG.md" > "${published_changelog}" 2>/dev/null; then
+      rm -f "${published_changelog}"
+      echo "Published release revision has no canonical changelog." >&2
+      exit 3
+    fi
+    previous_tag="$(git describe --tags --abbrev=0 "${published_revision}^" 2>/dev/null || true)"
+    if [[ -z "${previous_tag}" ]]; then
+      rm -f "${published_changelog}"
+      echo "Published release has no previous release boundary." >&2
+      exit 3
+    fi
+    load_candidate_boundary "${published_changelog}" "${release_version}"
+    validate_candidate_boundary "${previous_tag}" "${published_revision}"
+    rm -f "${published_changelog}"
+    base_ref="${candidate_base_ref}"
+    head_ref="${candidate_authorized_revision}"
     ;;
   *)
     echo "Unsupported GOVENV_RELEASE_TARGET: ${target}" >&2
@@ -41,9 +216,38 @@ case "${target}" in
     ;;
 esac
 
-if [[ -z "${release_version}" || ! "${release_version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+([+-][0-9A-Za-z.-]+)?$ ]]; then
+if [[ -z "${release_version}" ]]; then
+  echo "Could not resolve a release document heading." >&2
+  exit 2
+fi
+if [[ "${release_version}" != "Unreleased" ]] &&
+   [[ ! "${release_version}" =~ ^[0-9]+\.[0-9]+\.[0-9]+([+-][0-9A-Za-z.-]+)?$ ]]; then
   echo "Could not resolve a safe Release Please version." >&2
   exit 2
+fi
+if [[ "${target}" != "changelog" && "${release_version}" == "Unreleased" ]]; then
+  echo "Unreleased is valid only for canonical changelog materialization." >&2
+  exit 2
+fi
+
+if [[ "${release_version}" == "Unreleased" ]]; then
+  release_heading="## [Unreleased]"
+  release_notes=""
+else
+  if [[ -z "${release_heading}" ]]; then
+    release_heading="## [${release_version}]"
+  fi
+  if [[ "${release_heading}" != "## [${release_version}]"* ]]; then
+    echo "Release heading does not match candidate version ${release_version}." >&2
+    exit 2
+  fi
+  if [[ -n "${release_notes_file}" ]]; then
+    if [[ ! -f "${release_notes_file}" ]]; then
+      echo "Release notes observation does not exist: ${release_notes_file}" >&2
+      exit 2
+    fi
+    release_notes="$(cat "${release_notes_file}")"
+  fi
 fi
 
 if [[ -z "${base_ref}" ]]; then
@@ -58,11 +262,19 @@ if [[ -z "${base_ref}" ]]; then
   exit 2
 fi
 
-root="$(git rev-parse --show-toplevel)"
-cd "${root}"
-
 git rev-parse --verify "${base_ref}^{commit}" >/dev/null
 git rev-parse --verify "${head_ref}^{commit}" >/dev/null
+
+base_commit="$(git rev-parse "${base_ref}^{commit}")"
+head_commit="$(git rev-parse "${head_ref}^{commit}")"
+include_current_release=true
+if [[ "${release_version}" == "Unreleased" && "${base_commit}" == "${head_commit}" ]]; then
+  include_current_release=false
+fi
+if [[ "${release_version}" != "Unreleased" ]]; then
+  candidate_base_ref="${candidate_base_ref:-${base_ref}}"
+  candidate_authorized_revision="${candidate_authorized_revision:-${head_commit}}"
+fi
 
 input_root=".govenv/release-input"
 input_dir="${input_root}/Govenv/Adapter"
@@ -155,6 +367,55 @@ agda_list() {
   printf '%s' "${expression}"
 }
 
+extract_release_entry() {
+  local document="$1"
+  local version="$2"
+  awk -v version="${version}" '
+    BEGIN {
+      bracket = "## [" version "]"
+      plain = "## " version
+    }
+    /^## / {
+      if (capture) exit
+      if (index($0, bracket) == 1 || $0 == plain || index($0, plain " ") == 1) capture = 1
+    }
+    capture { print }
+  ' "${document}"
+}
+
+historical_exprs=()
+while IFS= read -r history_tag; do
+  [[ -n "${history_tag}" ]] || continue
+  history_version="${history_tag#v}"
+  history_document="$(mktemp)"
+  history_entry="$(mktemp)"
+  if ! git show "${history_tag}:CHANGELOG.md" > "${history_document}" 2>/dev/null; then
+    rm -f "${history_document}" "${history_entry}"
+    echo "Published release ${history_tag} has no reconstructible CHANGELOG.md." >&2
+    exit 3
+  fi
+  extract_release_entry "${history_document}" "${history_version}" > "${history_entry}"
+  rm -f "${history_document}"
+  if [[ ! -s "${history_entry}" ]]; then
+    rm -f "${history_entry}"
+    echo "Published release ${history_tag} has no reconstructible changelog entry." >&2
+    exit 3
+  fi
+  historical_exprs+=("$(jq -Rs . < "${history_entry}")")
+  rm -f "${history_entry}"
+done < <(git tag --merged "${base_ref}" --list 'v[0-9]*' --sort=-v:refname)
+
+historical_entries_expr="$(agda_list "${historical_exprs[@]}")"
+release_heading_expr="$(printf '%s' "${release_heading}" | jq -Rs .)"
+release_notes_expr="$(printf '%s' "${release_notes}" | jq -Rs .)"
+candidate_base_ref_expr="$(printf '%s' "${candidate_base_ref}" | jq -Rs .)"
+candidate_authorized_revision_expr="$(printf '%s' "${candidate_authorized_revision}" | jq -Rs .)"
+if [[ "${release_version}" == "Unreleased" ]]; then
+  candidate_version_expr="nothing"
+else
+  candidate_version_expr="just \"${release_version}\""
+fi
+
 items_expr="$(agda_list "${item_exprs[@]}")"
 reference_exprs=()
 for value in "${references[@]}"; do
@@ -169,7 +430,9 @@ cat > "${observation}" <<EOF
 {-# OPTIONS --safe #-}
 module Govenv.Adapter.ReleaseObservation where
 
+open import Agda.Builtin.Bool using (Bool; true; false)
 open import Agda.Builtin.List using (List; []; _∷_)
+open import Agda.Builtin.Maybe using (Maybe; just; nothing)
 open import Agda.Builtin.Nat using (Nat)
 open import Agda.Builtin.String using (String)
 open import Govenv.Kernel.Identifier using (GVR)
@@ -188,6 +451,27 @@ releasePullRequest = ${release_pr}
 releaseVersion : String
 releaseVersion = "${release_version}"
 
+candidateVersion : Maybe String
+candidateVersion = ${candidate_version_expr}
+
+includeCurrentRelease : Bool
+includeCurrentRelease = ${include_current_release}
+
+candidateBaseRef : String
+candidateBaseRef = ${candidate_base_ref_expr}
+
+candidateAuthorizedRevision : String
+candidateAuthorizedRevision = ${candidate_authorized_revision_expr}
+
+releaseHeading : String
+releaseHeading = ${release_heading_expr}
+
+releaseNotes : String
+releaseNotes = ${release_notes_expr}
+
+historicalEntries : List String
+historicalEntries = ${historical_entries_expr}
+
 baseRevision : String
 baseRevision = "${base_revision}"
 
@@ -198,23 +482,35 @@ releaseTag : String
 releaseTag = "${release_tag}"
 EOF
 
+compile_agda() {
+  local adapter="$1"
+  if command -v agda >/dev/null 2>&1; then
+    agda -i "${input_root}" -i . -i src --compile \
+      --compile-dir="${build_dir}" "${adapter}" >/dev/null
+  else
+    nix run github:cachix/devenv/v2.3 -- shell -- \
+      agda -i "${input_root}" -i . -i src --compile \
+      --compile-dir="${build_dir}" "${adapter}" >/dev/null
+  fi
+}
+
 if [[ "${target}" == "pull-request" ]]; then
-  nix run github:cachix/devenv/v2.3 -- shell -- \
-    agda -i "${input_root}" -i . -i src --compile \
-    --compile-dir="${build_dir}" src/Govenv/Adapter/ReleaseGovernance/Body.agda >/dev/null
-  nix run github:cachix/devenv/v2.3 -- shell -- \
-    agda -i "${input_root}" -i . -i src --compile \
-    --compile-dir="${build_dir}" src/Govenv/Adapter/ReleaseGovernance/Changelog.agda >/dev/null
+  compile_agda src/Govenv/Adapter/ReleaseGovernance/Body.agda
+  compile_agda src/Govenv/Adapter/ReleaseGovernance/Changelog.agda
 
   body_output=".govenv/release-governance-body.md"
   changelog_output=".govenv/release-governance-changelog.md"
   "${build_dir}/Body" > "${body_output}"
   "${build_dir}/Changelog" > "${changelog_output}"
   cat "${body_output}"
+elif [[ "${target}" == "changelog" ]]; then
+  compile_agda src/Govenv/Adapter/ReleaseGovernance/Changelog.agda
+
+  changelog_output=".govenv/release-governance-changelog.md"
+  "${build_dir}/Changelog" > "${changelog_output}"
+  cat "${changelog_output}"
 else
-  nix run github:cachix/devenv/v2.3 -- shell -- \
-    agda -i "${input_root}" -i . -i src --compile \
-    --compile-dir="${build_dir}" src/Govenv/Adapter/ReleaseGovernance/Release.agda >/dev/null
+  compile_agda src/Govenv/Adapter/ReleaseGovernance/Release.agda
 
   release_output=".govenv/release-governance-release.md"
   "${build_dir}/Release" > "${release_output}"
