@@ -82,7 +82,7 @@ jobs:
     with:
       revision: ${{ needs.materialize.outputs.effective-sha }}
   post-release-materialize:
-    if: ${{ github.event_name == 'push' && always() && needs.materialize.result == 'success' }}
+    if: ${{ github.event_name == 'push' && needs.materialize.result == 'success' && needs.release.result == 'success' }}
     needs: [materialize, release]
     outputs:
       effective-sha: ${{ steps.effective.outputs.sha }}
