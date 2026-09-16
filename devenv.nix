@@ -82,6 +82,28 @@ let
     fi
   '';
 
+  validateReleaseCandidateValidationRegression = ''
+    fixture=Govenv/Materialization/ReleaseGovernance/candidate-validation-counterexample.md
+    grep -Fq 'Materialize run #43' "$fixture"
+    grep -Fq 'ec9ce3e24f74aab6b29eb168b13def6019f74969' "$fixture"
+    grep -Fq "no checks reported on the 'release-please--branches--main--components--govenv' branch" "$fixture"
+    grep -Fq 'Resolve release candidate revision' .govenv/release.generated.yml
+    grep -Fq 'steps.candidate.outputs.sha' .govenv/release.generated.yml
+    candidate_job="$(awk '
+      /^  candidate-test:/ { capture = 1 }
+      capture && /^  [^ ]+:/ && $0 !~ /^  candidate-test:/ { exit }
+      capture { print }
+    ' .govenv/release.generated.yml)"
+    printf '%s\n' "$candidate_job" | grep -Fq 'needs: release-please'
+    printf '%s\n' "$candidate_job" | grep -Fq 'contents: read'
+    printf '%s\n' "$candidate_job" | grep -Fq 'uses: ./.github/workflows/test.yml'
+    printf '%s\n' "$candidate_job" | grep -Fq 'needs.release-please.outputs.candidate-revision'
+    if printf '%s\n' "$candidate_job" | grep -Eq 'contents: write|pull-requests: write|issues: write|environment:'; then
+      echo 'Release candidate validation must remain unprivileged and read-only.' >&2
+      exit 5
+    fi
+  '';
+
   validateReleasePushAuthorizationRegression = ''
     GOVENV_RELEASE_PUSH_AUTH_COUNTEREXAMPLE=Govenv/Materialization/ReleaseGovernance/push-auth-counterexample.md \
       bash src/Govenv/Adapter/release-governance-pr.sh >/dev/null
@@ -156,6 +178,7 @@ in
     ${validateReleaseHistoryRegression}
     ${validateReleaseRebaseProvenanceRegression}
     ${validatePagesHistoryRegression}
+    ${validateReleaseCandidateValidationRegression}
     ${validateReleasePushAuthorizationRegression}
   '';
 

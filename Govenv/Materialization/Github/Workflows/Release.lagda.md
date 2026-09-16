@@ -1,6 +1,6 @@
 # Release workflow
 
-Release is reusable only from governed callers and receives the exact materialized revision explicitly. The job is gated by the main-only authorized-effects environment, checks that revision before effectful behavior, and has no standalone manual or candidate-ref trigger.
+Release is reusable only from governed callers and receives the exact materialized revision explicitly. Its effectful Release Please job is gated by the main-only authorized-effects environment and checks that authorized revision before mutation. After a release candidate is materialized and read back, the workflow resolves the exact final candidate head and passes it to the reusable Test workflow under read-only permissions; candidate repository state is never executed with Release authority. The workflow has no standalone manual or candidate-ref trigger.
 
 ```agda
 {-# OPTIONS --safe #-}
@@ -12,7 +12,7 @@ open import Agda.Builtin.List using (List; []; _∷_)
 open import Agda.Builtin.Maybe using (just; nothing)
 open import Agda.Builtin.String using (String)
 open import Govenv.Administration using (authorizedBranch)
-open import Govenv.Github.Authorization using (releaseJob)
+open import Govenv.Github.Authorization using (readOnlyToken; releaseJob)
 open import Govenv.Materialization
 open import Govenv.Materialization.Github.Workflows.Workflow
 
@@ -40,8 +40,15 @@ checkCommand = "nix run github:cachix/devenv/v2.3 -- tasks run govenv:check"
 materializePrCommand : String
 materializePrCommand = "GOVENV_RELEASE_PR=\"$(jq -r '.number' <<< \"${GOVENV_RELEASE_PR_JSON}\")\"\nif [[ ! \"${GOVENV_RELEASE_PR}\" =~ ^[0-9]+$ ]]; then\n  echo \"Release Please did not return a valid pull request number.\" >&2\n  exit 2\nfi\nexport GOVENV_RELEASE_PR\nbash src/Govenv/Adapter/release-governance-pr.sh"
 
+resolveCandidateRevisionCommand : String
+resolveCandidateRevisionCommand = "GOVENV_RELEASE_PR=\"$(jq -r '.number' <<< \"${GOVENV_RELEASE_PR_JSON}\")\"\nif [[ ! \"${GOVENV_RELEASE_PR}\" =~ ^[0-9]+$ ]]; then\n  echo \"Release Please did not return a valid pull request number.\" >&2\n  exit 2\nfi\ncandidate_revision=\"$(gh pr view \"${GOVENV_RELEASE_PR}\" --json headRefOid --jq '.headRefOid')\"\nif [[ ! \"${candidate_revision}\" =~ ^[0-9a-f]{40}$ ]]; then\n  echo \"Release candidate head is not a full Git revision.\" >&2\n  exit 4\nfi\necho \"sha=${candidate_revision}\" >> \"${GITHUB_OUTPUT}\""
+
 materializeReleaseCommand : String
 materializeReleaseCommand = "bash src/Govenv/Adapter/release-governance-release.sh"
+
+candidateRevisionAvailable : String
+candidateRevisionAvailable =
+  "needs.release-please.outputs.candidate-revision != ''"
 
 steps : List Step
 steps =
@@ -68,6 +75,12 @@ steps =
       (binding "GH_TOKEN" (expression "secrets.GITHUB_TOKEN")
       ∷ binding "GOVENV_RELEASE_PR_JSON" (expression "steps.release.outputs.pr")
       ∷ [])
+  ∷ runStep "Resolve release candidate revision" (just "candidate")
+      (just "steps.release.outputs.prs_created == 'true'")
+      resolveCandidateRevisionCommand
+      (binding "GH_TOKEN" (expression "secrets.GITHUB_TOKEN")
+      ∷ binding "GOVENV_RELEASE_PR_JSON" (expression "steps.release.outputs.pr")
+      ∷ [])
   ∷ runStep "Materialize published release governance" nothing
       (just "steps.release.outputs.release_created == 'true'")
       materializeReleaseCommand
@@ -82,8 +95,15 @@ state = workflow
   "Release"
   (workflowCall (stringCallInput "revision" true ∷ []) ∷ [])
   (just (concurrency "release" false))
-  (job "release-please" releaseJob nothing [] [] nothing
-    "ubuntu-latest" 15 steps ∷ [])
+  (job "release-please" releaseJob nothing []
+    (binding "candidate-revision" (expression "steps.candidate.outputs.sha") ∷ [])
+    nothing "ubuntu-latest" 15 steps
+  ∷ reusableJob "candidate-test" (just candidateRevisionAvailable)
+      ("release-please" ∷ []) readOnlyToken
+      "./.github/workflows/test.yml"
+      (binding "revision"
+        (expression "needs.release-please.outputs.candidate-revision") ∷ [])
+  ∷ [])
 
 materialization : Materialization Workflow
 materialization = materialized
