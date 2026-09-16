@@ -344,7 +344,14 @@ references=()
 while IFS= read -r value; do
   [[ -n "${value}" ]] && references+=("${value#GV}")
 done < <(
-  git log "${base_ref}..${head_ref}" --format=%B |
+  while IFS= read -r commit; do
+    message="$(git show -s --format=%B "${commit}")"
+    if printf '%s\n' "${message}" |
+       grep -Eq '^Derived-From-(Authorized-)?Revision: [0-9a-f]{40}$'; then
+      continue
+    fi
+    printf '%s\n' "${message}"
+  done < <(git rev-list --reverse "${base_ref}..${head_ref}") |
     awk '
       /^Refs:/ {
         line = $0
