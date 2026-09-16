@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+## [0.2.2](https://github.com/klarkc/govenv/compare/v0.2.1...v0.2.2) (2026-09-16)
+<!-- govenv-release-freeze: version=0.2.2 base=v0.2.1 authorized=7d9dc5ed1d379417ba3efe9070d19a65de941419 -->
+
 <!-- govenv-governance-impact:start -->
 ### Governance impact
 
@@ -38,6 +41,34 @@
 Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `733c812..7d9dc5e`.
 <!-- govenv-governance-impact:end -->
 
+
+### Bug Fixes
+
+* **materialization:** make causal provenance rebase-stable ([991cd79](https://github.com/klarkc/govenv/commit/991cd7949269c674c65e5238374530487723c5aa))
+* **pages:** fetch release history for governed check ([e0186e9](https://github.com/klarkc/govenv/commit/e0186e9fbafe97ef08589b04cd3903aa0aaecc4f))
+* **release:** validate frozen candidate read-only ([ea593f0](https://github.com/klarkc/govenv/commit/ea593f02d2ba6c34d1c4730fea1eb1fc9cbf558a))
+* **test:** evaluate exact pull request head ([d7d1314](https://github.com/klarkc/govenv/commit/d7d131482448e9ead1c1f2d71aefd9eaf328238a))
+* **test:** honor explicit reusable revision ([7d9dc5e](https://github.com/klarkc/govenv/commit/7d9dc5ed1d379417ba3efe9070d19a65de941419))
+
+
+### Governance
+
+* **release:** make changelog canonical ([4b7132c](https://github.com/klarkc/govenv/commit/4b7132cdd3c7e6048ba2f053ebf935a59af61de4))
+* **roadmap:** derive current state ([a85ba42](https://github.com/klarkc/govenv/commit/a85ba42f29f472dc1afe6302c181b01a2a8ac440))
+
+
+### Miscellaneous
+
+* **materialize:** update governed materializations ([787c5d9](https://github.com/klarkc/govenv/commit/787c5d926a9922e87b5ea49f17fe19148de02ca6))
+* **materialize:** update governed materializations ([b6771ef](https://github.com/klarkc/govenv/commit/b6771efb57faa1095a42725641604c0f8e397480))
+* **materialize:** update governed materializations ([1d8350e](https://github.com/klarkc/govenv/commit/1d8350e0891b6f9685f52063386475b03255d4d5))
+* **materialize:** update governed materializations ([9d2d4ad](https://github.com/klarkc/govenv/commit/9d2d4ad4c24edd6abd2bb67e0eae7b1ac2546453))
+* **materialize:** update governed materializations ([8a46346](https://github.com/klarkc/govenv/commit/8a4634653db35ef95369fe73d624fd86164f4d08))
+* **materialize:** update governed materializations ([cc3215c](https://github.com/klarkc/govenv/commit/cc3215cd8058713772ae04c1f89d35a1b9e2fc30))
+* **materialize:** update governed materializations ([d4a2cea](https://github.com/klarkc/govenv/commit/d4a2cea1e062b2168c737d30ec00c9f85400e1a8))
+* **materialize:** update governed materializations ([c5fb2c2](https://github.com/klarkc/govenv/commit/c5fb2c27216b0aa9d299c1d88d6487f6067d0e0b))
+* **materialize:** update governed materializations ([f86ee58](https://github.com/klarkc/govenv/commit/f86ee5870abf527b4f065f827277be701f131441))
+* **materialize:** update governed materializations ([89a2356](https://github.com/klarkc/govenv/commit/89a2356ec79b3667c08510a7a8cc0af25763b15f))
 ## [0.2.1](https://github.com/klarkc/govenv/compare/v0.2.0...v0.2.1) (2026-09-15)
 
 <!-- govenv-governance-impact:start -->
