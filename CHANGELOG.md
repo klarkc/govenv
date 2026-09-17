@@ -17,13 +17,13 @@
 | **GV90 ◇ ↑** | Model human authorization as `AuthorizedRevision`: new semantic authority may originate only from the exact repository state accepted by an explicit human pull-request merge. Candidate revisions may perform unprivileged validation and transient non-authoritative projections, but automated candidate-authoring principals must be distinct from human authorizers and post-authorization materializers and must not receive capabilities that can alter executable automation, authorize or merge the candidate, mutate authoritative repository state, or mutate persistent governed external state; only after authorization may governed automation exercise the capabilities necessary to derive deterministic materialization revisions or external effects. Derived outcomes create no independent semantic authority, must not be treated as fresh human authorization, and must retain revision-addressable causal provenance to the authorizing revision. |
 | **GV95 ◇ ↑** | Make Govenv the sole semantic owner of the canonical changelog: derive the governed `Unreleased` state deterministically from the latest published release boundary to the current authorized revision, preserve every historical release entry immutably and reconstructibly, freeze that exact governed state into the Release Please candidate version before human approval, and preserve the approved freeze unchanged across the merge-to-publication boundary. Release Please may determine SemVer, analyze Conventional Commits, and coordinate the candidate/tag/release lifecycle, but its rendered notes are observational input rather than independent changelog authority; the pull-request body and published GitHub Release must project the same authorized typed release document and external publication must be verified by read-back equality. |
 
-Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `8728e3d..2a9a761`.
+Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `8728e3d..034324b`.
 <!-- govenv-governance-impact:end -->
 
 
 ### Bug Fixes
 
-* **release:** freeze exact Unreleased notes ([2a9a761](https://github.com/klarkc/govenv/commit/2a9a761a5045c65e0da37442bfc8721cc74a689b))
+* **release:** freeze exact Unreleased notes ([034324b](https://github.com/klarkc/govenv/commit/034324bdfcc3af0d698121a266e31f5279b71510))
 
 ## [0.2.3](https://github.com/klarkc/govenv/compare/v0.2.2...v0.2.3) (2026-09-17)
 <!-- govenv-release-freeze: version=0.2.3 base=v0.2.2 authorized=c41881fb5fcb8cb3eef5ea945ca7eeb8be67cdc6 -->
