@@ -8,8 +8,8 @@ open import Agda.Builtin.Unit
 open import Govenv.Adapter.ReleaseObservation
 open import Govenv.Kernel.Release
 open import Govenv.Materialization.ReleaseGovernance using
-  ( candidateBoundary; changelog; document; emptyUnreleased
-  ; frozenCandidate; unreleased )
+  ( candidateBoundary; changelog; document; emptyUnreleased; releaseEntry
+  ; releaseNotes; frozenCandidate; unreleased )
 open import Govenv.Projection.ReleaseGovernance using
   (renderChangelogMaterialization; renderError)
 open import Govenv.Roadmap using (roadmap)
@@ -32,13 +32,19 @@ main with governanceDelta previous references roadmap
   putStr (renderChangelogMaterialization (changelog emptyUnreleased historicalEntries))
 ...   | nothing | true =
   putStr (renderChangelogMaterialization
-    (changelog (unreleased (document baseRevision headRevision roadmap delta)) historicalEntries))
+    (changelog
+      (unreleased
+        (releaseEntry
+          (document baseRevision headRevision roadmap delta)
+          (releaseNotes conventionalCommits)))
+      historicalEntries))
 ...   | just version | true =
   putStr (renderChangelogMaterialization
     (changelog
       (frozenCandidate
         (candidateBoundary version releaseHeading candidateBaseRef candidateAuthorizedRevision)
-        (document baseRevision headRevision roadmap delta)
-        releaseNotes)
+        (releaseEntry
+          (document baseRevision headRevision roadmap delta)
+          (releaseNotes conventionalCommits)))
       historicalEntries))
 ...   | just version | false = failWith "A frozen release candidate must contain a release document."

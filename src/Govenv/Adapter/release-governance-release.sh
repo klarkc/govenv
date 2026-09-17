@@ -23,65 +23,84 @@ GOVENV_RELEASE_HEAD_REF="${release_sha}" \
 expected=".govenv/release-governance-release.md"
 tmp="$(mktemp -d)"
 trap 'rm -rf "${tmp}"' EXIT
+published_changelog="${tmp}/CHANGELOG.published.md"
+canonical_entry_raw="${tmp}/release-entry.canonical.raw.md"
+canonical_entry_without_boundary="${tmp}/release-entry.canonical.without-boundary.md"
+canonical_entry="${tmp}/release-entry.canonical.md"
 current="${tmp}/release.current.md"
-updated="${tmp}/release.updated.md"
-observed="${tmp}/release.observed.md"
 observed_body="${tmp}/release.observed-body.md"
+observed_governance="${tmp}/release.observed-governance.md"
 
-gh release view "${release_tag}" --json body --jq '.body // ""' > "${current}"
-shape="$(awk '
-  /<!-- govenv-governance-impact:start -->/ { starts++ }
-  /<!-- govenv-governance-impact:end -->/ { ends++ }
-  END { printf "%d:%d\n", starts + 0, ends + 0 }
-' "${current}")"
-if [[ "${shape}" != "1:1" ]]; then
-  echo "GitHub Release must carry exactly one governance section before materialization; observed ${shape}." >&2
-  exit 4
-fi
-
-awk -v section="${root}/${expected}" '
-  function emit_section( line) {
-    while ((getline line < section) > 0) print line
-    close(section)
-  }
-  /<!-- govenv-governance-impact:start -->/ {
-    emit_section()
-    skip = 1
-    replaced = 1
-    next
-  }
-  /<!-- govenv-governance-impact:end -->/ { skip = 0; next }
-  !skip { print }
-  END {
-    if (!replaced) {
-      # Release Please normally carries the changelog section into the release body.
-      # Absence is rejected instead of inventing target placement in the adapter.
-      exit 42
+extract_release_entry() {
+  local document="$1"
+  local version="$2"
+  awk -v version="${version}" '
+    BEGIN { heading = "## [" version "]" }
+    /^## \[/ {
+      if (capture) exit
+      if (index($0, heading) == 1) capture = 1
     }
-  }
-' "${current}" > "${updated}" || {
-  echo "GitHub Release body does not contain the governed changelog section." >&2
-  exit 4
+    capture { print }
+  ' "${document}"
 }
 
-gh release edit "${release_tag}" --notes-file "${updated}" >/dev/null
+trim_trailing_blank_lines() {
+  awk '
+    { lines[NR] = $0 }
+    END {
+      last = NR
+      while (last > 0 && lines[last] == "") last--
+      for (i = 1; i <= last; i++) print lines[i]
+    }
+  ' "$1"
+}
 
-gh release view "${release_tag}" --json body --jq '.body // ""' > "${observed_body}"
-if [[ "$(cat "${updated}")" != "$(cat "${observed_body}")" ]]; then
-  echo "GitHub Release whole-body read-back verification failed." >&2
-  diff -u "${updated}" "${observed_body}" >&2 || true
+verify_release_please_observed_semantic_notes() {
+  local observed="$1"
+  local canonical="$2"
+  local revision
+  while IFS= read -r revision; do
+    [[ -n "${revision}" ]] || continue
+    if ! grep -Fq "/commit/${revision}" "${observed}"; then
+      echo "Published Release Please observation omitted canonical semantic note ${revision}." >&2
+      return 5
+    fi
+  done < <(grep -oE '/commit/[0-9a-f]{40}' "${canonical}" | sed 's#^/commit/##' | sort -u)
+}
+
+if ! git show "${release_sha}:CHANGELOG.md" > "${published_changelog}" 2>/dev/null; then
+  echo "Published release revision has no canonical changelog." >&2
+  exit 3
+fi
+release_version="${release_tag#v}"
+extract_release_entry "${published_changelog}" "${release_version}" > "${canonical_entry_raw}"
+awk '!/^<!-- govenv-release-freeze:/' "${canonical_entry_raw}" > "${canonical_entry_without_boundary}"
+trim_trailing_blank_lines "${canonical_entry_without_boundary}" > "${canonical_entry}"
+
+# The canonical release entry must itself carry exactly the governed section
+# computed independently from the immutable release boundary.
+awk '
+  /<!-- govenv-governance-impact:start -->/ { capture = 1 }
+  capture { print }
+  /<!-- govenv-governance-impact:end -->/ { exit }
+' "${canonical_entry}" > "${observed_governance}"
+if ! cmp -s "${expected}" "${observed_governance}"; then
+  echo "Canonical release entry does not carry the expected governed release document." >&2
+  diff -u "${expected}" "${observed_governance}" >&2 || true
   exit 5
 fi
 
-awk '
-    /<!-- govenv-governance-impact:start -->/ { capture = 1 }
-    capture { print }
-    /<!-- govenv-governance-impact:end -->/ { exit }
-  ' "${observed_body}" > "${observed}"
+gh release view "${release_tag}" --json body --jq '.body // ""' > "${current}"
+verify_release_please_observed_semantic_notes "${current}" "${canonical_entry}"
 
-if ! cmp -s "${expected}" "${observed}"; then
-  echo "GitHub Release governance read-back verification failed." >&2
-  diff -u "${expected}" "${observed}" >&2 || true
+# Apply the entire canonical entry, not merely its governance subsection. This
+# makes the published GitHub Release a projection of the exact approved freeze.
+gh release edit "${release_tag}" --notes-file "${canonical_entry}" >/dev/null
+
+gh release view "${release_tag}" --json body --jq '.body // ""' > "${observed_body}"
+if ! cmp -s "${canonical_entry}" "${observed_body}"; then
+  echo "GitHub Release whole-body read-back verification failed." >&2
+  diff -u "${canonical_entry}" "${observed_body}" >&2 || true
   exit 5
 fi
 

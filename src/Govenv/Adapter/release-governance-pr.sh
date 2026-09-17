@@ -91,33 +91,108 @@ extract_release_entry() {
   ' "${document}"
 }
 
-extract_candidate_notes() {
+trim_trailing_blank_lines() {
+  awk '
+    { lines[NR] = $0 }
+    END {
+      last = NR
+      while (last > 0 && lines[last] == "") last--
+      for (i = 1; i <= last; i++) print lines[i]
+    }
+  ' "$1"
+}
+
+canonical_body_entry() {
+  local changelog="$1"
+  local version="$2"
+  local extracted="$3"
+  local without_boundary="$4"
+
+  extract_release_entry "${changelog}" "${version}" > "${extracted}"
+  awk '!/^<!-- govenv-release-freeze:/' "${extracted}" > "${without_boundary}"
+  trim_trailing_blank_lines "${without_boundary}"
+}
+
+extract_body_release_entry() {
   local document="$1"
   local version="$2"
-
   awk -v version="${version}" '
     BEGIN { heading = "## [" version "]" }
     /^## \[/ {
-      if (in_target) exit
-      if (index($0, heading) == 1) {
-        in_target = 1
+      if (capture) exit
+      if (index($0, heading) == 1) capture = 1
+    }
+    capture && /^---$/ { exit }
+    capture { print }
+  ' "${document}"
+}
+
+materialize_release_entry_in_body() {
+  local input="$1"
+  local entry="$2"
+  local version="$3"
+  local output="$4"
+
+  awk -v entry="${entry}" -v version="${version}" '
+    function load_entry( line) {
+      while ((getline line < entry) > 0) desired = desired line "\n"
+      close(entry)
+    }
+    BEGIN {
+      heading = "## [" version "]"
+      load_entry()
+    }
+    {
+      if (!skip && $0 ~ /^## \[/ && index($0, heading) == 1) {
+        printf "%s", desired
+        print ""
+        skip = 1
+        replaced = 1
         next
       }
+      if (skip) {
+        if ($0 == "---") {
+          skip = 0
+          print
+        }
+        next
+      }
+      print
     }
-    !in_target { next }
-    /^---$/ { exit }
-    /<!-- govenv-governance-impact:start -->/ { governance = 1; next }
-    governance && /<!-- govenv-governance-impact:end -->/ { governance = 0; next }
-    governance { next }
-    { lines[++count] = $0 }
-    END {
-      first = 1
-      while (first <= count && lines[first] == "") first++
-      last = count
-      while (last >= first && lines[last] == "") last--
-      for (i = first; i <= last; i++) print lines[i]
-    }
-  ' "${document}"
+    END { if (!replaced) exit 42 }
+  ' "${input}" > "${output}"
+}
+
+verify_release_entry_in_body() {
+  local document="$1"
+  local expected="$2"
+  local version="$3"
+  local label="$4"
+  local observed
+  observed="$(mktemp)"
+  extract_body_release_entry "${document}" "${version}" > "${observed}.raw"
+  trim_trailing_blank_lines "${observed}.raw" > "${observed}"
+  rm -f "${observed}.raw"
+  if ! cmp -s "${expected}" "${observed}"; then
+    echo "${label} canonical release-entry read-back verification failed." >&2
+    diff -u "${expected}" "${observed}" >&2 || true
+    rm -f "${observed}"
+    return 5
+  fi
+  rm -f "${observed}"
+}
+
+verify_release_please_observed_semantic_notes() {
+  local observed="$1"
+  local canonical="$2"
+  local revision
+  while IFS= read -r revision; do
+    [[ -n "${revision}" ]] || continue
+    if ! grep -Fq "/commit/${revision}" "${observed}"; then
+      echo "Release Please observation omitted canonical semantic note ${revision}." >&2
+      return 5
+    fi
+  done < <(grep -oE '/commit/[0-9a-f]{40}' "${canonical}" | sed 's#^/commit/##' | sort -u)
 }
 
 release_section_shape() {
@@ -471,20 +546,15 @@ fi
 
 current_body="${tmp}/body.current.md"
 updated_body="${tmp}/body.updated.md"
-release_notes="${tmp}/release-notes.md"
 gh pr view "${release_pr}" --json body --jq '.body // ""' > "${current_body}"
 release_heading="$(awk -v version="${release_version}" 'index($0, "## [" version "]") == 1 { print; exit }' "${current_body}")"
 if [[ -z "${release_heading}" ]]; then
   echo "Release pull request has no heading for ${release_version}." >&2
   exit 4
 fi
-extract_candidate_notes "${current_body}" "${release_version}" > "${release_notes}"
-
 GOVENV_RELEASE_VERSION="${release_version}" \
 GOVENV_RELEASE_HEADING="${release_heading}" \
-GOVENV_RELEASE_NOTES_FILE="${release_notes}" \
   bash src/Govenv/Adapter/release-governance.sh "${release_pr}" >/dev/null
-body_impact=".govenv/release-governance-body.md"
 canonical_changelog=".govenv/release-governance-changelog.md"
 
 current_changelog="${worktree}/CHANGELOG.md"
@@ -509,14 +579,20 @@ if ! cmp -s "${root}/${canonical_changelog}" "${remote_changelog}"; then
   exit 5
 fi
 
-materialize_section_at_release \
-  "${current_body}" "${root}/${body_impact}" \
-  "${release_version}" "${updated_body}"
+canonical_entry_raw="${tmp}/release-entry.canonical.raw.md"
+canonical_entry_without_boundary="${tmp}/release-entry.canonical.without-boundary.md"
+canonical_entry="${tmp}/release-entry.canonical.md"
+canonical_body_entry \
+  "${root}/${canonical_changelog}" "${release_version}" \
+  "${canonical_entry_raw}" "${canonical_entry_without_boundary}" > "${canonical_entry}"
+
+verify_release_please_observed_semantic_notes "${current_body}" "${canonical_entry}"
+materialize_release_entry_in_body \
+  "${current_body}" "${canonical_entry}" "${release_version}" "${updated_body}"
 
 gh pr edit "${release_pr}" --body-file "${updated_body}" >/dev/null
 gh pr view "${release_pr}" --json body --jq '.body // ""' > "${current_body}"
-verify_section_at_release \
-  "${current_body}" "${root}/${body_impact}" \
-  "${release_version}" "Release pull request"
+verify_release_entry_in_body \
+  "${current_body}" "${canonical_entry}" "${release_version}" "Release pull request"
 
 printf 'Release governance materialized and verified for PR #%s.\n' "${release_pr}"
