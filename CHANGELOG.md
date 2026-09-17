@@ -15,13 +15,13 @@
 | **GV84 ◇ ↑** | Make observed invariant regressions counterexample-closing: once a contradiction to a governed or relied-upon invariant is recorded as an observed regression, its repair is incomplete until the counterexample is preserved as governed evidence, the missing or incorrectly scoped assurance boundary is corrected or overstated governance superseded, and candidate validation rejects recurrence before the affected workflow may succeed. |
 | **GV95 ◇ ↑** | Make Govenv the sole semantic owner of the canonical changelog: derive the governed `Unreleased` state deterministically from the latest published release boundary to the current authorized revision, preserve every historical release entry immutably and reconstructibly, freeze that exact governed state into the Release Please candidate version before human approval, and preserve the approved freeze unchanged across the merge-to-publication boundary. Release Please may determine SemVer, analyze Conventional Commits, and coordinate the candidate/tag/release lifecycle, but its rendered notes are observational input rather than independent changelog authority; the pull-request body and published GitHub Release must project the same authorized typed release document and external publication must be verified by read-back equality. |
 
-Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `f8202bc..844c7a5`.
+Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `f8202bc..67362b9`.
 <!-- govenv-governance-impact:end -->
 
 
 ### Bug Fixes
 
-* **release:** unify published release renderer ([844c7a5](https://github.com/klarkc/govenv/commit/844c7a5536054c075bd283f6b659636e6e458cdf))
+* **release:** unify published release renderer ([67362b9](https://github.com/klarkc/govenv/commit/67362b998103d534d697dba3e7a40da9d28b0c8c))
 
 ## [0.2.4](https://github.com/klarkc/govenv/compare/v0.2.3...v0.2.4) (2026-09-17)
 <!-- govenv-release-freeze: version=0.2.4 base=v0.2.3 authorized=034324bdfcc3af0d698121a266e31f5279b71510 -->
