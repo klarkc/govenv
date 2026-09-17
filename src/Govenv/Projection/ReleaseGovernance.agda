@@ -21,6 +21,9 @@ open Materialization
 open import Govenv.Materialization.ReleaseGovernance
 open ImpactGroup
 open ReleaseDocument
+open ReleaseNote
+open ReleaseNoteGroup
+open ReleaseEntry
 open CandidateBoundary
 open ChangelogDocument
 open import Govenv.Projection.SemanticDiff
@@ -412,9 +415,41 @@ renderHistoricalEntries [] = ""
 renderHistoricalEntries (entry ∷ rest) =
   entry ++ renderHistoricalEntries rest
 
-renderObservedNotes : String → String
-renderObservedNotes "" = ""
-renderObservedNotes notes = "\n\n" ++ notes
+shortRevision : String → String
+shortRevision revision = primStringFromList (take 7 (primStringToList revision))
+
+renderReleaseNoteScope : String → String
+renderReleaseNoteScope scope with primStringEquality scope ""
+... | true = ""
+... | false = "**" ++ scope ++ ":** "
+
+renderReleaseNote : ReleaseNote → String
+renderReleaseNote note =
+  "* " ++ renderReleaseNoteScope (noteScope note) ++ noteDescription note ++
+  " ([" ++ shortRevision (noteRevision note) ++ "](" ++
+  noteRevisionUrl note ++ "))\n"
+
+renderReleaseNoteItems : List ReleaseNote → String
+renderReleaseNoteItems [] = ""
+renderReleaseNoteItems (note ∷ rest) =
+  renderReleaseNote note ++ renderReleaseNoteItems rest
+
+renderReleaseNoteGroup : ReleaseNoteGroup → String
+renderReleaseNoteGroup group with noteGroupItems group
+... | [] = ""
+... | items =
+  "\n\n### " ++ noteGroupLabel group ++ "\n\n" ++
+  renderReleaseNoteItems items
+
+renderReleaseNoteGroups : List ReleaseNoteGroup → String
+renderReleaseNoteGroups [] = ""
+renderReleaseNoteGroups (group ∷ rest) =
+  renderReleaseNoteGroup group ++ renderReleaseNoteGroups rest
+
+renderReleaseEntry : ReleaseEntry → String
+renderReleaseEntry entry =
+  renderPortableSection (entryDocument entry) ++
+  renderReleaseNoteGroups (entryNoteGroups entry)
 
 renderCandidateBoundary : CandidateBoundary → String
 renderCandidateBoundary boundary =
@@ -424,14 +459,13 @@ renderCandidateBoundary boundary =
 
 renderChangelogCurrent : ChangelogCurrent → String
 renderChangelogCurrent emptyUnreleased = "## [Unreleased]\n"
-renderChangelogCurrent (unreleased document) =
-  "## [Unreleased]\n\n" ++ renderPortableSection document
-renderChangelogCurrent (frozenCandidate boundary document notes) =
+renderChangelogCurrent (unreleased entry) =
+  "## [Unreleased]\n\n" ++ renderReleaseEntry entry
+renderChangelogCurrent (frozenCandidate boundary entry) =
   "## [Unreleased]\n\n" ++
   candidateHeading boundary ++ "\n" ++
   renderCandidateBoundary boundary ++ "\n" ++
-  renderPortableSection document ++
-  renderObservedNotes notes
+  renderReleaseEntry entry
 
 renderChangelogMaterialization : Materialization ChangelogDocument → String
 renderChangelogMaterialization materialization =

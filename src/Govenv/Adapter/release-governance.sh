@@ -13,8 +13,6 @@ if [[ -z "${head_ref}" ]]; then
   head_ref_explicit=false
 fi
 release_heading="${GOVENV_RELEASE_HEADING:-}"
-release_notes_file="${GOVENV_RELEASE_NOTES_FILE:-}"
-release_notes=""
 candidate_base_ref=""
 candidate_authorized_revision=""
 
@@ -76,32 +74,6 @@ validate_candidate_boundary() {
   fi
 }
 
-extract_candidate_notes() {
-  local document="$1"
-  local version="$2"
-
-  awk -v version="${version}" '
-    BEGIN { heading = "## [" version "]" }
-    /^## \[/ {
-      if (in_target) exit
-      if (index($0, heading) == 1) { in_target = 1; next }
-    }
-    !in_target { next }
-    /^<!-- govenv-release-freeze:/ { next }
-    /<!-- govenv-governance-impact:start -->/ { governance = 1; next }
-    governance && /<!-- govenv-governance-impact:end -->/ { governance = 0; next }
-    governance { next }
-    { lines[++count] = $0 }
-    END {
-      first = 1
-      while (first <= count && lines[first] == "") first++
-      last = count
-      while (last >= first && lines[last] == "") last--
-      for (i = first; i <= last; i++) print lines[i]
-    }
-  ' "${document}"
-}
-
 case "${target}" in
   pull-request)
     if [[ -z "${release_pr}" || ! "${release_pr}" =~ ^[0-9]+$ ]]; then
@@ -153,7 +125,6 @@ case "${target}" in
         release_heading="$(
           awk -v version="${release_version}" 'index($0, "## [" version "]") == 1 { print; exit }' CHANGELOG.md
         )"
-        release_notes="$(extract_candidate_notes CHANGELOG.md "${release_version}")"
       fi
     fi
     ;;
@@ -207,7 +178,6 @@ fi
 
 if [[ "${release_version}" == "Unreleased" ]]; then
   release_heading="## [Unreleased]"
-  release_notes=""
 else
   if [[ -z "${release_heading}" ]]; then
     release_heading="## [${release_version}]"
@@ -215,13 +185,6 @@ else
   if [[ "${release_heading}" != "## [${release_version}]"* ]]; then
     echo "Release heading does not match candidate version ${release_version}." >&2
     exit 2
-  fi
-  if [[ -n "${release_notes_file}" ]]; then
-    if [[ ! -f "${release_notes_file}" ]]; then
-      echo "Release notes observation does not exist: ${release_notes_file}" >&2
-      exit 2
-    fi
-    release_notes="$(cat "${release_notes_file}")"
   fi
 fi
 
@@ -320,6 +283,35 @@ while IFS= read -r value; do
   [[ -n "${value}" ]] && references+=("${value#GV}")
 done < <(emit_governance_references "${base_ref}" "${head_ref}")
 
+is_derived_materialization_commit() {
+  git show -s --format=%B "$1" | grep -Fxq 'Derived-From-Parent: true'
+}
+
+commit_observation_exprs=()
+conventional_subject_re='^([[:alnum:]_-]+)(\(([^)]*)\))?(!)?:[[:space:]]+(.*)$'
+while IFS= read -r revision; do
+  [[ -n "${revision}" ]] || continue
+  if is_derived_materialization_commit "${revision}"; then
+    derived_expr=true
+  else
+    derived_expr=false
+  fi
+  subject="$(git show -s --format=%s "${revision}")"
+  if [[ ! "${subject}" =~ ${conventional_subject_re} ]]; then
+    continue
+  fi
+  note_type="${BASH_REMATCH[1]}"
+  note_scope="${BASH_REMATCH[3]}"
+  note_description="${BASH_REMATCH[5]}"
+  type_expr="$(printf '%s' "${note_type}" | jq -Rs .)"
+  scope_expr="$(printf '%s' "${note_scope}" | jq -Rs .)"
+  description_expr="$(printf '%s' "${note_description}" | jq -Rs .)"
+  revision_expr="$(printf '%s' "${revision}" | jq -Rs .)"
+  commit_observation_exprs+=(
+    "conventionalCommit ${type_expr} ${scope_expr} ${description_expr} ${revision_expr} ${derived_expr}"
+  )
+done < <(git rev-list --reverse "${base_ref}..${head_ref}")
+
 agda_list() {
   local expression="[]"
   local index
@@ -370,7 +362,7 @@ done < <(git tag --merged "${base_ref}" --list 'v[0-9]*' --sort=-v:refname)
 
 historical_entries_expr="$(agda_list "${historical_exprs[@]}")"
 release_heading_expr="$(printf '%s' "${release_heading}" | jq -Rs .)"
-release_notes_expr="$(printf '%s' "${release_notes}" | jq -Rs .)"
+commit_observations_expr="$(agda_list "${commit_observation_exprs[@]}")"
 candidate_base_ref_expr="$(printf '%s' "${candidate_base_ref}" | jq -Rs .)"
 candidate_authorized_revision_expr="$(printf '%s' "${candidate_authorized_revision}" | jq -Rs .)"
 if [[ "${release_version}" == "Unreleased" ]]; then
@@ -401,6 +393,8 @@ open import Agda.Builtin.String using (String)
 open import Govenv.Kernel.Identifier using (GVR)
 open import Govenv.Kernel.Release
 open import Govenv.Kernel.Roadmap using (done; todo; cancelled; superseded)
+open import Govenv.Materialization.ReleaseGovernance using
+  (ConventionalCommitObservation; conventionalCommit)
 
 previous : RoadmapSnapshot
 previous = roadmapSnapshot (${phase_expr}) (${items_expr})
@@ -429,8 +423,8 @@ candidateAuthorizedRevision = ${candidate_authorized_revision_expr}
 releaseHeading : String
 releaseHeading = ${release_heading_expr}
 
-releaseNotes : String
-releaseNotes = ${release_notes_expr}
+conventionalCommits : List ConventionalCommitObservation
+conventionalCommits = ${commit_observations_expr}
 
 historicalEntries : List String
 historicalEntries = ${historical_entries_expr}

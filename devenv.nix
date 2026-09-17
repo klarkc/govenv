@@ -188,6 +188,92 @@ let
     fi
   '';
 
+  validateReleaseUnreleasedNotesRegression = ''
+    fixture=Govenv/Materialization/ReleaseGovernance/unreleased-notes-counterexample.md
+    grep -Fq '5983ff63b9279919a4e9b2fec655c7f2acdeeaaa' "$fixture"
+    grep -Fq 'c41881fb5fcb8cb3eef5ea945ca7eeb8be67cdc6' "$fixture"
+    grep -Fq 'requirement to freeze that' "$fixture"
+    grep -Fq 'materialize_release_entry_in_body' src/Govenv/Adapter/release-governance-pr.sh
+    grep -Fq 'verify_release_entry_in_body' src/Govenv/Adapter/release-governance-pr.sh
+    if grep -Fq 'GOVENV_RELEASE_NOTES_FILE' src/Govenv/Adapter/release-governance-pr.sh; then
+      echo 'Release Please rendered notes must not become canonical changelog authority.' >&2
+      exit 5
+    fi
+    grep -Fq 'gh release edit "''${release_tag}" --notes-file "''${canonical_entry}"' \
+      src/Govenv/Adapter/release-governance-release.sh
+    grep -Fq 'cmp -s "''${canonical_entry}" "''${observed_body}"' \
+      src/Govenv/Adapter/release-governance-release.sh
+
+    regression_tmp="$(mktemp -d)"
+    trap 'rm -rf "$regression_tmp"' EXIT
+    unreleased="$regression_tmp/unreleased.md"
+    candidate="$regression_tmp/candidate.md"
+    unreleased_payload="$regression_tmp/unreleased.payload.md"
+    candidate_payload="$regression_tmp/candidate.payload.md"
+
+    GOVENV_RELEASE_TARGET=changelog \
+    GOVENV_RELEASE_VERSION=Unreleased \
+    GOVENV_RELEASE_BASE_REF=v0.2.2 \
+    GOVENV_RELEASE_HEAD_REF=c41881fb5fcb8cb3eef5ea945ca7eeb8be67cdc6 \
+      bash src/Govenv/Adapter/release-governance.sh > "$unreleased"
+
+    GOVENV_RELEASE_TARGET=changelog \
+    GOVENV_RELEASE_VERSION=0.2.3 \
+    GOVENV_RELEASE_HEADING='## [0.2.3](https://github.com/klarkc/govenv/compare/v0.2.2...v0.2.3) (2026-09-17)' \
+    GOVENV_RELEASE_BASE_REF=v0.2.2 \
+    GOVENV_RELEASE_HEAD_REF=c41881fb5fcb8cb3eef5ea945ca7eeb8be67cdc6 \
+      bash src/Govenv/Adapter/release-governance.sh > "$candidate"
+
+    unreleased_current="$regression_tmp/unreleased.current.md"
+    awk '
+      /^## \[Unreleased\]/ { capture = 1 }
+      capture && /^## \[/ && $0 !~ /^## \[Unreleased\]/ { exit }
+      capture { print }
+    ' "$unreleased" > "$unreleased_current"
+
+    grep -Fq 'require verified publication boundary' "$unreleased_current"
+    grep -Fq '/commit/c41881fb5fcb8cb3eef5ea945ca7eeb8be67cdc6' "$unreleased_current"
+    if grep -Fq 'update governed materializations' "$unreleased_current"; then
+      echo 'Derived materialization commits must not become canonical Unreleased notes.' >&2
+      exit 5
+    fi
+
+    awk '
+      /^## \[Unreleased\]/ { capture = 1; next }
+      capture && /^## \[/ { exit }
+      capture { lines[++count] = $0 }
+      END {
+        first = 1
+        while (first <= count && lines[first] == "") first++
+        last = count
+        while (last >= first && lines[last] == "") last--
+        for (i = first; i <= last; i++) print lines[i]
+      }
+    ' "$unreleased" > "$unreleased_payload"
+
+    awk '
+      /^## \[0\.2\.3\]/ { capture = 1; next }
+      capture && /^<!-- govenv-release-freeze:/ { next }
+      capture && /^## \[/ { exit }
+      capture { lines[++count] = $0 }
+      END {
+        first = 1
+        while (first <= count && lines[first] == "") first++
+        last = count
+        while (last >= first && lines[last] == "") last--
+        for (i = first; i <= last; i++) print lines[i]
+      }
+    ' "$candidate" > "$candidate_payload"
+
+    if ! cmp -s "$unreleased_payload" "$candidate_payload"; then
+      echo 'Frozen candidate must preserve the complete canonical Unreleased payload.' >&2
+      diff -u "$unreleased_payload" "$candidate_payload" >&2 || true
+      exit 5
+    fi
+    trap - EXIT
+    rm -rf "$regression_tmp"
+  '';
+
   validateReleasePushAuthorizationRegression = ''
     GOVENV_RELEASE_PUSH_AUTH_COUNTEREXAMPLE=Govenv/Materialization/ReleaseGovernance/push-auth-counterexample.md \
       bash src/Govenv/Adapter/release-governance-pr.sh >/dev/null
@@ -266,6 +352,7 @@ in
     ${validateTestExplicitRevisionRegression}
     ${validateReleasePostMergeFreezeRegression}
     ${validateReleasePostPublicationConvergenceRegression}
+    ${validateReleaseUnreleasedNotesRegression}
     ${validateReleasePushAuthorizationRegression}
   '';
 
