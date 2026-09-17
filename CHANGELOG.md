@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+## [0.2.3](https://github.com/klarkc/govenv/compare/v0.2.2...v0.2.3) (2026-09-17)
+<!-- govenv-release-freeze: version=0.2.3 base=v0.2.2 authorized=c41881fb5fcb8cb3eef5ea945ca7eeb8be67cdc6 -->
+
 <!-- govenv-governance-impact:start -->
 ### Governance impact
 
@@ -23,6 +26,20 @@
 Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `e76acb1..c41881f`.
 <!-- govenv-governance-impact:end -->
 
+
+### Bug Fixes
+
+* **release:** converge main after publication ([224e67f](https://github.com/klarkc/govenv/commit/224e67fcf7e9c5856096ed127734ef4b5912c937))
+* **release:** preserve post-merge freeze materialization ([8dddae7](https://github.com/klarkc/govenv/commit/8dddae741144a242a4a5211cc5d44a1c2cfb338c))
+* **release:** require verified publication boundary ([c41881f](https://github.com/klarkc/govenv/commit/c41881fb5fcb8cb3eef5ea945ca7eeb8be67cdc6))
+
+
+### Miscellaneous
+
+* **materialize:** update governed materializations ([5983ff6](https://github.com/klarkc/govenv/commit/5983ff63b9279919a4e9b2fec655c7f2acdeeaaa))
+* **materialize:** update governed materializations ([9e30e00](https://github.com/klarkc/govenv/commit/9e30e004fff73f6e0eecea168cc5bc9abc5c6777))
+* **materialize:** update governed materializations ([f7d4982](https://github.com/klarkc/govenv/commit/f7d4982bdeb5bc7f1274e8b6a16bbf1eb0278710))
+* **materialize:** update governed materializations ([4a27d53](https://github.com/klarkc/govenv/commit/4a27d53df22b504a9b1cd35764ee2ed3f4ca2a39))
 ## [0.2.2](https://github.com/klarkc/govenv/compare/v0.2.1...v0.2.2) (2026-09-16)
 <!-- govenv-release-freeze: version=0.2.2 base=v0.2.1 authorized=7d9dc5ed1d379417ba3efe9070d19a65de941419 -->
 
