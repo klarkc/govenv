@@ -188,6 +188,46 @@ let
     fi
   '';
 
+  validateReleasePublishedRendererRegression = ''
+    fixture=Govenv/Materialization/ReleaseGovernance/published-renderer-counterexample.md
+    grep -Fq '35256420319' "$fixture"
+    grep -Fq '<sub>Derived from immutable typed roadmap snapshots' "$fixture"
+    grep -Fq 'portable canonical release entry' "$fixture"
+
+    if grep -Fq 'renderGithubReleaseMaterialization' \
+      src/Govenv/Adapter/ReleaseGovernance/Release.agda; then
+      echo 'Published release verification must not use an independent GitHub renderer.' >&2
+      exit 5
+    fi
+    grep -Fq 'renderPortableReleaseMaterialization' \
+      src/Govenv/Adapter/ReleaseGovernance/Release.agda
+
+    regression_tmp="$(mktemp -d)"
+    trap 'rm -rf "$regression_tmp"' EXIT
+    expected="$regression_tmp/published.expected.md"
+    canonical="$regression_tmp/published.canonical.md"
+
+    GOVENV_RELEASE_TARGET=github-release \
+    GOVENV_RELEASE_TAG=v0.2.4 \
+    GOVENV_RELEASE_HEAD_REF=f8202bcf9ef85b40257f6562d1af76eaec94ef64 \
+      bash src/Govenv/Adapter/release-governance.sh > "$expected"
+
+    awk '
+      /^## \[0\.2\.4\]/ { in_target = 1; next }
+      in_target && /<!-- govenv-governance-impact:start -->/ { capture = 1 }
+      in_target && capture { print }
+      in_target && capture && /<!-- govenv-governance-impact:end -->/ { exit }
+    ' CHANGELOG.md > "$canonical"
+
+    if ! cmp -s "$expected" "$canonical"; then
+      echo 'Published release governance must equal the portable canonical release section.' >&2
+      diff -u "$expected" "$canonical" >&2 || true
+      exit 5
+    fi
+    rm -rf "$regression_tmp"
+    trap - EXIT
+  '';
+
   validateReleaseUnreleasedNotesRegression = ''
     fixture=Govenv/Materialization/ReleaseGovernance/unreleased-notes-counterexample.md
     grep -Fq '5983ff63b9279919a4e9b2fec655c7f2acdeeaaa' "$fixture"
@@ -353,6 +393,7 @@ in
     ${validateReleasePostMergeFreezeRegression}
     ${validateReleasePostPublicationConvergenceRegression}
     ${validateReleaseUnreleasedNotesRegression}
+    ${validateReleasePublishedRendererRegression}
     ${validateReleasePushAuthorizationRegression}
   '';
 
