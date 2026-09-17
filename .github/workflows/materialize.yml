@@ -37,6 +37,10 @@ jobs:
       with:
         use-gha-cache: "enabled"
         use-flakehub: "disabled"
+    - name: "Verify published release boundary"
+      run: "release_tag=\"$(git describe --tags --abbrev=0 2>/dev/null || true)\"\nif [[ -n \"${release_tag}\" ]]; then\n  release_sha=\"$(git rev-parse \"${release_tag}^{commit}\")\"\n  GOVENV_RELEASE_READ_ONLY=true GOVENV_RELEASE_TAG=\"${release_tag}\" GOVENV_RELEASE_SHA=\"${release_sha}\" bash src/Govenv/Adapter/release-governance-release.sh\nfi"
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     - name: "Materialize constitution"
       run: "nix run github:cachix/devenv/v2.3 -- tasks run govenv:materialize"
     - name: "Check materialized state"

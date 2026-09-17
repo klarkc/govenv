@@ -2,6 +2,28 @@
 
 ## [Unreleased]
 
+<!-- govenv-governance-impact:start -->
+### Governance impact
+
+**Phase:** ▣ P1 — unchanged  
+**Items:** 3 advanced
+
+#### Advanced · 3
+
+| GV | Proposition |
+| :---: | --- |
+| **GV84 ◇ ↑** | Make observed invariant regressions counterexample-closing: once a contradiction to a governed or relied-upon invariant is recorded as an observed regression, its repair is incomplete until the counterexample is preserved as governed evidence, the missing or incorrectly scoped assurance boundary is corrected or overstated governance superseded, and candidate validation rejects recurrence before the affected workflow may succeed. |
+| **GV90 ◇ ↑** | Model human authorization as `AuthorizedRevision`: new semantic authority may originate only from the exact repository state accepted by an explicit human pull-request merge. Candidate revisions may perform unprivileged validation and transient non-authoritative projections, but automated candidate-authoring principals must be distinct from human authorizers and post-authorization materializers and must not receive capabilities that can alter executable automation, authorize or merge the candidate, mutate authoritative repository state, or mutate persistent governed external state; only after authorization may governed automation exercise the capabilities necessary to derive deterministic materialization revisions or external effects. Derived outcomes create no independent semantic authority, must not be treated as fresh human authorization, and must retain revision-addressable causal provenance to the authorizing revision. |
+| **GV95 ◇ ↑** | Make Govenv the sole semantic owner of the canonical changelog: derive the governed `Unreleased` state deterministically from the latest published release boundary to the current authorized revision, preserve every historical release entry immutably and reconstructibly, freeze that exact governed state into the Release Please candidate version before human approval, and preserve the approved freeze unchanged across the merge-to-publication boundary. Release Please may determine SemVer, analyze Conventional Commits, and coordinate the candidate/tag/release lifecycle, but its rendered notes are observational input rather than independent changelog authority; the pull-request body and published GitHub Release must project the same authorized typed release document and external publication must be verified by read-back equality. |
+
+Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `f8202bc..3f840e1`.
+<!-- govenv-governance-impact:end -->
+
+
+### Bug Fixes
+
+* **release:** verify published boundary across runs ([3f840e1](https://github.com/klarkc/govenv/commit/3f840e19848e8a9e0d1604960dd4fac21b37f5a7))
+
 ## [0.2.4](https://github.com/klarkc/govenv/compare/v0.2.3...v0.2.4) (2026-09-17)
 <!-- govenv-release-freeze: version=0.2.4 base=v0.2.3 authorized=034324bdfcc3af0d698121a266e31f5279b71510 -->
 
