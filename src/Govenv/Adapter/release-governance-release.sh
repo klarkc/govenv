@@ -3,6 +3,7 @@ set -euo pipefail
 
 release_tag="${GOVENV_RELEASE_TAG:-${1:-}}"
 release_sha="${GOVENV_RELEASE_SHA:-${2:-}}"
+read_only="${GOVENV_RELEASE_READ_ONLY:-false}"
 
 if [[ -z "${release_tag}" ]]; then
   echo "GOVENV_RELEASE_TAG or the first argument must identify the GitHub Release tag." >&2
@@ -10,6 +11,10 @@ if [[ -z "${release_tag}" ]]; then
 fi
 if [[ -z "${release_sha}" ]]; then
   release_sha="${release_tag}"
+fi
+if [[ "${read_only}" != true && "${read_only}" != false ]]; then
+  echo "GOVENV_RELEASE_READ_ONLY must be true or false." >&2
+  exit 2
 fi
 
 root="$(git rev-parse --show-toplevel)"
@@ -93,9 +98,18 @@ fi
 gh release view "${release_tag}" --json body --jq '.body // ""' > "${current}"
 verify_release_please_observed_semantic_notes "${current}" "${canonical_entry}"
 
-# Apply the entire canonical entry, not merely its governance subsection. This
-# makes the published GitHub Release a projection of the exact approved freeze.
-gh release edit "${release_tag}" --notes-file "${canonical_entry}" >/dev/null
+if ! cmp -s "${canonical_entry}" "${current}"; then
+  if [[ "${read_only}" == true ]]; then
+    echo "Published GitHub Release does not match the canonical release entry." >&2
+    diff -u "${canonical_entry}" "${current}" >&2 || true
+    exit 5
+  fi
+
+  # During the publication window only, apply the entire canonical entry rather
+  # than merely its governance subsection. Already-canonical immutable releases
+  # require no mutation and can therefore be verified again safely.
+  gh release edit "${release_tag}" --notes-file "${canonical_entry}" >/dev/null
+fi
 
 gh release view "${release_tag}" --json body --jq '.body // ""' > "${observed_body}"
 if ! cmp -s "${canonical_entry}" "${observed_body}"; then

@@ -1,6 +1,6 @@
 # Materialize workflow
 
-The Materialize workflow runs from an exact authorized revision on `main`. Its job is gated by the main-only `authorized-materialization` environment, evaluates with a read-only `GITHUB_TOKEN`, and uses only the governed materializer repository credential for Git transport. It derives at most one deterministic materialization commit whose immediate Git parent is its exact causal revision, making provenance stable under rebase rewriting, and passes the resulting effective revision explicitly to post-materialization reusable workflows. Because release publication can advance the latest immutable release boundary after the initial materialization has already been checked, the parent workflow records that boundary before Release, then re-enters the same materializer authority only after Release has completed successfully. Only a boundary advance observed after that verified Release enables post-release rematerialization; if that rematerialization changes `main`, Release is invoked once more against the derived revision so the next candidate is reconciled with the newly canonical `Unreleased` state.
+The Materialize workflow runs from an exact authorized revision on `main`. Its job is gated by the main-only `authorized-materialization` environment, evaluates with a read-only `GITHUB_TOKEN`, and uses only the governed materializer repository credential for Git transport. Before accepting the latest published tag as changelog authority, every fresh run read-backs that immutable GitHub Release against the canonical release entry; tag existence alone is insufficient. It derives at most one deterministic materialization commit whose immediate Git parent is its exact causal revision, making provenance stable under rebase rewriting, and passes the resulting effective revision explicitly to post-materialization reusable workflows. Because release publication can advance the latest immutable release boundary after the initial materialization has already been checked, the parent workflow records that boundary before Release, then re-enters the same materializer authority only after Release has completed successfully. Only a boundary advance observed after that verified Release enables post-release rematerialization; if that rematerialization changes `main`, Release is invoked once more against the derived revision so the next candidate is reconciled with the newly canonical `Unreleased` state.
 
 ```agda
 {-# OPTIONS --safe #-}
@@ -54,6 +54,10 @@ materializeCommand =
 checkCommand : String
 checkCommand =
   "nix run github:cachix/devenv/v2.3 -- tasks run govenv:check"
+
+verifyPublishedReleaseBoundaryCommand : String
+verifyPublishedReleaseBoundaryCommand =
+  "release_tag=\"$(git describe --tags --abbrev=0 2>/dev/null || true)\"\nif [[ -n \"${release_tag}\" ]]; then\n  release_sha=\"$(git rev-parse \"${release_tag}^{commit}\")\"\n  GOVENV_RELEASE_READ_ONLY=true GOVENV_RELEASE_TAG=\"${release_tag}\" GOVENV_RELEASE_SHA=\"${release_sha}\" bash src/Govenv/Adapter/release-governance-release.sh\nfi"
 
 detectDriftCommand : String
 detectDriftCommand =
@@ -119,6 +123,9 @@ steps =
     (binding "use-gha-cache" (literal "enabled")
     ∷ binding "use-flakehub" (literal "disabled")
     ∷ [])
+  ∷ runStep "Verify published release boundary" nothing nothing
+      verifyPublishedReleaseBoundaryCommand
+      (binding "GH_TOKEN" (expression "secrets.GITHUB_TOKEN") ∷ [])
   ∷ runStep "Materialize constitution" nothing nothing materializeCommand []
   ∷ runStep "Check materialized state" nothing nothing checkCommand []
   ∷ runStep "Detect materialization drift" (just "drift") nothing detectDriftCommand []

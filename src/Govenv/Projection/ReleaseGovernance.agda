@@ -480,6 +480,10 @@ renderGithubReleaseMaterialization : Materialization ReleaseDocument → String
 renderGithubReleaseMaterialization materialization =
   startMarker ++ renderGithubRelease "###" (state materialization) ++ endMarker
 
+renderPortableReleaseMaterialization : Materialization ReleaseDocument → String
+renderPortableReleaseMaterialization materialization =
+  renderPortableSection (state materialization)
+
 renderError : GovernanceDeltaError → String
 renderError (itemRegressed itemId) =
   "Governance item regressed from completed to pending: " ++ renderGovernanceId itemId

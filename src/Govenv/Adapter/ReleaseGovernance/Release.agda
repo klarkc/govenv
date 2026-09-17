@@ -7,7 +7,7 @@ open import Govenv.Adapter.ReleaseObservation
 open import Govenv.Kernel.Release
 open import Govenv.Materialization.ReleaseGovernance using (githubRelease)
 open import Govenv.Projection.ReleaseGovernance using
-  (renderGithubReleaseMaterialization; renderError)
+  (renderPortableReleaseMaterialization; renderError)
 open import Govenv.Roadmap using (roadmap)
 
 postulate
@@ -23,6 +23,6 @@ postulate
 main : IO ⊤
 main with governanceDelta previous references roadmap
 ... | validDelta delta =
-  putStr (renderGithubReleaseMaterialization
+  putStr (renderPortableReleaseMaterialization
     (githubRelease releaseTag baseRevision headRevision roadmap delta))
 ... | invalidDelta error = failWith (renderError error)

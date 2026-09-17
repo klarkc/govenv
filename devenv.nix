@@ -274,6 +274,55 @@ let
     rm -rf "$regression_tmp"
   '';
 
+  validatePublishedReleaseVerificationRegression = ''
+    fixture=Govenv/Materialization/ReleaseGovernance/published-verification-counterexample.md
+    grep -Fq 'Materialize run #57' "$fixture"
+    grep -Fq 'f8202bcf9ef85b40257f6562d1af76eaec94ef64' "$fixture"
+    grep -Fq 'a2c9d6702324b581fd433a3869b0e3888a77aea3' "$fixture"
+    grep -Fq 'tag existence' "$fixture"
+
+    grep -Fq 'renderPortableReleaseMaterialization' \
+      src/Govenv/Adapter/ReleaseGovernance/Release.agda
+    if grep -Fq 'renderGithubReleaseMaterialization' \
+      src/Govenv/Adapter/ReleaseGovernance/Release.agda; then
+      echo 'Published release verification must reconstruct the canonical portable projection.' >&2
+      exit 5
+    fi
+    grep -Fq 'GOVENV_RELEASE_READ_ONLY' src/Govenv/Adapter/release-governance-release.sh
+    grep -Fq 'Already-canonical immutable releases' src/Govenv/Adapter/release-governance-release.sh
+
+    materialize_workflow=.govenv/materialize.generated.yml
+    grep -Fq 'Verify published release boundary' "$materialize_workflow"
+    grep -Fq 'GOVENV_RELEASE_READ_ONLY=true' "$materialize_workflow"
+    grep -Fq 'GOVENV_RELEASE_TAG=' "$materialize_workflow"
+    grep -Fq 'GH_TOKEN: ''${{ secrets.GITHUB_TOKEN }}' "$materialize_workflow"
+
+    regression_tmp="$(mktemp -d)"
+    trap 'rm -rf "$regression_tmp"' EXIT
+    GOVENV_RELEASE_TARGET=github-release \
+    GOVENV_RELEASE_TAG=v0.2.4 \
+    GOVENV_RELEASE_HEAD_REF=f8202bcf9ef85b40257f6562d1af76eaec94ef64 \
+      bash src/Govenv/Adapter/release-governance.sh >/dev/null
+    git show f8202bcf9ef85b40257f6562d1af76eaec94ef64:CHANGELOG.md > \
+      "$regression_tmp/changelog.md"
+    awk '
+      /<!-- govenv-governance-impact:start -->/ { capture = 1 }
+      capture { print }
+      /<!-- govenv-governance-impact:end -->/ { exit }
+    ' "$regression_tmp/changelog.md" > "$regression_tmp/observed.md"
+    if ! cmp -s .govenv/release-governance-release.md "$regression_tmp/observed.md"; then
+      echo 'Published boundary reconstruction must equal the canonical portable governance section.' >&2
+      diff -u .govenv/release-governance-release.md "$regression_tmp/observed.md" >&2 || true
+      exit 5
+    fi
+    if grep -Fq '<sub>' .govenv/release-governance-release.md; then
+      echo 'Canonical published governance verification must remain portable.' >&2
+      exit 5
+    fi
+    trap - EXIT
+    rm -rf "$regression_tmp"
+  '';
+
   validateReleasePushAuthorizationRegression = ''
     GOVENV_RELEASE_PUSH_AUTH_COUNTEREXAMPLE=Govenv/Materialization/ReleaseGovernance/push-auth-counterexample.md \
       bash src/Govenv/Adapter/release-governance-pr.sh >/dev/null
@@ -353,6 +402,7 @@ in
     ${validateReleasePostMergeFreezeRegression}
     ${validateReleasePostPublicationConvergenceRegression}
     ${validateReleaseUnreleasedNotesRegression}
+    ${validatePublishedReleaseVerificationRegression}
     ${validateReleasePushAuthorizationRegression}
   '';
 
