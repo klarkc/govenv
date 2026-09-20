@@ -228,6 +228,43 @@ let
     trap - EXIT
   '';
 
+  validateReleasePublishedBodyReadbackRegression = ''
+    fixture=Govenv/Materialization/ReleaseGovernance/published-body-readback-counterexample.md
+    grep -Fq '35512667953' "$fixture"
+    grep -Fq 'GitHub Release whole-body read-back verification failed.' "$fixture"
+    grep -Fq 'terminal newline' "$fixture"
+
+    grep -Fq "jq -j '.body // \"\"'" \
+      src/Govenv/Adapter/release-governance-release.sh
+    if grep -Fq -- "--jq '.body // \"\"'" \
+      src/Govenv/Adapter/release-governance-release.sh; then
+      echo 'Published release read-back must not add an output record terminator.' >&2
+      exit 5
+    fi
+
+    regression_tmp="$(mktemp -d)"
+    trap 'rm -rf "$regression_tmp"' EXIT
+    canonical="$regression_tmp/canonical.md"
+    observed="$regression_tmp/observed.md"
+
+    printf 'release-body\n' > "$canonical"
+    printf '{"body":"release-body\\n"}\n' | jq -j '.body // ""' > "$observed"
+    if ! cmp -s "$canonical" "$observed"; then
+      echo 'Exact JSON body decoding must preserve the canonical terminal newline.' >&2
+      diff -u "$canonical" "$observed" >&2 || true
+      exit 5
+    fi
+
+    printf '{"body":"release-body\\n"}\n' | jq -r '.body // ""' > "$observed"
+    if cmp -s "$canonical" "$observed"; then
+      echo 'Regression fixture must demonstrate the extra record terminator.' >&2
+      exit 5
+    fi
+
+    rm -rf "$regression_tmp"
+    trap - EXIT
+  '';
+
   validateReleaseUnreleasedNotesRegression = ''
     fixture=Govenv/Materialization/ReleaseGovernance/unreleased-notes-counterexample.md
     grep -Fq '5983ff63b9279919a4e9b2fec655c7f2acdeeaaa' "$fixture"
@@ -394,6 +431,7 @@ in
     ${validateReleasePostPublicationConvergenceRegression}
     ${validateReleaseUnreleasedNotesRegression}
     ${validateReleasePublishedRendererRegression}
+    ${validateReleasePublishedBodyReadbackRegression}
     ${validateReleasePushAuthorizationRegression}
   '';
 
