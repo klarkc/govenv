@@ -55,6 +55,10 @@ trim_trailing_blank_lines() {
   ' "$1"
 }
 
+read_release_body() {
+  gh release view "$1" --json body | jq -j '.body // ""'
+}
+
 verify_release_please_observed_semantic_notes() {
   local observed="$1"
   local canonical="$2"
@@ -90,14 +94,14 @@ if ! cmp -s "${expected}" "${observed_governance}"; then
   exit 5
 fi
 
-gh release view "${release_tag}" --json body --jq '.body // ""' > "${current}"
+read_release_body "${release_tag}" > "${current}"
 verify_release_please_observed_semantic_notes "${current}" "${canonical_entry}"
 
 # Apply the entire canonical entry, not merely its governance subsection. This
 # makes the published GitHub Release a projection of the exact approved freeze.
 gh release edit "${release_tag}" --notes-file "${canonical_entry}" >/dev/null
 
-gh release view "${release_tag}" --json body --jq '.body // ""' > "${observed_body}"
+read_release_body "${release_tag}" > "${observed_body}"
 if ! cmp -s "${canonical_entry}" "${observed_body}"; then
   echo "GitHub Release whole-body read-back verification failed." >&2
   diff -u "${canonical_entry}" "${observed_body}" >&2 || true
