@@ -2,6 +2,27 @@
 
 ## [Unreleased]
 
+<!-- govenv-governance-impact:start -->
+### Governance impact
+
+**Phase:** ▣ P1 — unchanged  
+**Items:** 2 advanced
+
+#### Advanced · 2
+
+| GV | Proposition |
+| :---: | --- |
+| **GV84 ◇ ↑** | Make observed invariant regressions counterexample-closing: once a contradiction to a governed or relied-upon invariant is recorded as an observed regression, its repair is incomplete until the counterexample is preserved as governed evidence, the missing or incorrectly scoped assurance boundary is corrected or overstated governance superseded, and candidate validation rejects recurrence before the affected workflow may succeed. |
+| **GV95 ◇ ↑** | Make Govenv the sole semantic owner of the canonical changelog: derive the governed `Unreleased` state deterministically from the latest published release boundary to the current authorized revision, preserve every historical release entry immutably and reconstructibly, freeze that exact governed state into the Release Please candidate version before human approval, and preserve the approved freeze unchanged across the merge-to-publication boundary. Release Please may determine SemVer, analyze Conventional Commits, and coordinate the candidate/tag/release lifecycle, but its rendered notes are observational input rather than independent changelog authority; the pull-request body and published GitHub Release must project the same authorized typed release document and external publication must be verified by read-back equality. |
+
+Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `135cfa8..7c2047a`.
+<!-- govenv-governance-impact:end -->
+
+
+### Bug Fixes
+
+* **release:** preserve exact published body read-back ([7c2047a](https://github.com/klarkc/govenv/commit/7c2047a08050ae729e1e2490e6f0ff5bcadd1989))
+
 ## [0.2.5](https://github.com/klarkc/govenv/compare/v0.2.4...v0.2.5) (2026-09-17)
 <!-- govenv-release-freeze: version=0.2.5 base=v0.2.4 authorized=67362b998103d534d697dba3e7a40da9d28b0c8c -->
 
