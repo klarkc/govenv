@@ -383,6 +383,7 @@ let
     diff -u .github/workflows/test.yml .govenv/test.generated.yml
     diff -u .github/workflows/release.yml .govenv/release.generated.yml
     diff -u .github/workflows/pages.yml .govenv/pages.generated.yml
+    actionlint -ignore SC2016 .github/workflows/*.yml
   '';
 
   materializeGithubDescription = ''
@@ -397,6 +398,7 @@ in
   env.LC_ALL = "C.UTF-8";
 
   packages = [
+    pkgs.actionlint
     pkgs.agda
     pkgs.diffutils
     pkgs.gh

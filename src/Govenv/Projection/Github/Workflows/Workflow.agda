@@ -35,7 +35,7 @@ renderMaybeId (just identifier) = "      id: " ++ identifier ++ "\n"
 renderMaybeCondition : Maybe String → String
 renderMaybeCondition nothing = ""
 renderMaybeCondition (just condition) =
-  "      if: ${{ " ++ condition ++ " }}\n"
+  "      if: " ++ primShowString ("${{ " ++ condition ++ " }}") ++ "\n"
 
 renderBindings : String → List Binding → String
 renderBindings indent [] = ""
@@ -173,7 +173,7 @@ renderSecurity security environmentUrl =
 renderJobCondition : Maybe String → String
 renderJobCondition nothing = ""
 renderJobCondition (just condition) =
-  "    if: ${{ " ++ condition ++ " }}\n"
+  "    if: " ++ primShowString ("${{ " ++ condition ++ " }}") ++ "\n"
 
 renderNeedsTail : List String → String
 renderNeedsTail [] = ""

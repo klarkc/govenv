@@ -67,10 +67,16 @@ detectReleaseBoundaryAdvanceCommand : String
 detectReleaseBoundaryAdvanceCommand =
   "current_boundary=\"$(git describe --tags --abbrev=0 2>/dev/null || true)\"\nif [[ \"${current_boundary}\" == \"${GOVENV_PREVIOUS_RELEASE_BOUNDARY}\" ]]; then\n  advanced=false\nelse\n  advanced=true\nfi\necho \"advanced=${advanced}\" >> \"${GITHUB_OUTPUT}\""
 
+materializerCommitName : String
+materializerCommitName = "govenv-materializer"
+
+materializerCommitEmail : String
+materializerCommitEmail = "govenv-materializer@users.noreply.github.com"
+
 commitCommand : String
 commitCommand =
-  "git config user.name \"govenv-materializer\"\n" ++
-  "git config user.email \"govenv-materializer@users.noreply.github.com\"\n" ++
+  "git config user.name \"" ++ materializerCommitName ++ "\"\n" ++
+  "git config user.email \"" ++ materializerCommitEmail ++ "\"\n" ++
   "git add --all\n" ++
   "printf '%s\\n' \\\n  'chore(materialize): update governed materializations' \\\n  '' \\\n  '' \\\n  \"Derived-From-Parent: true\" \\\n  'Refs: GV44 GV51 GV90 GV92 GV93' \\\n  'skip-checks: true' > .govenv/materialization-commit-message\n" ++
   "git commit --cleanup=verbatim -F .govenv/materialization-commit-message\n" ++
@@ -94,15 +100,23 @@ reconcileReleaseCondition : String
 reconcileReleaseCondition =
   "needs.post-release-materialize.outputs.changed == 'true'"
 
+materializerPushIdentityCondition : String
+materializerPushIdentityCondition =
+  "github.event_name == 'push' && " ++
+  "github.event.head_commit.author.name == '" ++ materializerCommitName ++ "' && " ++
+  "github.event.head_commit.author.email == '" ++ materializerCommitEmail ++ "' && " ++
+  "github.event.head_commit.committer.name == '" ++ materializerCommitName ++ "' && " ++
+  "github.event.head_commit.committer.email == '" ++ materializerCommitEmail ++ "'"
+
 derivedPushCondition : String
 derivedPushCondition =
-  "github.event_name == 'push' && " ++
+  materializerPushIdentityCondition ++ " && " ++
   "startsWith(github.event.head_commit.message, 'chore(materialize): update governed materializations') && " ++
   "contains(github.event.head_commit.message, 'Derived-From-Parent: true')"
 
 materializeConcurrencyGroup : String
 materializeConcurrencyGroup =
-  "materialize-${{ github.event_name }}-${{ " ++ derivedPushCondition ++ " }}"
+  "materialize-${{ github.event_name }}-${{ " ++ materializerPushIdentityCondition ++ " }}"
 
 mainDispatchOnly : String
 mainDispatchOnly =
