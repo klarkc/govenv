@@ -1,6 +1,8 @@
 { pkgs, ... }:
 
 let
+  agdaStdlib = pkgs.agdaPackages.standard-library;
+
   buildMaterializers = ''
     rm -rf .govenv/materialize-build
     mkdir -p .govenv/materialize-build
@@ -364,6 +366,20 @@ let
       bash src/Govenv/Adapter/release-governance-pr.sh >/dev/null
   '';
 
+  checkArchitectureAssurance = ''
+    rm -rf .govenv/architecture-assurance-build
+    mkdir -p .govenv/architecture-assurance-build
+    agda -i . -i src --compile --compile-dir=.govenv/architecture-assurance-build src/Govenv/Adapter/ArchitectureAssurance.agda >/dev/null
+    .govenv/architecture-assurance-build/ArchitectureAssurance
+  '';
+
+  checkConstitutionalHistorySpike = ''
+    agda -i . -i src -i ${agdaStdlib}/src src/Govenv/Kernel/ConstitutionalHistorySpike/ConstitutionalHistoryScenarios.agda
+    agda -i . -i src -i ${agdaStdlib}/src src/Govenv/Kernel/ConstitutionalHistorySpike/EcosystemReuse.agda
+    agda -i . -i src -i ${agdaStdlib}/src src/Govenv/Kernel/ConstitutionalHistorySpike/ConstitutionalHistoryStdlibScenarios.agda
+    agda -i . -i src -i ${agdaStdlib}/src src/Govenv/Kernel/ConstitutionalHistorySpike/ConstitutionalHistoryPropositionalScenarios.agda
+  '';
+
   checkMaterializations = ''
     ${buildMaterializers}
     ${validateRoadmapEvolution}
@@ -400,6 +416,7 @@ in
   packages = [
     pkgs.actionlint
     pkgs.agda
+    agdaStdlib
     pkgs.diffutils
     pkgs.gh
     pkgs.ghc
@@ -429,6 +446,8 @@ in
 
   tasks."govenv:check".exec = ''
     agda -i . -i src Govenv.lagda.md
+    ${checkArchitectureAssurance}
+    ${checkConstitutionalHistorySpike}
     ${checkMaterializations}
     ${checkAdminAdapters}
     ${validateReleasePlacementRegression}

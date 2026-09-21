@@ -1,6 +1,6 @@
 {-# OPTIONS --safe #-}
 
-module spike.ConstitutionalHistoryPropositionalScenarios where
+module Govenv.Kernel.ConstitutionalHistorySpike.ConstitutionalHistoryPropositionalScenarios where
 
 open import Agda.Builtin.Equality using (_≡_; refl)
 open import Agda.Builtin.List using ([]; _∷_)
@@ -8,7 +8,7 @@ open import Agda.Builtin.Nat using (Nat)
 open import Agda.Builtin.Unit using (⊤; tt)
 open import Relation.Nullary using (¬_)
 open import Relation.Nullary.Decidable using (From-yes; from-yes; from-no)
-open import spike.ConstitutionalHistoryPropositional
+open import Govenv.Kernel.ConstitutionalHistorySpike.ConstitutionalHistoryPropositional
 
 decideValid : (h : History) → (entry : HistoryEntry) → From-yes (validEntry? h entry)
 decideValid h entry = from-yes (validEntry? h entry)

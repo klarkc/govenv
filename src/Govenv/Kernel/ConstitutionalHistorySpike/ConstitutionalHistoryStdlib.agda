@@ -1,6 +1,6 @@
 {-# OPTIONS --safe #-}
 
-module spike.ConstitutionalHistoryStdlib where
+module Govenv.Kernel.ConstitutionalHistorySpike.ConstitutionalHistoryStdlib where
 
 open import Agda.Builtin.Equality using (_≡_; refl)
 open import Agda.Builtin.Maybe using (Maybe; just; nothing)

@@ -13,6 +13,7 @@ open import Agda.Builtin.Bool using (true; false)
 open import Agda.Builtin.Equality using (_≡_; refl)
 open import Agda.Builtin.List using (List; []; _∷_)
 open import Agda.Builtin.Nat using (Nat)
+import Govenv.Assurance.GV1 as GV1
 import Govenv.Assurance.GV3 as GV3
 import Govenv.Assurance.GV4 as GV4
 import Govenv.Assurance.GV5 as GV5

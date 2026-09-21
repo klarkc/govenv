@@ -1,6 +1,6 @@
 # Architecture
 
-Govenv declares the architectural roles of repository areas and the dependency directions allowed between them. Enforcement will move from declaration to repository checking as the evaluator lands.
+Govenv declares the architectural roles of repository areas and the dependency directions allowed between them. Candidate validation observes every versioned Agda and literate-Agda source path and requires it to remain inside the governed Govenv source roots. This source-boundary check is intentionally narrower than total area classification: existing frontend source such as `src/Govenv/Roadmap/DSL.agda` is valid project source even though frontend is not yet modeled as an architecture role. `Architecture/source-placement-counterexample.md` preserves the PR #32 GV1 regression that exposed the previously missing source-boundary assurance.
 
 ```agda
 {-# OPTIONS --safe #-}
@@ -8,8 +8,16 @@ Govenv declares the architectural roles of repository areas and the dependency d
 module Govenv.Architecture where
 
 open import Agda.Builtin.List
+open import Agda.Builtin.String using (String)
 open import Agda.Builtin.Unit
 open import Govenv.Kernel.Architecture
+
+sourceRoots : List String
+sourceRoots =
+    "Govenv.lagda.md"
+  ∷ "Govenv/"
+  ∷ "src/Govenv/"
+  ∷ []
 
 architecture : Architecture
 architecture = record
