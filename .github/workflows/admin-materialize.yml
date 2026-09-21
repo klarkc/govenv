@@ -5,7 +5,7 @@ on:
 
 jobs:
   materialize:
-    if: ${{ github.ref == 'refs/heads/main' }}
+    if: "${{ github.ref == 'refs/heads/main' }}"
     environment: "admin-materialization"
     permissions:
       contents: read
