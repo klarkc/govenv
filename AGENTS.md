@@ -1,5 +1,20 @@
 # AGENTS.md
 
+## Operational policy vs governance
+
+An **operational policy** tells a contributor or AI agent how to work: which investigations to perform, which order to follow, which heuristics to apply, or which implementation choices to prefer. Operational policy may depend on judgment and belongs in `AGENTS.md`.
+
+**Governance** states which repository or system states, transitions, effects, or semantic properties are permitted. A governed property must be meaningful independently of which contributor or agent produced the state and belongs in Govenv governed source rather than being enforced only by contributor behavior.
+
+Use this test when classifying a rule:
+
+- If different processes may legitimately produce the same valid state, the rule about the process is probably operational policy.
+- If the resulting state or effect can itself be classified as permitted or forbidden, that property is a governance candidate.
+
+Operational policy must not substitute for governable semantics. When an operational rule reveals a repository or system property that can be stated independently of contributor behavior, promote that property into governance when the constitutional model is ready to express it.
+
+The word `policy` may also occur inside governed domain concepts, such as a release policy or deployment branch policy. Those are governed properties. `Operational policy` specifically means contributor/agent process guidance in this file.
+
 ## Reuse-first engineering policy
 
 This is an operational engineering policy for contributors and AI agents. It is not part of Govenv's constitutional governance model and must not be represented as a Governance item merely to enforce agent behavior.
@@ -22,6 +37,20 @@ Do not assume a bespoke implementation is necessary. Search the relevant ecosyst
 Prefer mature ecosystem primitives when they preserve or improve the desired semantics, proof strength, maintainability, reproducibility, and readability. Examples include standard relations, decidable equality, membership, uniqueness, collection abstractions, package/module functions, checks, builders, tasks, and service integrations.
 
 When custom code is still preferable, be able to state why the available ecosystem alternative is semantically insufficient, would weaken the model, would introduce disproportionate complexity, or would impose an unjustified dependency or upgrade.
+
+## Semantic validation before check trust
+
+A successful automated check is evidence about the checks that currently exist; it is not permission to ignore a semantic contradiction that is already observable from established governance.
+
+Before declaring a governed candidate or pull request ready:
+
+1. Identify the established governance and obligations relevant to the changed paths, semantics, and effects.
+2. Compare the candidate semantically with those established requirements.
+3. Run the authoritative repository checks.
+4. Compare the governed expectation, the observed candidate state, and the check result.
+5. If the candidate observably contradicts established governance while the authoritative check succeeds, treat the divergence as a counterexample to assurance/enforcement rather than as a valid candidate.
+
+Do not silently erase such a counterexample by merely editing the candidate until the check passes. Preserve the observed contradiction in the appropriate governed evidence form and investigate the missing, incorrectly scoped, or overstated assurance boundary. A later repair should reject recurrence.
 
 ## Preserve the Govenv frontend
 
