@@ -6,7 +6,7 @@
 ### Governance impact
 
 **Phase:** ▣ P1 — unchanged  
-**Items:** 1 completed
+**Items:** 1 completed · 1 advanced
 
 #### Completed · 1
 
@@ -14,8 +14,19 @@
 | :---: | --- |
 | **GV95 ◇ → ✓** | Make Govenv the sole semantic owner of the canonical changelog: derive the governed `Unreleased` state deterministically from the latest published release boundary to the current authorized revision, preserve every historical release entry immutably and reconstructibly, freeze that exact governed state into the Release Please candidate version before human approval, and preserve the approved freeze unchanged across the merge-to-publication boundary. Release Please may determine SemVer, analyze Conventional Commits, and coordinate the candidate/tag/release lifecycle, but its rendered notes are observational input rather than independent changelog authority; the pull-request body and published GitHub Release must project the same authorized typed release document and external publication must be verified by read-back equality. |
 
-Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `1be569a..84ea9a7`.
+#### Advanced · 1
+
+| GV | Proposition |
+| :---: | --- |
+| **GV84 ◇ ↑** | Make observed invariant regressions counterexample-closing: once a contradiction to a governed or relied-upon invariant is recorded as an observed regression, its repair is incomplete until the counterexample is preserved as governed evidence, the missing or incorrectly scoped assurance boundary is corrected or overstated governance superseded, and candidate validation rejects recurrence before the affected workflow may succeed. |
+
+Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `1be569a..abcc045`.
 <!-- govenv-governance-impact:end -->
+
+
+### Bug Fixes
+
+* **release:** preserve historical renderer boundary ([abcc045](https://github.com/klarkc/govenv/commit/abcc045d12ed8c34502eee8ba0d9d10bfadbd075))
 
 
 ### Governance
