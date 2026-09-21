@@ -1,12 +1,12 @@
 {-# OPTIONS --safe #-}
 
-module Govenv.Kernel.ConstitutionalHistorySpike.ConstitutionalHistoryScenarios where
+module Govenv.Experiment.ConstitutionalHistory.BaselineScenarios where
 
 open import Agda.Builtin.Equality using (_≡_; refl)
 open import Agda.Builtin.List using ([]; _∷_)
 open import Agda.Builtin.Nat using (Nat)
 open import Agda.Builtin.Unit using (⊤; tt)
-open import Govenv.Kernel.ConstitutionalHistorySpike.ConstitutionalHistory
+open import Govenv.Experiment.ConstitutionalHistory.Baseline
 
 prop : (n : Nat) → Proposition n
 prop n = proposition (Prop n) ⊤

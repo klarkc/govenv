@@ -1,6 +1,6 @@
 {-# OPTIONS --safe #-}
 
-module Govenv.Kernel.ConstitutionalHistorySpike.ConstitutionalHistory where
+module Govenv.Experiment.ConstitutionalHistory.Baseline where
 
 open import Agda.Builtin.Bool using (Bool; true; false)
 open import Agda.Builtin.Equality using (_≡_; refl)

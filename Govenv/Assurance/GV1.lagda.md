@@ -2,13 +2,12 @@
 
 GV1 source-boundary behavior is observed against the versioned Agda source
 paths of the candidate repository. Every observed source must remain under the
-governed `Govenv.Architecture.sourceRoots`.
+governed `Govenv.SourceLayout.sourceRoots`.
 
-The root-level `spike/ConstitutionalHistory.agda` path observed on PR #32 is
-preserved as the counterexample that exposed the previously missing assurance
-boundary. This closes that observed source-boundary regression but does not by
+This assurance closes the observed source-boundary regression but does not by
 itself discharge all legacy GV1 assurance debt: identifying whether arbitrary
 source is semantically reusable kernel requires a stronger classification model.
+Counterexamples are preserved under `Govenv.Assurance.GV1.Counterexample.*`.
 
 ```agda
 {-# OPTIONS --safe #-}
@@ -19,8 +18,8 @@ open import Agda.Builtin.Equality using (_≡_; refl)
 open import Agda.Builtin.List using (List; []; _∷_)
 open import Agda.Builtin.Maybe using (just; nothing)
 open import Agda.Builtin.String using (String)
-open import Govenv.Architecture using (sourceRoots)
-open import Govenv.Kernel.Architecture using (firstOutsideRoots)
+open import Govenv.SourceLayout using (sourceRoots)
+open import Govenv.Kernel.SourceLayout using (firstOutsideRoots)
 open import Govenv.Kernel.Assurance using
   (ObservedEvidence; observedEvidence)
 open import Govenv.Kernel.Fact using
@@ -60,19 +59,9 @@ sourceBoundaryEvidence =
   observedEvidence
     Subject Observation dependencies Diagnostic Obligation rule
 
-counterexampleFacts : Facts Subject Observation dependencies
-counterexampleFacts =
-  observed ("spike/ConstitutionalHistory.agda" ∷ []) ∷ᶠ empty
-
-counterexampleRejected :
-  Rule.check rule counterexampleFacts ≡
-  violated
-    (sourceOutsideGovenv "spike/ConstitutionalHistory.agda")
-counterexampleRejected = refl
-
 canonicalKernelFacts : Facts Subject Observation dependencies
 canonicalKernelFacts =
-  observed ("src/Govenv/Kernel/Architecture.agda" ∷ []) ∷ᶠ empty
+  observed ("src/Govenv/Kernel/SourceLayout.agda" ∷ []) ∷ᶠ empty
 
 canonicalKernelAccepted :
   Rule.check rule canonicalKernelFacts ≡ holds

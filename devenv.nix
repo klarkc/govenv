@@ -7,6 +7,7 @@ let
     rm -rf .govenv/materialize-build
     mkdir -p .govenv/materialize-build
     agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/Readme.agda >/dev/null
+    agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/Agents.agda >/dev/null
     agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/RoadmapSnapshot.agda >/dev/null
     agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/Github/Workflows/Materialize.agda >/dev/null
     agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/Github/Workflows/AdminMaterialize.agda >/dev/null
@@ -373,17 +374,19 @@ let
     .govenv/architecture-assurance-build/ArchitectureAssurance
   '';
 
-  checkConstitutionalHistorySpike = ''
-    agda -i . -i src -i ${agdaStdlib}/src src/Govenv/Kernel/ConstitutionalHistorySpike/ConstitutionalHistoryScenarios.agda
-    agda -i . -i src -i ${agdaStdlib}/src src/Govenv/Kernel/ConstitutionalHistorySpike/EcosystemReuse.agda
-    agda -i . -i src -i ${agdaStdlib}/src src/Govenv/Kernel/ConstitutionalHistorySpike/ConstitutionalHistoryStdlibScenarios.agda
-    agda -i . -i src -i ${agdaStdlib}/src src/Govenv/Kernel/ConstitutionalHistorySpike/ConstitutionalHistoryPropositionalScenarios.agda
+  checkConstitutionalHistoryExperiment = ''
+    agda -i . -i src -i ${agdaStdlib}/src src/Govenv/Experiment/ConstitutionalHistory.agda
+    agda -i . -i src -i ${agdaStdlib}/src src/Govenv/Experiment/ConstitutionalHistory/BaselineScenarios.agda
+    agda -i . -i src -i ${agdaStdlib}/src src/Govenv/Experiment/ConstitutionalHistory/EcosystemReuse.agda
+    agda -i . -i src -i ${agdaStdlib}/src src/Govenv/Experiment/ConstitutionalHistory/StdlibScenarios.agda
+    agda -i . -i src -i ${agdaStdlib}/src src/Govenv/Experiment/ConstitutionalHistory/PropositionalScenarios.agda
   '';
 
   checkMaterializations = ''
     ${buildMaterializers}
     ${validateRoadmapEvolution}
     .govenv/materialize-build/Readme > .govenv/README.generated.md
+    .govenv/materialize-build/Agents > .govenv/AGENTS.generated.md
     .govenv/materialize-build/RoadmapSnapshot > .govenv/roadmap.generated.snapshot
     .govenv/materialize-build/Materialize > .govenv/materialize.generated.yml
     .govenv/materialize-build/AdminMaterialize > .govenv/admin-materialize.generated.yml
@@ -392,6 +395,7 @@ let
     .govenv/materialize-build/Pages > .govenv/pages.generated.yml
     ${materializeChangelog ".govenv/CHANGELOG.generated.md"}
     diff -u README.md .govenv/README.generated.md
+    diff -u AGENTS.md .govenv/AGENTS.generated.md
     diff -u CHANGELOG.md .govenv/CHANGELOG.generated.md
     diff -u .govenv/roadmap.snapshot .govenv/roadmap.generated.snapshot
     diff -u .github/workflows/materialize.yml .govenv/materialize.generated.yml
@@ -429,6 +433,7 @@ in
     ${buildMaterializers}
     ${validateRoadmapEvolution}
     .govenv/materialize-build/Readme > README.md
+    .govenv/materialize-build/Agents > AGENTS.md
     .govenv/materialize-build/RoadmapSnapshot > .govenv/roadmap.snapshot
     .govenv/materialize-build/Materialize > .github/workflows/materialize.yml
     .govenv/materialize-build/AdminMaterialize > .github/workflows/admin-materialize.yml
@@ -447,7 +452,7 @@ in
   tasks."govenv:check".exec = ''
     agda -i . -i src Govenv.lagda.md
     ${checkArchitectureAssurance}
-    ${checkConstitutionalHistorySpike}
+    ${checkConstitutionalHistoryExperiment}
     ${checkMaterializations}
     ${checkAdminAdapters}
     ${validateReleasePlacementRegression}
