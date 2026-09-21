@@ -21,7 +21,7 @@
 | **GV84 ◇ ↑** | Make observed invariant regressions counterexample-closing: once a contradiction to a governed or relied-upon invariant is recorded as an observed regression, its repair is incomplete until the counterexample is preserved as governed evidence, the missing or incorrectly scoped assurance boundary is corrected or overstated governance superseded, and candidate validation rejects recurrence before the affected workflow may succeed. |
 | **GV90 ◇ ↑** | Model human authorization as `AuthorizedRevision`: new semantic authority may originate only from the exact repository state accepted by an explicit human pull-request merge. Candidate revisions may perform unprivileged validation and transient non-authoritative projections, but automated candidate-authoring principals must be distinct from human authorizers and post-authorization materializers and must not receive capabilities that can alter executable automation, authorize or merge the candidate, mutate authoritative repository state, or mutate persistent governed external state; only after authorization may governed automation exercise the capabilities necessary to derive deterministic materialization revisions or external effects. Derived outcomes create no independent semantic authority, must not be treated as fresh human authorization, and must retain revision-addressable causal provenance to the authorizing revision. |
 
-Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `1be569a..4f85955`.
+Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `1be569a..3dd0834`.
 <!-- govenv-governance-impact:end -->
 
 
@@ -29,7 +29,7 @@ Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit
 
 * **release:** preserve historical renderer boundary ([13c86c0](https://github.com/klarkc/govenv/commit/13c86c0be3268cdd503b38f066b3883768f47193))
 * **materialize:** preserve authorizing run across derived push ([3361293](https://github.com/klarkc/govenv/commit/3361293bf8f77fb271c52e2ef79397042f37633d))
-* **workflow:** close materialize projection boundary ([4f85955](https://github.com/klarkc/govenv/commit/4f8595503ff1fdb04cd7c66bc38649a1e88106e2))
+* **workflow:** close materialize projection boundary ([3dd0834](https://github.com/klarkc/govenv/commit/3dd0834de86d45c3254d3182650fc866e89ff16e))
 
 
 ### Governance
