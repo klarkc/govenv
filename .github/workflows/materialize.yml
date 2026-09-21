@@ -6,12 +6,12 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: "materialize-${{ github.event_name }}"
+  group: "materialize-${{ github.event_name }}-${{ github.event_name == 'push' && startsWith(github.event.head_commit.message, 'chore(materialize): update governed materializations') && contains(github.event.head_commit.message, 'Derived-From-Parent: true') }}"
   cancel-in-progress: true
 
 jobs:
   materialize:
-    if: ${{ github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main' }}
+    if: ${{ (github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main') && !(github.event_name == 'push' && startsWith(github.event.head_commit.message, 'chore(materialize): update governed materializations') && contains(github.event.head_commit.message, 'Derived-From-Parent: true')) }}
     outputs:
       effective-sha: ${{ steps.effective.outputs.sha }}
       release-boundary: ${{ steps.release-boundary.outputs.tag }}
