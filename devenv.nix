@@ -204,24 +204,32 @@ let
 
     regression_tmp="$(mktemp -d)"
     trap 'rm -rf "$regression_tmp"' EXIT
+    published_changelog="$regression_tmp/published.changelog.md"
     expected="$regression_tmp/published.expected.md"
     canonical="$regression_tmp/published.canonical.md"
 
-    GOVENV_RELEASE_TARGET=github-release \
-    GOVENV_RELEASE_TAG=v0.2.4 \
-    GOVENV_RELEASE_HEAD_REF=f8202bcf9ef85b40257f6562d1af76eaec94ef64 \
-      bash src/Govenv/Adapter/release-governance.sh > "$expected"
+    git show v0.2.4:CHANGELOG.md > "$published_changelog"
 
-    awk '
-      /^## \[0\.2\.4\]/ { in_target = 1; next }
-      in_target && /<!-- govenv-governance-impact:start -->/ { capture = 1 }
-      in_target && capture { print }
-      in_target && capture && /<!-- govenv-governance-impact:end -->/ { exit }
-    ' CHANGELOG.md > "$canonical"
+    for source in "$published_changelog" CHANGELOG.md; do
+      output="$canonical"
+      if [[ "$source" == "$published_changelog" ]]; then
+        output="$expected"
+      fi
+      awk '
+        /^## \[0\.2\.4\]/ { in_target = 1; next }
+        in_target && /<!-- govenv-governance-impact:start -->/ { capture = 1 }
+        in_target && capture { print }
+        in_target && capture && /<!-- govenv-governance-impact:end -->/ { exit }
+      ' "$source" > "$output"
+    done
 
     if ! cmp -s "$expected" "$canonical"; then
-      echo 'Published release governance must equal the portable canonical release section.' >&2
+      echo 'Published historical release governance must remain byte-identical to its immutable release boundary.' >&2
       diff -u "$expected" "$canonical" >&2 || true
+      exit 5
+    fi
+    if grep -Fq '<sub>Derived from immutable typed roadmap snapshots' "$canonical"; then
+      echo 'Published historical release governance must retain the portable canonical renderer.' >&2
       exit 5
     fi
     rm -rf "$regression_tmp"
