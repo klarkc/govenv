@@ -21,6 +21,7 @@ import Govenv.Assurance.GV15 as GV15
 import Govenv.Assurance.GV16 as GV16
 import Govenv.Assurance.GV20 as GV20
 import Govenv.Assurance.GV21 as GV21
+import Govenv.Assurance.GV44 as GV44
 import Govenv.Assurance.GV50 as GV50
 import Govenv.Assurance.GV52 as GV52
 import Govenv.Assurance.GV54 as GV54
@@ -40,7 +41,6 @@ data LegacyCompletion : Nat → Set where
   legacyGV2 : LegacyCompletion 2
   legacyGV19 : LegacyCompletion 19
   legacyGV22 : LegacyCompletion 22
-  legacyGV44 : LegacyCompletion 44
   legacyGV45 : LegacyCompletion 45
   legacyGV51 : LegacyCompletion 51
   legacyGV60 : LegacyCompletion 60
@@ -60,7 +60,7 @@ assurances =
   ∷ assures (statically GV20.evidence)
   ∷ assures (statically GV21.evidence)
   ∷ assures (inherited legacyGV22)
-  ∷ assures (inherited legacyGV44)
+  ∷ assures (statically GV44.evidence)
   ∷ assures (inherited legacyGV45)
   ∷ assures (statically GV50.evidence)
   ∷ assures (inherited legacyGV51)
