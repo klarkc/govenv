@@ -20,19 +20,19 @@
 | :---: | --- |
 | **GV84 ◇ ↑** | Make observed invariant regressions counterexample-closing: once a contradiction to a governed or relied-upon invariant is recorded as an observed regression, its repair is incomplete until the counterexample is preserved as governed evidence, the missing or incorrectly scoped assurance boundary is corrected or overstated governance superseded, and candidate validation rejects recurrence before the affected workflow may succeed. |
 
-Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `1be569a..abcc045`.
+Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `1be569a..13c86c0`.
 <!-- govenv-governance-impact:end -->
 
 
 ### Bug Fixes
 
-* **release:** preserve historical renderer boundary ([abcc045](https://github.com/klarkc/govenv/commit/abcc045d12ed8c34502eee8ba0d9d10bfadbd075))
+* **release:** preserve historical renderer boundary ([13c86c0](https://github.com/klarkc/govenv/commit/13c86c0be3268cdd503b38f066b3883768f47193))
 
 
 ### Governance
 
-* **roadmap:** complete GV95 ([3ebcccb](https://github.com/klarkc/govenv/commit/3ebcccb16f0c2f532f968120322984ac57238783))
-* **assurance:** establish GV95 completion evidence ([84ea9a7](https://github.com/klarkc/govenv/commit/84ea9a70e024487993e883263b03fa8e3bec2947))
+* **roadmap:** complete GV95 ([b934509](https://github.com/klarkc/govenv/commit/b9345094ccb9a55062dbd90a74bf11e3af96c791))
+* **assurance:** establish GV95 completion evidence ([662f841](https://github.com/klarkc/govenv/commit/662f84107b0c86a4d53a95d8b10dc2b8687843e5))
 
 ## [0.2.6](https://github.com/klarkc/govenv/compare/v0.2.5...v0.2.6) (2026-09-21)
 <!-- govenv-release-freeze: version=0.2.6 base=v0.2.5 authorized=29b5926cf6d1a590ec2a9afa3427af14d75d1e64 -->
