@@ -1,12 +1,12 @@
 {-# OPTIONS --safe #-}
 
-module spike.ConstitutionalHistoryScenarios where
+module Govenv.Kernel.ConstitutionalHistorySpike.ConstitutionalHistoryStdlibScenarios where
 
 open import Agda.Builtin.Equality using (_≡_; refl)
 open import Agda.Builtin.List using ([]; _∷_)
 open import Agda.Builtin.Nat using (Nat)
 open import Agda.Builtin.Unit using (⊤; tt)
-open import spike.ConstitutionalHistory
+open import Govenv.Kernel.ConstitutionalHistorySpike.ConstitutionalHistoryStdlib
 
 prop : (n : Nat) → Proposition n
 prop n = proposition (Prop n) ⊤
@@ -174,3 +174,74 @@ h95-established-valid =
 
 gv95-established-glyph : governanceGlyph h95-established 95 ≡ mixed
 gv95-established-glyph = refl
+
+-- Stdlib-backed declaration validity rejects duplicate Proposition IDs.
+
+p70a : Proposition 70
+p70a = prop 70
+
+p70b : Proposition 70
+p70b = prop 70
+
+duplicateDeclaration : GovernanceDeclaration
+duplicateDeclaration =
+  governanceDeclaration 70 "duplicate ids" 1
+    (someProposition p70a ∷ someProposition p70b ∷ [])
+
+duplicateIdsRejected :
+  ValidEntry ε (declare duplicateDeclaration) → ⊤
+duplicateIdsRejected ()
+
+-- Supersession coverage is set-like rather than list-order-sensitive.
+
+p80 : Proposition 80
+p80 = prop 80
+
+p81 : Proposition 81
+p81 = prop 81
+
+g80 : GovernanceDeclaration
+g80 = governanceDeclaration 80 "two pending propositions" 1
+  (someProposition p80 ∷ someProposition p81 ∷ [])
+
+g81 : GovernanceDeclaration
+g81 = governanceDeclaration 81 "empty successor" 1 []
+
+s80-81-reordered : Supersession
+s80-81-reordered =
+  supersession 80 81 []
+    ( dispositionOf 81 abandoned
+    ∷ dispositionOf 80 abandoned
+    ∷ [])
+
+h80-81-reordered : History
+h80-81-reordered =
+  ε
+  ▻ declare g80
+  ▻ declare g81
+  ▻ supersede s80-81-reordered
+
+h80-81-reordered-valid : ValidHistory h80-81-reordered
+h80-81-reordered-valid =
+  extend
+    (extend
+      (extend empty (declare g80) valid)
+      (declare g81)
+      valid)
+    (supersede s80-81-reordered)
+    valid
+
+s80-81-duplicate-disposition : Supersession
+s80-81-duplicate-disposition =
+  supersession 80 81 []
+    ( dispositionOf 80 abandoned
+    ∷ dispositionOf 80 abandoned
+    ∷ dispositionOf 81 abandoned
+    ∷ [])
+
+duplicateDispositionRejected :
+  ValidEntry
+    (ε ▻ declare g80 ▻ declare g81)
+    (supersede s80-81-duplicate-disposition)
+    → ⊤
+duplicateDispositionRejected ()

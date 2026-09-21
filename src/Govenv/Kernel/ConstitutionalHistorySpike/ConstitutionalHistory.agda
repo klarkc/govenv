@@ -1,6 +1,6 @@
 {-# OPTIONS --safe #-}
 
-module spike.ConstitutionalHistory where
+module Govenv.Kernel.ConstitutionalHistorySpike.ConstitutionalHistory where
 
 open import Agda.Builtin.Bool using (Bool; true; false)
 open import Agda.Builtin.Equality using (_≡_; refl)

@@ -1,6 +1,6 @@
 {-# OPTIONS --safe #-}
 
-module spike.EcosystemReuse where
+module Govenv.Kernel.ConstitutionalHistorySpike.EcosystemReuse where
 
 open import Agda.Builtin.Bool using (true)
 open import Agda.Builtin.Equality using (_≡_; refl)
