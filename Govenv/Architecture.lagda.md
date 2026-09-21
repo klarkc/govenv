@@ -1,52 +1,39 @@
 # Architecture
 
-Govenv declares the architectural roles of repository areas and the dependency directions allowed between them. Candidate validation observes every versioned Agda and literate-Agda source path and requires it to remain inside the governed Govenv source roots. This source-boundary check is intentionally narrower than total area classification: existing frontend source such as `src/Govenv/Roadmap/DSL.agda` is valid project source even though frontend is not yet modeled as an architecture role. `Architecture/source-placement-counterexample.md` preserves the PR #32 GV1 regression that exposed the previously missing source-boundary assurance.
+Govenv architecture is semantic, not path-derived. Architectural subjects are
+Agda declaration identities (`Name`) and roles describe their semantic place in
+the system. Source paths belong to `Govenv.SourceLayout`; the root closure is
+owned by `Govenv.lagda.md`; generated artifacts belong to their materialization
+authority. None of those transport/layout concerns is an architectural role.
+
+GV98 is still pending. This module therefore defines the architectural role
+vocabulary and allowed dependency directions without claiming that every
+repository declaration has already been classified or that those dependencies
+are already enforced.
 
 ```agda
 {-# OPTIONS --safe #-}
 
 module Govenv.Architecture where
 
-open import Agda.Builtin.List
-open import Agda.Builtin.String using (String)
-open import Agda.Builtin.Unit
+open import Agda.Builtin.List using (List; []; _∷_)
 open import Govenv.Kernel.Architecture
 
-sourceRoots : List String
-sourceRoots =
-    "Govenv.lagda.md"
-  ∷ "Govenv/"
-  ∷ "src/Govenv/"
+allowedDependencies : List Dependency
+allowedDependencies =
+    allow governance kernel
+  ∷ allow protocol governance
+  ∷ allow assurance governance
+  ∷ allow assurance protocol
+  ∷ allow assurance materialization
+  ∷ allow assurance kernel
+  ∷ allow experiment kernel
+  ∷ allow materialization governance
+  ∷ allow materialization protocol
+  ∷ allow materialization kernel
+  ∷ allow projection materialization
+  ∷ allow projection kernel
+  ∷ allow adapter assurance
+  ∷ allow adapter projection
   ∷ []
-
-architecture : Architecture
-architecture = record
-  { areas =
-      area "Govenv.lagda.md" closure
-    ∷ area "Govenv/Materialization/" materialization
-    ∷ area "Govenv/" constitution
-    ∷ area "src/Govenv/Kernel/" kernel
-    ∷ area "src/Govenv/Projection/" projection
-    ∷ area "src/Govenv/Adapter/" adapter
-    ∷ area "README.md" generated
-    ∷ area ".govenv/roadmap.snapshot" generated
-    ∷ []
-  ; dependencies =
-      allow closure constitution
-    ∷ allow closure materialization
-    ∷ allow closure kernel
-    ∷ allow constitution kernel
-    ∷ allow materialization constitution
-    ∷ allow materialization kernel
-    ∷ allow projection materialization
-    ∷ allow projection kernel
-    ∷ allow adapter projection
-    ∷ []
-  }
-
-ArchitectureValid : Set
-ArchitectureValid = ⊤
-
-architectureValid : ArchitectureValid
-architectureValid = tt
 ```

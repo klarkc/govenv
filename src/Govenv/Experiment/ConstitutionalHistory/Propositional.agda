@@ -1,6 +1,6 @@
 {-# OPTIONS --safe #-}
 
-module Govenv.Kernel.ConstitutionalHistorySpike.ConstitutionalHistoryPropositional where
+module Govenv.Experiment.ConstitutionalHistory.Propositional where
 
 open import Agda.Builtin.Equality using (_≡_)
 open import Agda.Builtin.Maybe using (Maybe; just; nothing)

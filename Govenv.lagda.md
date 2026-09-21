@@ -5,13 +5,16 @@ Govenv is the canonical project entrypoint and formal closure root.
 ```agda
 module Govenv where
 
-open import Agda.Builtin.Unit
 open import Govenv.Architecture
+open import Govenv.SourceLayout
+open import Govenv.Governance
+open import Govenv.Protocol
 open import Govenv.Authorization
 open import Govenv.Github.Authorization
 open import Govenv.Administration
 open import Govenv.Assurance
 open import Govenv.Materialization
+open import Govenv.Materialization.Agents
 open import Govenv.Materialization.Readme
 open import Govenv.Materialization.RoadmapSnapshot
 open import Govenv.Materialization.ReleaseGovernance
@@ -37,10 +40,4 @@ open import Govenv.Release
 open import Govenv.Kernel.Fact
 open import Govenv.Kernel.Verdict
 open import Govenv.Kernel.Rule
-
-projectLoads : Set
-projectLoads = ArchitectureValid
-
-projectLoadsProof : projectLoads
-projectLoadsProof = architectureValid
 ```
