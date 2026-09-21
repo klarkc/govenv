@@ -14,13 +14,14 @@
 | :---: | --- |
 | **GV95 ◇ → ✓** | Make Govenv the sole semantic owner of the canonical changelog: derive the governed `Unreleased` state deterministically from the latest published release boundary to the current authorized revision, preserve every historical release entry immutably and reconstructibly, freeze that exact governed state into the Release Please candidate version before human approval, and preserve the approved freeze unchanged across the merge-to-publication boundary. Release Please may determine SemVer, analyze Conventional Commits, and coordinate the candidate/tag/release lifecycle, but its rendered notes are observational input rather than independent changelog authority; the pull-request body and published GitHub Release must project the same authorized typed release document and external publication must be verified by read-back equality. |
 
-Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `1be569a..3ebcccb`.
+Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `1be569a..84ea9a7`.
 <!-- govenv-governance-impact:end -->
 
 
 ### Governance
 
 * **roadmap:** complete GV95 ([3ebcccb](https://github.com/klarkc/govenv/commit/3ebcccb16f0c2f532f968120322984ac57238783))
+* **assurance:** establish GV95 completion evidence ([84ea9a7](https://github.com/klarkc/govenv/commit/84ea9a70e024487993e883263b03fa8e3bec2947))
 
 ## [0.2.6](https://github.com/klarkc/govenv/compare/v0.2.5...v0.2.6) (2026-09-21)
 <!-- govenv-release-freeze: version=0.2.6 base=v0.2.5 authorized=29b5926cf6d1a590ec2a9afa3427af14d75d1e64 -->
