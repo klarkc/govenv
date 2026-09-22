@@ -2,6 +2,69 @@
 
 ## [Unreleased]
 
+<!-- govenv-governance-impact:start -->
+### Governance impact
+
+**Phase:** ▣ P1 — unchanged  
+**Items:** 1 advanced · 4 introduced · 3 superseded
+
+#### Advanced · 1
+
+| GV | Proposition |
+| :---: | --- |
+| **GV84 ◇ ↑** | Make observed invariant regressions counterexample-closing: once a contradiction to a governed or relied-upon invariant is recorded as an observed regression, its repair is incomplete until the counterexample is preserved as governed evidence, the missing or incorrectly scoped assurance boundary is corrected or overstated governance superseded, and candidate validation rejects recurrence before the affected workflow may succeed. |
+
+#### Introduced · 4
+
+| GV | Proposition |
+| :---: | --- |
+| **+ GV96 ◇** | Close versioned artifact authority: handwritten semantic authority is limited to code-first `.agda` modules and human-facing normative `.lagda.md` modules; implementation and experiment documentation must live in the owning `.agda`, while Governance, Protocol, and governed evidence keep prose and formalization together in the owning literate module. Every other versioned artifact must be produced by exactly one governed `Govenv.Materialization.*` definition and verified against it; transient `.govenv` state is forbidden from being versioned, with only the temporary root-level `devenv.nix`, `devenv.yaml`, and `devenv.lock` bootstrap escape hatch until GV38 completes. |
+| **+ GV97 ◇** | Model `Govenv.Governance` and `Govenv.Protocol` as distinct human-facing literate normative domains: Governance defines constitutional validity, while Protocol guides contributor and agent process without independently invalidating repository state. Materialize `AGENTS.md` exclusively from `Govenv.Protocol` and reject tracked divergence. |
+| **+ GV98 ◇** | Classify Agda semantic declarations by reflected `Name` into architectural roles for governance, protocol, assurance, materialization, kernel, experiment, projection, and adapters, and enforce allowed dependency directions between those roles. Source layout, the root closure, and generated artifacts are separate transport/composition concerns and must not determine semantic role. Experiments may depend on the reusable kernel, but kernel code must never depend on experiments. |
+| **+ GV99 ◇** | Require every persisted counterexample to be governed literate evidence under `Govenv/Assurance/GV<n>/Counterexample/` for the assurance boundary it refutes. Any external fixture needed to exercise that counterexample must be a governed materialization of the canonical evidence rather than an independent handwritten authority. |
+
+#### Superseded · 3
+
+##### GV62 ↪ GV98
+
+```diff
+- Enforce architecture roles and dependency directions for the closure root, constitution, materialization, kernel, projection, adapters, and generated artifacts.
++ Classify Agda semantic declarations by reflected `Name` into architectural roles for governance, protocol, assurance, materialization, kernel, experiment, projection, and adapters, and enforce allowed dependency directions between those roles. Source layout, the root closure, and generated artifacts are separate transport/composition concerns and must not determine semantic role. Experiments may depend on the reusable kernel, but kernel code must never depend on experiments.
+```
+
+##### GV71 ↪ GV96
+
+```diff
+- Restrict handwritten versioned repository content to Agda and Markdown only. Any generated or governed materialization may use its required target format. Until GV38 is completed, the only handwritten bootstrap escape hatch is root-level `devenv.nix`, `devenv.yaml`, and `devenv.lock`; all other implementation languages and handwritten configuration formats, including Nix elsewhere, are forbidden.
++ Close versioned artifact authority: handwritten semantic authority is limited to code-first `.agda` modules and human-facing normative `.lagda.md` modules; implementation and experiment documentation must live in the owning `.agda`, while Governance, Protocol, and governed evidence keep prose and formalization together in the owning literate module. Every other versioned artifact must be produced by exactly one governed `Govenv.Materialization.*` definition and verified against it; transient `.govenv` state is forbidden from being versioned, with only the temporary root-level `devenv.nix`, `devenv.yaml`, and `devenv.lock` bootstrap escape hatch until GV38 completes.
+```
+
+##### GV72 ↪ GV96
+
+```diff
+- Require every versioned repository artifact not permitted as handwritten source by GV71, except the temporary root-level `devenv.nix`, `devenv.yaml`, and `devenv.lock` bootstrap escape hatch, to be produced by exactly one governed `Govenv.Materialization.*` definition and verified against its materialized state; transient `.govenv` state is forbidden from being versioned.
++ Close versioned artifact authority: handwritten semantic authority is limited to code-first `.agda` modules and human-facing normative `.lagda.md` modules; implementation and experiment documentation must live in the owning `.agda`, while Governance, Protocol, and governed evidence keep prose and formalization together in the owning literate module. Every other versioned artifact must be produced by exactly one governed `Govenv.Materialization.*` definition and verified against it; transient `.govenv` state is forbidden from being versioned, with only the temporary root-level `devenv.nix`, `devenv.yaml`, and `devenv.lock` bootstrap escape hatch until GV38 completes.
+```
+
+Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `8af5ae6..c945c16`.
+<!-- govenv-governance-impact:end -->
+
+
+### Governance
+
+* **architecture:** close source-boundary counterexample ([cb0b18c](https://github.com/klarkc/govenv/commit/cb0b18cefd31ee20e084b1c3515bb982f7361c1e))
+* **architecture:** separate normative and experiment domains ([c945c16](https://github.com/klarkc/govenv/commit/c945c162a8272cabc024f40dae0bf6a92a08a3b8))
+
+
+### Documentation
+
+* **policy:** distinguish operations from governance ([a0442f4](https://github.com/klarkc/govenv/commit/a0442f4ef47f136c6131f29ae0b0218367757b36))
+
+
+### Miscellaneous
+
+* **spike:** model constitutional history semantics ([12916bd](https://github.com/klarkc/govenv/commit/12916bd22545ddb85ab8d6948a436fa783343210))
+
 ## [0.2.7](https://github.com/klarkc/govenv/compare/v0.2.6...v0.2.7) (2026-09-21)
 <!-- govenv-release-freeze: version=0.2.7 base=v0.2.6 authorized=3dd0834de86d45c3254d3182650fc866e89ff16e -->
 
