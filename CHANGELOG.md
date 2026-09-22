@@ -18,7 +18,7 @@
 
 | GV | Proposition |
 | :---: | --- |
-| **+ GV101 ◇** | Partition project requirements and mechanisms into Governance, Protocol, and irreducible observation/effect execution: every expressible and checkable property of repository or system state, transition, effect, authorization, or semantic output that determines constitutional validity must be governed; contributor and agent process guidance remains Protocol even when machine-checkable, and compliance with that guidance must not itself determine repository validity, while Governance may independently require canonical Protocol materializations to match their source; adapters may only observe, apply, or verify effects and must not introduce semantic authority. |
+| **+ GV101 ✓** | Partition project requirements and mechanisms into Governance, Protocol, and irreducible observation/effect execution: every expressible and checkable property of repository or system state, transition, effect, authorization, or semantic output that determines constitutional validity must be governed; contributor and agent process guidance remains Protocol even when machine-checkable, and compliance with that guidance must not itself determine repository validity, while Governance may independently require canonical Protocol materializations to match their source; adapters may only observe, apply, or verify effects and must not introduce semantic authority. |
 | **+ GV102 ◇** | Separate domain semantic authority from materialization binding: every state materialized by Govenv must have exactly one canonical `Govenv.Materialization.*` definition that binds authoritative semantic sources and any target-specific composition, ordering, or inclusion to its target, application mode, privilege, required authority, and verification; Governance, Protocol, and other governed project data retain ownership of their domain semantics and must not be duplicated or re-owned by materializations, projections, or adapters; projections encode target-format representation and adapters only observe, apply, or verify effects. |
 | **+ GV96 ◇** | Close versioned artifact authority: handwritten semantic authority is limited to code-first `.agda` modules and human-facing normative `.lagda.md` modules; implementation and experiment documentation must live in the owning `.agda`, while Governance, Protocol, and governed evidence keep prose and formalization together in the owning literate module. Every other versioned artifact must be produced by exactly one governed `Govenv.Materialization.*` definition and verified against it; transient `.govenv` state is forbidden from being versioned, with only the temporary root-level `devenv.nix`, `devenv.yaml`, and `devenv.lock` bootstrap escape hatch until GV38 completes. |
 | **+ GV97 ◇** | Model `Govenv.Governance` and `Govenv.Protocol` as distinct human-facing literate normative domains: Governance defines constitutional validity, while Protocol guides contributor and agent process without independently invalidating repository state. Materialize `AGENTS.md` exclusively from `Govenv.Protocol` and reject tracked divergence. |
@@ -96,7 +96,7 @@
 + Keep MCP strictly optional and adapter-only: core Governance and Protocol semantics, `govenv check`, scoped advice, LSP/editor integration, Git boundaries, and coding-agent lifecycle integration must not depend on MCP availability; any MCP integration may project the same governed context or diagnostic/advisory deltas without becoming semantic authority.
 ```
 
-Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `8af5ae6..675c1ee`.
+Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `8af5ae6..bf3f870`.
 <!-- govenv-governance-impact:end -->
 
 
@@ -105,6 +105,7 @@ Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit
 * **architecture:** close source-boundary counterexample ([ff3c01c](https://github.com/klarkc/govenv/commit/ff3c01c11a9814ba8e365635be82e37afd45632b))
 * **architecture:** separate normative and experiment domains ([c916e8d](https://github.com/klarkc/govenv/commit/c916e8d03bc7b2f6721ceee581d1cf43c9391cb2))
 * **project:** align purpose and integration roadmap ([675c1ee](https://github.com/klarkc/govenv/commit/675c1ee71e0e5cbde0325ab323237394438418af))
+* **governance:** classify semantic authority domains ([bf3f870](https://github.com/klarkc/govenv/commit/bf3f870e5263fbf831498166c044a377b03aa474))
 
 
 ### Documentation
