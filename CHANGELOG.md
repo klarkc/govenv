@@ -96,25 +96,25 @@
 + Keep MCP strictly optional and adapter-only: core Governance and Protocol semantics, `govenv check`, scoped advice, LSP/editor integration, Git boundaries, and coding-agent lifecycle integration must not depend on MCP availability; any MCP integration may project the same governed context or diagnostic/advisory deltas without becoming semantic authority.
 ```
 
-Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `8af5ae6..8089ac9`.
+Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `8af5ae6..675c1ee`.
 <!-- govenv-governance-impact:end -->
 
 
 ### Governance
 
-* **architecture:** close source-boundary counterexample ([cb0b18c](https://github.com/klarkc/govenv/commit/cb0b18cefd31ee20e084b1c3515bb982f7361c1e))
-* **architecture:** separate normative and experiment domains ([c945c16](https://github.com/klarkc/govenv/commit/c945c162a8272cabc024f40dae0bf6a92a08a3b8))
-* **project:** align purpose and integration roadmap ([8089ac9](https://github.com/klarkc/govenv/commit/8089ac936e2860df62eabfd12b74d91ea7390ea3))
+* **architecture:** close source-boundary counterexample ([ff3c01c](https://github.com/klarkc/govenv/commit/ff3c01c11a9814ba8e365635be82e37afd45632b))
+* **architecture:** separate normative and experiment domains ([c916e8d](https://github.com/klarkc/govenv/commit/c916e8d03bc7b2f6721ceee581d1cf43c9391cb2))
+* **project:** align purpose and integration roadmap ([675c1ee](https://github.com/klarkc/govenv/commit/675c1ee71e0e5cbde0325ab323237394438418af))
 
 
 ### Documentation
 
-* **policy:** distinguish operations from governance ([a0442f4](https://github.com/klarkc/govenv/commit/a0442f4ef47f136c6131f29ae0b0218367757b36))
+* **policy:** distinguish operations from governance ([51cedb9](https://github.com/klarkc/govenv/commit/51cedb938c98fcfcb69a831257c31d758a9a754c))
 
 
 ### Miscellaneous
 
-* **spike:** model constitutional history semantics ([12916bd](https://github.com/klarkc/govenv/commit/12916bd22545ddb85ab8d6948a436fa783343210))
+* **spike:** model constitutional history semantics ([9d8a2be](https://github.com/klarkc/govenv/commit/9d8a2beda969bd2d75942409f2e3aa27cec31618))
 
 ## [0.2.7](https://github.com/klarkc/govenv/compare/v0.2.6...v0.2.7) (2026-09-21)
 <!-- govenv-release-freeze: version=0.2.7 base=v0.2.6 authorized=3dd0834de86d45c3254d3182650fc866e89ff16e -->
