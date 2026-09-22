@@ -17,6 +17,6 @@ materialization = materialized
   adminApplication
   adminPrivilege
   adminAuthority
-  readBackEquality
+  descriptionReadBackEquality
   description
 ```

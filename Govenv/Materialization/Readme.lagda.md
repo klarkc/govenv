@@ -16,7 +16,7 @@ open import Govenv.Kernel.Readme
 open Readme
 open import Govenv.Kernel.Roadmap using (Roadmap; Membership; progressing; complete; phaseNode; membership; done; todo; cancelled; superseded)
 open import Govenv.Materialization
-open import Govenv.Project using (name; description)
+open import Govenv.Project using (name; description; purpose)
 open import Govenv.Readme using (readme)
 
 private
@@ -92,6 +92,8 @@ materialization = materialized
       ∷ badge "https://img.shields.io/github/v/release/klarkc/govenv?display_name=tag&sort=semver" "Release" (just (releaseUrl readme))
       ∷ badge "https://img.shields.io/badge/license-Apache--2.0-blue" (licenseName readme) nothing
       ∷ [] )
+  ∷ heading section normal "Purpose"
+  ∷ paragraph normal (text purpose ∷ [])
   ∷ heading section normal "Roadmap"
   ∷ current (currentOf (roadmap readme))
   ∷ blockQuote (roadmapNote readme)

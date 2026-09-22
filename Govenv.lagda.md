@@ -19,6 +19,8 @@ open import Govenv.Materialization.Readme
 open import Govenv.Materialization.RoadmapSnapshot
 open import Govenv.Materialization.ReleaseGovernance
 open import Govenv.Materialization.Github.Repository.Description
+open import Govenv.Materialization.Github.Repository.Topics
+open import Govenv.Materialization.Github.Repository.Website
 open import Govenv.Materialization.Github.Repository.MaterializerDeployKeys
 open import Govenv.Materialization.Github.Repository.MainAuthorization
 open import Govenv.Materialization.Github.Repository.MainAuthorityBoundary

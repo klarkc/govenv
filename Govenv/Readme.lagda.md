@@ -8,11 +8,12 @@ This module contains governed source data used by the repository README. `Govenv
 module Govenv.Readme where
 
 open import Govenv.Kernel.Readme
+open import Govenv.Project using (website)
 open import Govenv.Roadmap using (roadmap)
 
 readme : Readme
 readme = record
-  { docsUrl = "https://klarkc.github.io/govenv/"
+  { docsUrl = website
   ; agdaVersion = "2.8.0"
   ; releaseUrl = "https://github.com/klarkc/govenv/releases"
   ; licenseName = "Apache-2.0"
