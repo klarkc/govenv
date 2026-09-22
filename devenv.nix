@@ -17,7 +17,7 @@ let
   '';
 
   checkAdminAdapters = ''
-    agda -i . -i src src/Govenv/Adapter/Github/Repository/DescriptionApplication.agda
+    agda -i . -i src src/Govenv/Adapter/Github/Repository/MetadataApplication.agda
     agda -i . -i src src/Govenv/Adapter/Github/Actions/AdminEnvironment.agda
     agda -i . -i src src/Govenv/Adapter/Github/Actions/MaterializerEnvironmentBoundary.agda
     agda -i . -i src src/Govenv/Adapter/Github/Repository/MaterializerCredential.agda
@@ -33,7 +33,7 @@ let
   buildAdminAdapters = ''
     rm -rf .govenv/admin-apply-build
     mkdir -p .govenv/admin-apply-build
-    agda -i . -i src --compile --compile-dir=.govenv/admin-apply-build src/Govenv/Adapter/Github/Repository/DescriptionApplication.agda >/dev/null
+    agda -i . -i src --compile --compile-dir=.govenv/admin-apply-build src/Govenv/Adapter/Github/Repository/MetadataApplication.agda >/dev/null
     agda -i . -i src --compile --compile-dir=.govenv/admin-apply-build src/Govenv/Adapter/Github/Actions/AdminEnvironment.agda >/dev/null
     agda -i . -i src --compile --compile-dir=.govenv/admin-apply-build src/Govenv/Adapter/Github/Actions/MaterializerEnvironmentBoundary.agda >/dev/null
     agda -i . -i src --compile --compile-dir=.govenv/admin-apply-build src/Govenv/Adapter/Github/Repository/MaterializerCredential.agda >/dev/null

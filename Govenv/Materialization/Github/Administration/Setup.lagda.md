@@ -13,7 +13,7 @@ open import Agda.Builtin.List using (List; []; _∷_)
 open import Agda.Builtin.String using (String)
 
 data AdminSetupStep : Set where
-  repositoryDescriptionStep : AdminSetupStep
+  repositoryMetadataStep : AdminSetupStep
   adminEnvironmentStep : AdminSetupStep
   materializerEnvironmentBoundaryStep : AdminSetupStep
   materializerCredentialStep : AdminSetupStep
@@ -27,7 +27,7 @@ setupTarget = "setup"
 plan : List AdminSetupStep
 plan =
   adminEnvironmentStep
-  ∷ repositoryDescriptionStep
+  ∷ repositoryMetadataStep
   ∷ materializerEnvironmentBoundaryStep
   ∷ materializerCredentialStep
   ∷ materializerEnvironmentStep

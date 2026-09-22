@@ -25,7 +25,7 @@ data ApplicationAuthorization : ApplicationAuthority → Set where
   authorizedApplication : AuthorizedRevision → ApplicationAuthorization authorizedOnly
 
 data GithubRepositoryProperty : Set where
-  repositoryDescription : GithubRepositoryProperty
+  repositoryDescription repositoryWebsite repositoryTopics : GithubRepositoryProperty
 
 data RepositoryFileSection : Set where
   releaseGovernanceImpactInChangelog : RepositoryFileSection
@@ -64,8 +64,12 @@ data Verification : Target → Set where
     {path : String} {section : RepositoryFileSection}
     {placement : RepositoryFileSectionPlacement} →
     Verification (repositoryFileSection path section placement)
-  readBackEquality : {property : GithubRepositoryProperty} →
-    Verification (githubRepository property)
+  descriptionReadBackEquality :
+    Verification (githubRepository repositoryDescription)
+  websiteReadBackEquality :
+    Verification (githubRepository repositoryWebsite)
+  topicsReadBackSetEquality :
+    Verification (githubRepository repositoryTopics)
   rulesetReadBackEquality : {name : String} →
     Verification (githubRepositoryRuleset name)
   deployKeySetReadBackEquality : Verification githubRepositoryDeployKeys

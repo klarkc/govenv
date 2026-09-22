@@ -26,6 +26,7 @@ allowedDependencies =
   ∷ allow assurance governance
   ∷ allow assurance protocol
   ∷ allow assurance materialization
+  ∷ allow assurance projection
   ∷ allow assurance kernel
   ∷ allow experiment kernel
   ∷ allow materialization governance
@@ -33,7 +34,10 @@ allowedDependencies =
   ∷ allow materialization kernel
   ∷ allow projection materialization
   ∷ allow projection kernel
+  ∷ allow adapter governance
   ∷ allow adapter assurance
+  ∷ allow adapter materialization
   ∷ allow adapter projection
+  ∷ allow adapter kernel
   ∷ []
 ```
