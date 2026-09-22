@@ -6,7 +6,7 @@
 ### Governance impact
 
 **Phase:** ▣ P1 — unchanged  
-**Items:** 1 advanced · 4 introduced · 3 superseded
+**Items:** 1 advanced · 12 introduced · 9 superseded
 
 #### Advanced · 1
 
@@ -14,22 +14,58 @@
 | :---: | --- |
 | **GV84 ◇ ↑** | Make observed invariant regressions counterexample-closing: once a contradiction to a governed or relied-upon invariant is recorded as an observed regression, its repair is incomplete until the counterexample is preserved as governed evidence, the missing or incorrectly scoped assurance boundary is corrected or overstated governance superseded, and candidate validation rejects recurrence before the affected workflow may succeed. |
 
-#### Introduced · 4
+#### Introduced · 12
 
 | GV | Proposition |
 | :---: | --- |
+| **+ GV101 ◇** | Partition project requirements and mechanisms into Governance, Protocol, and irreducible observation/effect execution: every expressible and checkable property of repository or system state, transition, effect, authorization, or semantic output that determines constitutional validity must be governed; contributor and agent process guidance remains Protocol even when machine-checkable, and compliance with that guidance must not itself determine repository validity, while Governance may independently require canonical Protocol materializations to match their source; adapters may only observe, apply, or verify effects and must not introduce semantic authority. |
+| **+ GV102 ◇** | Separate domain semantic authority from materialization binding: every state materialized by Govenv must have exactly one canonical `Govenv.Materialization.*` definition that binds authoritative semantic sources and any target-specific composition, ordering, or inclusion to its target, application mode, privilege, required authority, and verification; Governance, Protocol, and other governed project data retain ownership of their domain semantics and must not be duplicated or re-owned by materializations, projections, or adapters; projections encode target-format representation and adapters only observe, apply, or verify effects. |
 | **+ GV96 ◇** | Close versioned artifact authority: handwritten semantic authority is limited to code-first `.agda` modules and human-facing normative `.lagda.md` modules; implementation and experiment documentation must live in the owning `.agda`, while Governance, Protocol, and governed evidence keep prose and formalization together in the owning literate module. Every other versioned artifact must be produced by exactly one governed `Govenv.Materialization.*` definition and verified against it; transient `.govenv` state is forbidden from being versioned, with only the temporary root-level `devenv.nix`, `devenv.yaml`, and `devenv.lock` bootstrap escape hatch until GV38 completes. |
 | **+ GV97 ◇** | Model `Govenv.Governance` and `Govenv.Protocol` as distinct human-facing literate normative domains: Governance defines constitutional validity, while Protocol guides contributor and agent process without independently invalidating repository state. Materialize `AGENTS.md` exclusively from `Govenv.Protocol` and reject tracked divergence. |
 | **+ GV98 ◇** | Classify Agda semantic declarations by reflected `Name` into architectural roles for governance, protocol, assurance, materialization, kernel, experiment, projection, and adapters, and enforce allowed dependency directions between those roles. Source layout, the root closure, and generated artifacts are separate transport/composition concerns and must not determine semantic role. Experiments may depend on the reusable kernel, but kernel code must never depend on experiments. |
 | **+ GV99 ◇** | Require every persisted counterexample to be governed literate evidence under `Govenv/Assurance/GV<n>/Counterexample/` for the assurance boundary it refutes. Any external fixture needed to exercise that counterexample must be a governed materialization of the canonical evidence rather than an independent handwritten authority. |
+| **+ GV100 ◇** | Govern Govenv's canonical project purpose and public repository identity metadata: `Govenv.Project.purpose` states the long-term project direction and is projected in full into the README; `description` is a faithful summary limited to 250 characters; `purpose` is limited to 500 characters; and `website` plus `topics` are canonical project data materialized to GitHub with read-back verification. |
+| **+ GV103 ◇** | Enforce staged candidate and commit governance transparently through a provider-neutral Git-hook boundary whose operational installation is supplied by the active runtime backend, with Stage 0 using devenv; Govenv owns the governed gate semantics while hook-manager and provider mechanics remain integration concerns. |
+| **+ GV107 ◇** | Keep MCP strictly optional and adapter-only: core Governance and Protocol semantics, `govenv check`, scoped advice, LSP/editor integration, Git boundaries, and coding-agent lifecycle integration must not depend on MCP availability; any MCP integration may project the same governed context or diagnostic/advisory deltas without becoming semantic authority. |
+| **+ GV104 ◇** | Separate constitutional findings from non-constitutional Protocol advisories: `govenv check` remains the authoritative full Governance evaluation, while scoped advice is selected from Protocol by semantic focus or candidate delta and may guide contributors or agents without changing repository validity; applicability belongs to Protocol semantics and relevance/scoping belongs to projections rather than editor or agent transport. |
+| **+ GV105 ◇** | Expose anticipatory Governance and Protocol context through provider-neutral coding-agent lifecycle boundaries: before-tool integration may gate or rewrite governed effects using the same semantic rules, after-tool integration may attach scoped Protocol advice and context, provider capability and wire differences remain adapter concerns, and unsupported agents fall back to the available LSP, Git-hook, and authoritative check boundaries without weakening validation. |
+| **+ GV106 ◇** | Make `govenv shell` establish supported editor and coding-agent integrations through the active runtime backend for agents launched within that shell, including lifecycle hooks, LSP, and Git fallback boundaries, while never packaging or taking ownership of the coding-agent executable itself. |
 
-#### Superseded · 3
+#### Superseded · 9
+
+##### GV57 ↪ GV101
+
+```diff
+- Inventory repository behavior and policy, distinguishing governed semantics from irreducibly observational or effectful mechanisms.
++ Partition project requirements and mechanisms into Governance, Protocol, and irreducible observation/effect execution: every expressible and checkable property of repository or system state, transition, effect, authorization, or semantic output that determines constitutional validity must be governed; contributor and agent process guidance remains Protocol even when machine-checkable, and compliance with that guidance must not itself determine repository validity, while Governance may independently require canonical Protocol materializations to match their source; adapters may only observe, apply, or verify effects and must not introduce semantic authority.
+```
+
+##### GV58 ↪ GV101
+
+```diff
+- Require every inventory entry whose semantics can be expressed and checked by Govenv to be backed by governed data and a rule.
++ Partition project requirements and mechanisms into Governance, Protocol, and irreducible observation/effect execution: every expressible and checkable property of repository or system state, transition, effect, authorization, or semantic output that determines constitutional validity must be governed; contributor and agent process guidance remains Protocol even when machine-checkable, and compliance with that guidance must not itself determine repository validity, while Governance may independently require canonical Protocol materializations to match their source; adapters may only observe, apply, or verify effects and must not introduce semantic authority.
+```
+
+##### GV59 ↪ GV101
+
+```diff
+- Minimize the ungoverned surface to irreducible observation and effect execution; adapters may perform effects but must not introduce semantic content, policy, structure, ordering, or authorization decisions.
++ Partition project requirements and mechanisms into Governance, Protocol, and irreducible observation/effect execution: every expressible and checkable property of repository or system state, transition, effect, authorization, or semantic output that determines constitutional validity must be governed; contributor and agent process guidance remains Protocol even when machine-checkable, and compliance with that guidance must not itself determine repository validity, while Governance may independently require canonical Protocol materializations to match their source; adapters may only observe, apply, or verify effects and must not introduce semantic authority.
+```
 
 ##### GV62 ↪ GV98
 
 ```diff
 - Enforce architecture roles and dependency directions for the closure root, constitution, materialization, kernel, projection, adapters, and generated artifacts.
 + Classify Agda semantic declarations by reflected `Name` into architectural roles for governance, protocol, assurance, materialization, kernel, experiment, projection, and adapters, and enforce allowed dependency directions between those roles. Source layout, the root closure, and generated artifacts are separate transport/composition concerns and must not determine semantic role. Experiments may depend on the reusable kernel, but kernel code must never depend on experiments.
+```
+
+##### GV51 ↪ GV102
+
+```diff
+- Materialization closure: every state materialized by Govenv must have exactly one canonical `Govenv.Materialization.*` definition containing all semantic content, structure, ordering, inclusion, policy, and required capability decisions; projections encode only target-format representation, and adapters only observe, apply, or verify effects.
++ Separate domain semantic authority from materialization binding: every state materialized by Govenv must have exactly one canonical `Govenv.Materialization.*` definition that binds authoritative semantic sources and any target-specific composition, ordering, or inclusion to its target, application mode, privilege, required authority, and verification; Governance, Protocol, and other governed project data retain ownership of their domain semantics and must not be duplicated or re-owned by materializations, projections, or adapters; projections encode target-format representation and adapters only observe, apply, or verify effects.
 ```
 
 ##### GV71 ↪ GV96
@@ -46,7 +82,21 @@
 + Close versioned artifact authority: handwritten semantic authority is limited to code-first `.agda` modules and human-facing normative `.lagda.md` modules; implementation and experiment documentation must live in the owning `.agda`, while Governance, Protocol, and governed evidence keep prose and formalization together in the owning literate module. Every other versioned artifact must be produced by exactly one governed `Govenv.Materialization.*` definition and verified against it; transient `.govenv` state is forbidden from being versioned, with only the temporary root-level `devenv.nix`, `devenv.yaml`, and `devenv.lock` bootstrap escape hatch until GV38 completes.
 ```
 
-Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `8af5ae6..c945c16`.
+##### GV30 ↪ GV103
+
+```diff
+- Enforce commit governance transparently through a Git hook; Stage 0 installs it through devenv, and Govenv later owns the integration directly.
++ Enforce staged candidate and commit governance transparently through a provider-neutral Git-hook boundary whose operational installation is supplied by the active runtime backend, with Stage 0 using devenv; Govenv owns the governed gate semantics while hook-manager and provider mechanics remain integration concerns.
+```
+
+##### GV34 ↪ GV107
+
+```diff
+- Expose governance context and diagnostic deltas through an MCP adapter for agent clients.
++ Keep MCP strictly optional and adapter-only: core Governance and Protocol semantics, `govenv check`, scoped advice, LSP/editor integration, Git boundaries, and coding-agent lifecycle integration must not depend on MCP availability; any MCP integration may project the same governed context or diagnostic/advisory deltas without becoming semantic authority.
+```
+
+Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `8af5ae6..8089ac9`.
 <!-- govenv-governance-impact:end -->
 
 
@@ -54,6 +104,7 @@ Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit
 
 * **architecture:** close source-boundary counterexample ([cb0b18c](https://github.com/klarkc/govenv/commit/cb0b18cefd31ee20e084b1c3515bb982f7361c1e))
 * **architecture:** separate normative and experiment domains ([c945c16](https://github.com/klarkc/govenv/commit/c945c162a8272cabc024f40dae0bf6a92a08a3b8))
+* **project:** align purpose and integration roadmap ([8089ac9](https://github.com/klarkc/govenv/commit/8089ac936e2860df62eabfd12b74d91ea7390ea3))
 
 
 ### Documentation
