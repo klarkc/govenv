@@ -1,23 +1,25 @@
+<!-- Generated from Govenv.Protocol. Do not edit manually. -->
+
 # AGENTS.md
 
-## Operational policy vs governance
+## Protocol vs governance
 
-An **operational policy** tells a contributor or AI agent how to work: which investigations to perform, which order to follow, which heuristics to apply, or which implementation choices to prefer. Operational policy may depend on judgment and belongs in `AGENTS.md`.
+A **protocol** tells a contributor or AI agent how to work: which investigations to perform, which order to follow, which heuristics to apply, or which implementation choices to prefer. Protocol may depend on judgment and belongs in `Govenv.Protocol`; `AGENTS.md` is its materialized projection.
 
 **Governance** states which repository or system states, transitions, effects, or semantic properties are permitted. A governed property must be meaningful independently of which contributor or agent produced the state and belongs in Govenv governed source rather than being enforced only by contributor behavior.
 
 Use this test when classifying a rule:
 
-- If different processes may legitimately produce the same valid state, the rule about the process is probably operational policy.
+- If different processes may legitimately produce the same valid state, the rule about the process is probably protocol.
 - If the resulting state or effect can itself be classified as permitted or forbidden, that property is a governance candidate.
 
-Operational policy must not substitute for governable semantics. When an operational rule reveals a repository or system property that can be stated independently of contributor behavior, promote that property into governance when the constitutional model is ready to express it.
+Protocol must not substitute for governable semantics. When a protocol rule reveals a repository or system property that can be stated independently of contributor behavior, promote that property into governance when the constitutional model is ready to express it.
 
-The word `policy` may also occur inside governed domain concepts, such as a release policy or deployment branch policy. Those are governed properties. `Operational policy` specifically means contributor/agent process guidance in this file.
+The word `policy` may also occur inside governed domain concepts, such as a release policy or deployment branch policy. Those are governed properties. `Protocol` specifically means contributor/agent process guidance in `Govenv.Protocol`.
 
 ## Reuse-first engineering policy
 
-This is an operational engineering policy for contributors and AI agents. It is not part of Govenv's constitutional governance model and must not be represented as a Governance item merely to enforce agent behavior.
+This protocol guides contributors and AI agents. It is not part of Govenv's constitutional governance model and must not be represented as a Governance item merely to enforce agent behavior.
 
 Before introducing a new abstraction, helper, data structure, validation mechanism, script, build primitive, or workflow mechanism, first check whether the capability already exists in:
 
@@ -56,21 +58,21 @@ Do not silently erase such a counterexample by merely editing the candidate unti
 
 Reuse should normally happen below the public Govenv model and DSL. Do not distort domain concepts merely to fit a library API.
 
-## Literate Agda is for governance
+## Documentation follows semantic authority
 
-Treat `*.lagda.md` as governed semantic documentation, not as an implementation manual. Literate Agda should express governance, governed domain facts, constitutional rationale, and the human-readable meaning of formal decisions. It may contain the Agda necessary to state or establish those governed facts, but it should not expose incidental implementation details, plumbing, backend mechanics, library-specific APIs, rendering algorithms, or materializer internals merely to explain how the implementation works.
+Treat `*.lagda.md` as human-facing normative semantic authority. Governance and Protocol are both literate domains: prose and formalization belong together in the same literate module.
 
-Keep implementation detail in the appropriate kernel, projection, adapter, materializer, Nix, or other implementation module. When implementation details are needed to establish a governed property, expose only the semantic boundary needed by the governance layer.
+Implementation domains such as Kernel, Projection, Adapter, and Experiment are code-first. Their documentation belongs in the same owning `.agda` source rather than in adjacent handwritten Markdown files.
 
-`AGENTS.md` is the operational materialization of contributor and agent policy. Process guidance, reuse heuristics, coding conventions, implementation-selection policy, and similar non-constitutional instructions belong here rather than in literate Agda unless they are promoted into an actual governed property.
+Standalone versioned documents are not independent semantic authority. They must be governed materializations unless they are themselves literate normative source or governed evidence represented as a literate module. `AGENTS.md` is materialized from `Govenv.Protocol` and must not be edited as an authority.
 
 Prefer this layering:
 
 ```text
-Govenv frontend / domain language
-            ↓
-Govenv semantic kernel
-            ↓
+Govenv.Governance / Govenv.Protocol
+                    ↓
+             Govenv semantic kernel
+                    ↓
 Agda stdlib / external Agda libraries / Nixpkgs packages / devenv modules / flake inputs
 ```
 
