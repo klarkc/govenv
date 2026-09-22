@@ -17,6 +17,14 @@ Protocol must not substitute for governable semantics. When a protocol rule reve
 
 The word `policy` may also occur inside governed domain concepts, such as a release policy or deployment branch policy. Those are governed properties. `Protocol` specifically means contributor/agent process guidance in `Govenv.Protocol`.
 
+## Project purpose stewardship
+
+Treat `Govenv.Project.purpose` as the canonical statement of why Govenv exists and the long-term criterion for roadmap coherence. Before declaring a material change to project scope, architecture, product boundaries, roadmap direction, or supported contributor/agent workflow ready, compare the candidate direction with the current purpose.
+
+If the purpose no longer accurately describes the intended project, update the governed purpose deliberately as part of the same conceptual change rather than allowing implementation drift to redefine it implicitly. Do not rewrite the purpose merely to justify a local design choice; changes to purpose must represent an intentional change in project direction and remain coherent with established governance.
+
+Keep the public project description as a concise faithful summary of the canonical purpose, keep the README projection of the full purpose synchronized through its governed materialization, and review the governed website and repository topics whenever the purpose or public project identity materially changes.
+
 ## Reuse-first engineering policy
 
 This protocol guides contributors and AI agents. It is not part of Govenv's constitutional governance model and must not be represented as a Governance item merely to enforce agent behavior.
