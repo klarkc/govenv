@@ -3,7 +3,7 @@
 <h1 align="center">Govenv</h1>
 
 <p align="center">
-  <strong>A type system for your repository. Govern code, configuration, tooling, CI, and AI agents through one typed Govenv model.</strong>
+  <strong>Turn every repository into a self-governing developer environment: define what valid means once, catch problems early, and reproduce the same tooling, automation, and runtime anywhere.</strong>
 </p>
 
 <p align="center">
@@ -12,10 +12,6 @@
   <a href="https://github.com/klarkc/govenv/releases"><img src="https://img.shields.io/github/v/release/klarkc/govenv?display_name=tag&sort=semver" alt="Release" /></a>
   <img src="https://img.shields.io/badge/license-Apache--2.0-blue" alt="Apache-2.0" />
 </p>
-
-## Purpose
-
-Turn a repository into a formally governed environment where code, configuration, tooling, CI, and AI agents operate from one typed and verifiable Govenv semantic model, with Governance defining validity, Protocol guiding process, and governable obligations enforced at their earliest sound information boundary.
 
 ## Roadmap
 
@@ -64,7 +60,7 @@ Turn a repository into a formally governed environment where code, configuration
 - ◇ **GV102** Separate domain semantic authority from materialization binding: every state materialized by Govenv must have exactly one canonical `Govenv.Materialization.*` definition that binds authoritative semantic sources and any target-specific composition, ordering, or inclusion to its target, application mode, privilege, required authority, and verification; Governance, Protocol, and other governed project data retain ownership of their domain semantics and must not be duplicated or re-owned by materializations, projections, or adapters; projections encode target-format representation and adapters only observe, apply, or verify effects.
 - ◇ **GV18** Allow versioned materializations to follow their governing source change in the immediately subsequent `chore(materialize)` commit; the final pushed or reviewed state must contain canonical materializations.
 - ✓ **GV19** Require CI validation and publication workflows to materialize governed artifacts from the constitution and reject any resulting tracked drift before continuing.
-- ✓ **GV21** Project the canonical Govenv description from `Govenv.Project` into repository-facing materializations.
+- ↪ **GV21** Project the canonical Govenv description from `Govenv.Project` into repository-facing materializations. → **GV109**
 - ↪ **GV22** Require admin-privileged external materializations to run only through the manual, target-restricted `Admin Materialize` workflow. → **GV108**
 - ✓ **GV45** Require every admin materialization to read the target back after applying it, fail unless the observed value equals the governed expected value, and emit execution evidence tied to the constitution SHA, target, repository, and workflow run.
 - ◇ **GV46** Model admin materialization evidence as typed governed data that can be consumed by a formal rule or assurance check rather than relying on workflow success alone.
@@ -84,7 +80,9 @@ Turn a repository into a formally governed environment where code, configuration
 - ◇ **GV97** Model `Govenv.Governance` and `Govenv.Protocol` as distinct human-facing literate normative domains: Governance defines constitutional validity, while Protocol guides contributor and agent process without independently invalidating repository state. Materialize `AGENTS.md` exclusively from `Govenv.Protocol` and reject tracked divergence.
 - ◇ **GV98** Classify Agda semantic declarations by reflected `Name` into architectural roles for governance, protocol, assurance, materialization, kernel, experiment, projection, and adapters, and enforce allowed dependency directions between those roles. Source layout, the root closure, and generated artifacts are separate transport/composition concerns and must not determine semantic role. Experiments may depend on the reusable kernel, but kernel code must never depend on experiments.
 - ◇ **GV99** Require every persisted counterexample to be governed literate evidence under `Govenv/Assurance/GV<n>/Counterexample/` for the assurance boundary it refutes. Any external fixture needed to exercise that counterexample must be a governed materialization of the canonical evidence rather than an independent handwritten authority.
-- ◇ **GV100** Govern Govenv's canonical project purpose and public repository identity metadata: `Govenv.Project.purpose` states the long-term project direction and is projected in full into the README; `description` is a faithful summary limited to 250 characters; `purpose` is limited to 500 characters; and `website` plus `topics` are canonical project data materialized to GitHub with read-back verification.
+- ↪ **GV100** Govern Govenv's canonical project purpose and public repository identity metadata: `Govenv.Project.purpose` states the long-term project direction and is projected in full into the README; `description` is a faithful summary limited to 250 characters; `purpose` is limited to 500 characters; and `website` plus `topics` are canonical project data materialized to GitHub with read-back verification. → **GV109**
+- ✓ **GV109** Make `Govenv.Project.purpose` the single canonical public project statement: remove independent `description` state, limit `purpose` to 250 characters, project it verbatim as the README hero and GitHub repository description, and keep `website` plus `topics` as canonical project metadata materialized to GitHub with read-back verification.
+- ✓ **GV110** Support governed vigilance witnesses for Protocol reviews whose judgment is intentionally non-constitutional but whose need for refresh has an objective semantic trigger: validation may require only a fresh explicit witness, never claim that the Protocol judgment itself is correct. Counter-style witnesses must remain unchanged without a trigger, advance exactly once on triggered reaffirmation, reset to zero when the reviewed subject changes, and never advance automatically. Apply this first to project-purpose stewardship: every semantic roadmap change must either reaffirm the unchanged purpose by advancing `purposeReviewIndex` or revise the purpose and reset the index, with freshness checked by Agda against governed predecessor snapshots.
 - ◇ **GV73** Require every persisted supporting artifact, including snapshots, fixtures, baselines, schemas, test vectors, and evidence, to be colocated with the module that semantically owns it; catch-all artifact directories are forbidden unless the artifact is genuinely project-global.
 - ◇ **GV74** Make governance completion evidence-bearing and persistent: a governance item may transition to `done` only when governed evidence establishes its proposition for the candidate repository state, and every non-superseded `done` item, including items completed before this rule, must remain satisfied in every subsequent valid repository state.
 - ◇ **GV84** Make observed invariant regressions counterexample-closing: once a contradiction to a governed or relied-upon invariant is recorded as an observed regression, its repair is incomplete until the counterexample is preserved as governed evidence, the missing or incorrectly scoped assurance boundary is corrected or overstated governance superseded, and candidate validation rejects recurrence before the affected workflow may succeed.
