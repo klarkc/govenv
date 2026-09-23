@@ -35,6 +35,32 @@ Write the purpose as durable product positioning for developers first. Lead with
 
 Project the same canonical purpose verbatim anywhere Govenv presents its public project statement, including the README hero and GitHub repository description; do not maintain a separate summary property that can drift from it. Review the governed website and repository topics whenever the purpose or public project identity materially changes.
 
+## Project direction review
+
+Treat project direction as one review over the complete governed state, not as independently maintained status prose. Purpose states the long-term direction. Current summarizes where governed evidence says the project is now. Next identifies the immediate gap selected between Purpose and Current. Roadmap makes that selected direction executable.
+
+Whenever a source relevant to Current or Next changes, review the complete resulting direction rather than patching one sentence locally. The agent must consider every typed subject supplied by the direction-review closure and give each subject an explicit disposition. The compiler may prove bounds, provenance, coverage, reference validity, and freshness; it must not pretend to prove the quality of the natural-language judgment. The human authorizes that judgment through the pull request.
+
+Keep Current and Next concise enough to serve as immediate README feedback. They are summaries, not duplicate backlogs or secondary semantic authorities. Current must not claim progress unsupported by governed state. Next must remain coherent with Purpose and Current and must not hide known unresolved gaps merely because they do not yet have a GovernanceId.
+
+## Session and corpus consolidation
+
+Do not rely on an agent remembering prior sessions. When a session, handoff, recovery archive, or other knowledge corpus is declared as relevant project input, bind it to immutable provenance and consolidate it before allowing semantic roadmap evolution. Extract the observations that may matter to project direction and give every declared observation exactly one explicit disposition: represented by current governed state, superseded by an identified decision, rejected with rationale, or irrelevant with rationale.
+
+An undisposed observation keeps the direction review stale. Absence from Current, Next, or Roadmap is never by itself evidence that an observation was considered. This protocol does not claim that a compiler can observe private model state or prove perfect natural-language extraction; it requires complete treatment of the declared observation set and preserves provenance so a human or later agent can audit the judgment.
+
+## Developer journal and social posts
+
+Treat Govenv social posts as a technical development journal, not advertising. Write for developers who should be able to see what changed, why it matters, and what direction follows without hype, unsupported claims, or generic promotional language.
+
+Two semantic triggers require a reviewed draft. A semantic change to Next requires a direction-journal post based on the exact before/after project-direction review. A major or minor release requires a release-journal post based on the exact frozen typed ReleaseDocument that is being approved for publication. Patch releases do not require a release post unless another trigger independently requires one.
+
+For every triggered draft, cover all relevant source changes explicitly in typed metadata before writing the natural-language summary. The agent may compress, group, or intentionally omit a source change only through an explicit disposition with rationale; the compiler should validate coverage, provenance, target character limits, template identity, and freshness. Never reconstruct a release summary from memory after publication when the frozen ReleaseDocument already owns the approved change set.
+
+Use the canonical Govenv logo and the square developer-journal image pattern for each post. Preserve the visual grammar: DEV JOURNAL identity, concise How we got here context, What we're doing now, Where we're going next, and the repository link. Generate the image from a governed image brief tied to the same source revision as the text. Visual generation remains an agent judgment and must be reviewed together with the post rather than treated as compiler-proven semantics.
+
+The pull request or release candidate is the editorial review boundary. Publishing is an external effect and must happen only after the exact draft and image have been human-authorized. Store X credentials only as external GitHub environment/repository secrets, never as versioned repository content. Publish only the exact approved text and image, then read back the resulting post identity/URL and retain revision-addressable publication evidence. A failed or unavailable social publication must never mutate the approved journal content or block recovery of the governed repository state.
+
 ## Reuse-first engineering policy
 
 This protocol guides contributors and AI agents. It is not part of Govenv's constitutional governance model and must not be represented as a Governance item merely to enforce agent behavior.
