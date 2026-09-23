@@ -17,13 +17,23 @@ Protocol must not substitute for governable semantics. When a protocol rule reve
 
 The word `policy` may also occur inside governed domain concepts, such as a release policy or deployment branch policy. Those are governed properties. `Protocol` specifically means contributor/agent process guidance in `Govenv.Protocol`.
 
+## Protocol vigilance witnesses
+
+Some Protocol obligations require irreducible contributor or agent judgment that a compiler cannot honestly prove, while the need to exercise that judgment can still have a precise semantic trigger. In those cases Govenv may pair the Protocol with a governed **vigilance witness**: a minimal explicit state change whose freshness establishes only that the review was actively acknowledged after the trigger. The witness never proves that the judgment itself was correct and therefore does not promote the Protocol content into Governance.
+
+Use a vigilance witness only when the Protocol judgment is genuinely non-decidable, the trigger is objective and stable, forgetting the review creates material risk, and the witness can remain low-noise. If the desired outcome is itself machine-decidable and determines constitutional validity, model that outcome directly as Governance instead. Avoid vigilance witnesses for noisy high-frequency triggers, low-value reviews, or cases where they would become checkbox theater. Never derive or advance a vigilance witness automatically: automatic acknowledgement destroys the signal that a contributor or agent actively maintained the judgment.
+
+For counter-style witnesses, preserve the index when neither trigger nor reviewed subject changes; increment it exactly once when the trigger changes and the subject is deliberately reaffirmed; reset it to zero whenever the reviewed subject itself changes. Enforce witness freshness at the earliest sound information boundary while keeping the underlying judgment in Protocol.
+
 ## Project purpose stewardship
 
-Treat `Govenv.Project.purpose` as the canonical statement of why Govenv exists and the long-term criterion for roadmap coherence. Before declaring a material change to project scope, architecture, product boundaries, roadmap direction, or supported contributor/agent workflow ready, compare the candidate direction with the current purpose.
+Treat `Govenv.Project.purpose` as the canonical statement of why Govenv exists and the long-term criterion for roadmap coherence. Every semantic change to `Govenv.Roadmap` must review the current purpose against the complete resulting roadmap, not only the changed item or phase. Material changes to project scope, architecture, product boundaries, or supported contributor/agent workflow outside the roadmap must also review the purpose.
 
-If the purpose no longer accurately describes the intended project, update the governed purpose deliberately as part of the same conceptual change rather than allowing implementation drift to redefine it implicitly. Do not rewrite the purpose merely to justify a local design choice; changes to purpose must represent an intentional change in project direction and remain coherent with established governance.
+If the purpose no longer accurately describes the intended project, update the governed purpose deliberately as part of the same conceptual change rather than allowing implementation drift to redefine it implicitly. Do not rewrite the purpose merely to justify a local design choice; changes to purpose must represent an intentional change in project direction and remain coherent with established governance. `Govenv.Project.purposeReviewIndex` is the vigilance witness for this review: when the roadmap changes semantically and the purpose is reaffirmed unchanged, increment the index exactly once; whenever the purpose itself changes, reset the index to zero; when neither changes, preserve the index. Never advance the index mechanically or merely to satisfy the compiler.
 
-Keep the public project description as a concise faithful summary of the canonical purpose, keep the README projection of the full purpose synchronized through its governed materialization, and review the governed website and repository topics whenever the purpose or public project identity materially changes.
+Write the purpose as durable product positioning for developers first. Lead with the practical outcome and value a developer gets from adopting Govenv, use concrete language that remains understandable without roadmap or internal architecture context, and prefer stable product capabilities over current implementation mechanisms. The purpose should be concise, memorable, credible, and technically precise enough to serve as public product copy while remaining faithful to the full long-term roadmap. Avoid hype, unsupported superlatives, vague promises, internal governance identifiers, and incidental backend or tooling names unless they are essential to the product identity.
+
+Project the same canonical purpose verbatim anywhere Govenv presents its public project statement, including the README hero and GitHub repository description; do not maintain a separate summary property that can drift from it. Review the governed website and repository topics whenever the purpose or public project identity materially changes.
 
 ## Reuse-first engineering policy
 

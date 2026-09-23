@@ -84,7 +84,7 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GOVENV_ADMIN_TOKEN }}
     - name: "Record repository metadata evidence"
-      run: "{\n  printf '%s\\n' '### Repository metadata materialization evidence'\n  printf '%s\\n' \"- Constitution: \\`${GITHUB_SHA}\\`\"\n  printf '%s\\n' \"- Effective revision: \\`${GOVENV_EFFECTIVE_REVISION}\\`\"\n  printf '%s\\n' '- Target: `repository-metadata`'\n  printf '%s\\n' \"- Repository: \\`${GITHUB_REPOSITORY}\\`\"\n  printf '%s\\n' \"- Workflow run: \\`${GITHUB_RUN_ID}\\`\"\n  printf '%s\\n' \"- Actor: \\`${GITHUB_ACTOR}\\`\"\n  printf '%s\\n' '- Expected: `Govenv.Project.description`, `website`, `topics`'\n  printf '%s\\n' '- Observed: `all repository metadata read-back equal`'\n  printf '%s\\n' '- Assurance: `expected == observed`'\n} >> \"${GITHUB_STEP_SUMMARY}\""
+      run: "{\n  printf '%s\\n' '### Repository metadata materialization evidence'\n  printf '%s\\n' \"- Constitution: \\`${GITHUB_SHA}\\`\"\n  printf '%s\\n' \"- Effective revision: \\`${GOVENV_EFFECTIVE_REVISION}\\`\"\n  printf '%s\\n' '- Target: `repository-metadata`'\n  printf '%s\\n' \"- Repository: \\`${GITHUB_REPOSITORY}\\`\"\n  printf '%s\\n' \"- Workflow run: \\`${GITHUB_RUN_ID}\\`\"\n  printf '%s\\n' \"- Actor: \\`${GITHUB_ACTOR}\\`\"\n  printf '%s\\n' '- Expected: `Govenv.Project.purpose`, `website`, `topics`'\n  printf '%s\\n' '- Observed: `all repository metadata read-back equal`'\n  printf '%s\\n' '- Assurance: `expected == observed`'\n} >> \"${GITHUB_STEP_SUMMARY}\""
       env:
         GOVENV_EFFECTIVE_REVISION: ${{ needs.materialize.outputs.effective-sha }}
   test:
