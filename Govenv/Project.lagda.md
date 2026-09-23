@@ -2,8 +2,15 @@
 
 Govenv has one canonical project identity and purpose. Distributions may project
 other branding, but they do not rename Govenv itself or redefine its purpose.
-Public repository metadata is governed project state rather than independently
-maintained GitHub configuration.
+The same canonical purpose is projected as the public repository statement,
+including the README hero and GitHub repository description. Public repository
+metadata is governed project state rather than independently maintained GitHub
+configuration.
+
+`purposeReviewIndex` is a vigilance witness for Protocol stewardship. It does
+not claim that the purpose is objectively correct; it records that a roadmap
+change explicitly reaffirmed the current purpose, or resets when the purpose is
+revised.
 
 ```agda
 {-# OPTIONS --safe #-}
@@ -25,17 +32,14 @@ project = govenv
 name : String
 name = "Govenv"
 
-descriptionCharacterLimit : Nat
-descriptionCharacterLimit = 250
-
 purposeCharacterLimit : Nat
-purposeCharacterLimit = 500
-
-description : String
-description = "A type system for your repository. Govern code, configuration, tooling, CI, and AI agents through one typed Govenv model."
+purposeCharacterLimit = 250
 
 purpose : String
-purpose = "Turn a repository into a formally governed environment where code, configuration, tooling, CI, and AI agents operate from one typed and verifiable Govenv semantic model, with Governance defining validity, Protocol guiding process, and governable obligations enforced at their earliest sound information boundary."
+purpose = "Turn every repository into a self-governing developer environment: define what valid means once, catch problems early, and reproduce the same tooling, automation, and runtime anywhere."
+
+purposeReviewIndex : Nat
+purposeReviewIndex = zero
 
 website : String
 website = "https://klarkc.github.io/govenv/"
@@ -54,10 +58,6 @@ private
   length : {A : Set} → List A → Nat
   length [] = zero
   length (_ ∷ xs) = suc (length xs)
-
-descriptionWithinLimit :
-  (length (primStringToList description) < suc descriptionCharacterLimit) ≡ true
-descriptionWithinLimit = refl
 
 purposeWithinLimit :
   (length (primStringToList purpose) < suc purposeCharacterLimit) ≡ true

@@ -36,6 +36,10 @@ record GovernanceDelta : Set where
     itemImpacts : List ItemImpact
     phaseProgress : PhaseProgress
 
+governanceDeltaChanged : GovernanceDelta → Bool
+governanceDeltaChanged (governanceDeltaValue [] (phaseUnchanged phase)) = false
+governanceDeltaChanged delta = true
+
 data SnapshotPhase : Set where
   snapshotAbsent : SnapshotPhase
   snapshotActive : Nat → SnapshotPhase

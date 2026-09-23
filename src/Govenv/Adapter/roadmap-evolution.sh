@@ -2,12 +2,14 @@
 set -euo pipefail
 
 explicit_snapshot="${GOVENV_PREVIOUS_ROADMAP_SNAPSHOT:-${1:-}}"
+explicit_purpose_snapshot="${GOVENV_PREVIOUS_PROJECT_PURPOSE_SNAPSHOT:-${2:-}}"
 root="$(git rev-parse --show-toplevel)"
 cd "${root}"
 
 input_root=".govenv/roadmap-evolution-input"
 mkdir -p "${input_root}"
 
+previous_ref=""
 if [[ -n "${explicit_snapshot}" ]]; then
   snapshot_path="${explicit_snapshot}"
 else
@@ -23,6 +25,18 @@ else
     :
   else
     printf '%s\n' 'govenv-roadmap-snapshot-v2' 'phase absent' > "${snapshot_path}"
+  fi
+fi
+
+purpose_snapshot_path=""
+if [[ -n "${explicit_purpose_snapshot}" ]]; then
+  purpose_snapshot_path="${explicit_purpose_snapshot}"
+elif [[ -n "${previous_ref}" ]] &&
+     git rev-parse --verify "${previous_ref}^{commit}" >/dev/null 2>&1; then
+  candidate_purpose_snapshot="${input_root}/previous-project-purpose.snapshot"
+  if git show "${previous_ref}:.govenv/project-purpose.snapshot" \
+      > "${candidate_purpose_snapshot}" 2>/dev/null; then
+    purpose_snapshot_path="${candidate_purpose_snapshot}"
   fi
 fi
 
@@ -91,6 +105,77 @@ if [[ -z "${phase_expr}" ]]; then
   exit 3
 fi
 
+previous_purpose_available=false
+previous_purpose_expr='""'
+previous_purpose_review_index=0
+if [[ -n "${purpose_snapshot_path}" ]]; then
+  [[ -f "${purpose_snapshot_path}" ]] || {
+    echo "Governed project purpose snapshot is missing: ${purpose_snapshot_path}" >&2
+    exit 3
+  }
+
+  purpose_header=""
+  purpose_expr=""
+  purpose_review_index=""
+  while IFS= read -r line; do
+    case "${line}" in
+      govenv-project-purpose-snapshot-v1)
+        [[ -z "${purpose_header}" ]] || {
+          echo "Duplicate project purpose snapshot header." >&2
+          exit 3
+        }
+        purpose_header="${line}"
+        ;;
+      "review-index "*)
+        value="${line#review-index }"
+        [[ "${value}" =~ ^[0-9]+$ ]] || {
+          echo "Invalid project purpose review index: ${line}" >&2
+          exit 3
+        }
+        [[ -z "${purpose_review_index}" ]] || {
+          echo "Duplicate project purpose review index." >&2
+          exit 3
+        }
+        purpose_review_index="${value}"
+        ;;
+      "purpose "*)
+        value="${line#purpose }"
+        [[ "${value}" =~ ^\".*\"$ ]] || {
+          echo "Invalid project purpose snapshot value: ${line}" >&2
+          exit 3
+        }
+        [[ -z "${purpose_expr}" ]] || {
+          echo "Duplicate project purpose snapshot value." >&2
+          exit 3
+        }
+        purpose_expr="${value}"
+        ;;
+      "") ;;
+      *)
+        echo "Invalid project purpose snapshot line: ${line}" >&2
+        exit 3
+        ;;
+    esac
+  done < "${purpose_snapshot_path}"
+
+  [[ "${purpose_header}" == "govenv-project-purpose-snapshot-v1" ]] || {
+    echo "Unsupported project purpose snapshot format." >&2
+    exit 3
+  }
+  [[ -n "${purpose_expr}" ]] || {
+    echo "Project purpose snapshot has no purpose." >&2
+    exit 3
+  }
+  [[ -n "${purpose_review_index}" ]] || {
+    echo "Project purpose snapshot has no review index." >&2
+    exit 3
+  }
+
+  previous_purpose_available=true
+  previous_purpose_expr="${purpose_expr}"
+  previous_purpose_review_index="${purpose_review_index}"
+fi
+
 agda_list() {
   local expression="[]"
   local index value
@@ -116,12 +201,30 @@ module Govenv.Adapter.RoadmapEvolutionObservation where
 open import Govenv.Kernel.Identifier using (GVR)
 open import Govenv.Kernel.Release
 open import Govenv.Kernel.Roadmap using (done; todo; cancelled; superseded)
+open import Agda.Builtin.Bool using (Bool; true; false)
 open import Agda.Builtin.List using ([]; _∷_)
+open import Agda.Builtin.Nat using (Nat)
+open import Agda.Builtin.String using (String)
 
 previous : RoadmapSnapshot
 previous = roadmapSnapshot (${phase_expr}) (${items_expr})
+
+previousPurposeAvailable : Bool
+previousPurposeAvailable = ${previous_purpose_available}
+
+previousPurpose : String
+previousPurpose = ${previous_purpose_expr}
+
+previousPurposeReviewIndex : Nat
+previousPurposeReviewIndex = ${previous_purpose_review_index}
 EOF2
 
 agda -i "${input_root}" -i . -i src --compile \
   --compile-dir="${build_dir}" src/Govenv/Adapter/RoadmapEvolution.agda >/dev/null
 "${build_dir}/RoadmapEvolution"
+
+if ! agda -i "${input_root}" -i . -i src \
+    src/Govenv/Adapter/PurposeVigilance.agda >/dev/null; then
+  echo "Project purpose vigilance failed: review the complete resulting roadmap, then either advance purposeReviewIndex by one when reaffirming the current purpose or change purpose and reset the index to zero." >&2
+  exit 4
+fi
