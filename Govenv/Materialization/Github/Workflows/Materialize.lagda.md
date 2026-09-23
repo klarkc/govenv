@@ -12,9 +12,10 @@ open import Agda.Builtin.List using (List; []; _∷_)
 open import Agda.Builtin.Maybe using (just; nothing)
 open import Agda.Builtin.String using (String; primStringAppend)
 open import Govenv.Administration using
-  (authorizedBranch; materializerCredentialName)
+  (authorizedBranch; materializerCredentialName; adminTokenSecret)
 open import Govenv.Github.Authorization using
-  (materializeJob; readOnlyToken; releaseToken; pagesCallToken)
+  ( materializeJob; authorizedRepositoryAdministrationJob
+  ; readOnlyToken; releaseToken; pagesCallToken )
 open import Govenv.Materialization
 open import Govenv.Materialization.Github.Workflows.Workflow
 
@@ -54,6 +55,33 @@ materializeCommand =
 checkCommand : String
 checkCommand =
   "nix run github:cachix/devenv/v2.3 -- tasks run govenv:check"
+
+repositoryMetadataBuildCommand : String
+repositoryMetadataBuildCommand =
+  "nix run github:cachix/devenv/v2.3 -- tasks run govenv:repository-metadata:build"
+
+repositoryMetadataApplyCommand : String
+repositoryMetadataApplyCommand =
+  "nix run github:cachix/devenv/v2.3 -- shell -- " ++
+  ".govenv/repository-metadata-build/MetadataApplication"
+
+repositoryMetadataCredentialSecret : String
+repositoryMetadataCredentialSecret = adminTokenSecret
+
+repositoryMetadataEvidenceCommand : String
+repositoryMetadataEvidenceCommand =
+  "{\n" ++
+  "  printf '%s\\n' '### Repository metadata materialization evidence'\n" ++
+  "  printf '%s\\n' \"- Constitution: \\`${GITHUB_SHA}\\`\"\n" ++
+  "  printf '%s\\n' \"- Effective revision: \\`${GOVENV_EFFECTIVE_REVISION}\\`\"\n" ++
+  "  printf '%s\\n' '- Target: `repository-metadata`'\n" ++
+  "  printf '%s\\n' \"- Repository: \\`${GITHUB_REPOSITORY}\\`\"\n" ++
+  "  printf '%s\\n' \"- Workflow run: \\`${GITHUB_RUN_ID}\\`\"\n" ++
+  "  printf '%s\\n' \"- Actor: \\`${GITHUB_ACTOR}\\`\"\n" ++
+  "  printf '%s\\n' '- Expected: `Govenv.Project.description`, `website`, `topics`'\n" ++
+  "  printf '%s\\n' '- Observed: `all repository metadata read-back equal`'\n" ++
+  "  printf '%s\\n' '- Assurance: `expected == observed`'\n" ++
+  "} >> \"${GITHUB_STEP_SUMMARY}\""
 
 detectDriftCommand : String
 detectDriftCommand =
@@ -129,6 +157,10 @@ authorizedMaterializeOnly =
 publishOnly : String
 publishOnly = "github.event_name == 'push'"
 
+repositoryMetadataCondition : String
+repositoryMetadataCondition =
+  publishOnly ++ " && needs.materialize.result == 'success'"
+
 effectiveRevisionCommand : String
 effectiveRevisionCommand =
   "echo \"sha=$(git rev-parse HEAD)\" >> \"${GITHUB_OUTPUT}\""
@@ -156,6 +188,31 @@ steps =
       recordReleaseBoundaryCommand []
   ∷ runStep "Record effective materialized revision" (just "effective") nothing
       effectiveRevisionCommand []
+  ∷ []
+
+repositoryMetadataSteps : List Step
+repositoryMetadataSteps =
+  usesStep "Checkout authorized repository metadata revision" nothing nothing checkout
+    (binding "ref" (expression "needs.materialize.outputs.effective-sha")
+    ∷ binding "fetch-depth" (literal "0")
+    ∷ binding "persist-credentials" (literal "false")
+    ∷ [])
+  ∷ usesStep "Install Nix" nothing nothing installNix
+    (binding "extra-conf" (literal nixExtraConf) ∷ [])
+  ∷ usesStep "Cache Nix" nothing nothing cacheNix
+    (binding "use-gha-cache" (literal "enabled")
+    ∷ binding "use-flakehub" (literal "disabled")
+    ∷ [])
+  ∷ runStep "Build repository metadata adapter" nothing nothing
+      repositoryMetadataBuildCommand []
+  ∷ runStep "Apply and verify repository metadata" nothing nothing
+      repositoryMetadataApplyCommand
+      (binding "GH_TOKEN"
+        (expression ("secrets." ++ repositoryMetadataCredentialSecret)) ∷ [])
+  ∷ runStep "Record repository metadata evidence" nothing nothing
+      repositoryMetadataEvidenceCommand
+      (binding "GOVENV_EFFECTIVE_REVISION"
+        (expression "needs.materialize.outputs.effective-sha") ∷ [])
   ∷ []
 
 postReleaseSteps : List Step
@@ -199,13 +256,18 @@ state = workflow
         (expression "steps.release-boundary.outputs.tag")
     ∷ [])
     nothing "ubuntu-latest" 15 steps
+  ∷ job "repository-metadata" authorizedRepositoryAdministrationJob
+      (just repositoryMetadataCondition) ("materialize" ∷ []) []
+      nothing "ubuntu-latest" 15 repositoryMetadataSteps
   ∷ reusableJob "test" (just publishOnly) ("materialize" ∷ []) readOnlyToken
       "./.github/workflows/test.yml"
       (binding "revision" (expression "needs.materialize.outputs.effective-sha") ∷ [])
-  ∷ reusableJob "release" (just publishOnly) ("materialize" ∷ "test" ∷ []) releaseToken
+  ∷ reusableJob "release" (just publishOnly)
+      ("materialize" ∷ "test" ∷ "repository-metadata" ∷ []) releaseToken
       "./.github/workflows/release.yml"
       (binding "revision" (expression "needs.materialize.outputs.effective-sha") ∷ [])
-  ∷ reusableJob "pages" (just publishOnly) ("materialize" ∷ "test" ∷ []) pagesCallToken
+  ∷ reusableJob "pages" (just publishOnly)
+      ("materialize" ∷ "test" ∷ "repository-metadata" ∷ []) pagesCallToken
       "./.github/workflows/pages.yml"
       (binding "revision" (expression "needs.materialize.outputs.effective-sha") ∷ [])
   ∷ job "post-release-materialize" materializeJob

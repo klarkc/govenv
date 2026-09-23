@@ -2,7 +2,7 @@
 
 This module is the canonical semantic definition of the GitHub repository
 topics. Administrative privilege and read-back verification belong to the
-materialization target, not to its adapter.
+materialization target, while application is automatic after an authorized revision.
 
 ```agda
 {-# OPTIONS --safe #-}
@@ -17,7 +17,7 @@ open import Govenv.Project using (topics)
 materialization : Materialization (List String)
 materialization = materialized
   (githubRepository repositoryTopics)
-  adminApplication
+  authorizedEffectApplication
   adminPrivilege
   adminAuthority
   topicsReadBackSetEquality

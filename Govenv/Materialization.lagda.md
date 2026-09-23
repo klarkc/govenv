@@ -112,6 +112,9 @@ versionedPrivilege = repository
 versionedAuthority : ApplicationAuthority
 versionedAuthority = authorizedOnly
 
+authorizedEffectApplication : Application
+authorizedEffectApplication = automatic
+
 adminApplication : Application
 adminApplication = manual
 

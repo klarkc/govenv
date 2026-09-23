@@ -2,7 +2,7 @@
 
 This module is the canonical semantic definition of the GitHub repository
 website. Administrative privilege and read-back verification belong to the
-materialization target, not to its adapter.
+materialization target, while application is automatic after an authorized revision.
 
 ```agda
 {-# OPTIONS --safe #-}
@@ -16,7 +16,7 @@ open import Govenv.Project using (website)
 materialization : Materialization String
 materialization = materialized
   (githubRepository repositoryWebsite)
-  adminApplication
+  authorizedEffectApplication
   adminPrivilege
   adminAuthority
   websiteReadBackEquality

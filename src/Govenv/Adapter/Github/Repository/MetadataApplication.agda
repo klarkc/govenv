@@ -44,11 +44,11 @@ applyRepositoryMetadataImpl expectedDescription expectedWebsite expectedTopics =
   observedTopicsText <- runGh ["api", endpoint <> "/topics", "--jq", ".names[]"]
   let observedTopics = filter (not . Text.null) (Text.lines observedTopicsText)
   if observedDescription /= expectedDescription
-    then Exit.die "Admin materialization verification failed for repository description."
+    then Exit.die "Repository metadata read-back verification failed for description."
     else if observedWebsite /= expectedWebsite
-      then Exit.die "Admin materialization verification failed for repository website."
+      then Exit.die "Repository metadata read-back verification failed for website."
       else if List.sort observedTopics /= List.sort expectedTopics
-        then Exit.die "Admin materialization verification failed for repository topics."
+        then Exit.die "Repository metadata read-back verification failed for topics."
         else pure ()
 #-}
 

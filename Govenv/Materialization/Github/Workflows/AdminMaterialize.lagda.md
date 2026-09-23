@@ -1,6 +1,6 @@
 # Admin Materialize workflow
 
-`Admin Materialize` exposes one human-facing administrative operation: `setup`. It is executable only through the main-only administrative environment, validates the governed repository state before exposing the administrative credential, and delegates the ordered Stage A effects to the Agda-projected setup executable. Main rulesets remain outside this setup until Stage B is authorized and verified, preserving GV91.
+`Admin Materialize` exposes one human-facing bootstrap/recovery operation: `setup`. It never applies ordinary project-state materializations such as repository metadata; reruns reconcile authority boundaries and rotate governed subordinate credentials. It is executable only through the main-only administrative environment, validates the governed repository state before exposing the administrative credential, and delegates the ordered Stage A effects to the Agda-projected setup executable. Main rulesets remain outside this setup until Stage B is authorized and verified, preserving GV91.
 
 ```agda
 {-# OPTIONS --safe #-}
@@ -50,6 +50,9 @@ applySetupCommand =
   "nix run github:cachix/devenv/v2.3 -- shell -- " ++
   ".govenv/admin-apply-build/Setup"
 
+adminCheckoutFetchDepth : String
+adminCheckoutFetchDepth = "0"
+
 mainDispatchOnly : String
 mainDispatchOnly = "github.ref == 'refs/heads/main'"
 
@@ -71,6 +74,7 @@ steps : List Step
 steps =
   usesStep "Checkout" nothing nothing checkout
     (binding "ref" (expression "github.sha")
+    ∷ binding "fetch-depth" (literal adminCheckoutFetchDepth)
     ∷ binding "persist-credentials" (literal "false")
     ∷ [])
   ∷ usesStep "Install Nix" nothing nothing installNix
