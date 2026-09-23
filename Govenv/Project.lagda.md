@@ -39,7 +39,7 @@ purpose : String
 purpose = "Turn every repository into a self-governing developer environment: define what valid means once, catch problems early, and reproduce the same tooling, automation, and runtime anywhere."
 
 purposeReviewIndex : Nat
-purposeReviewIndex = zero
+purposeReviewIndex = suc zero
 
 website : String
 website = "https://klarkc.github.io/govenv/"
