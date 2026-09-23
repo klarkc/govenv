@@ -118,7 +118,7 @@
 + Keep MCP strictly optional and adapter-only: core Governance and Protocol semantics, `govenv check`, scoped advice, LSP/editor integration, Git boundaries, and coding-agent lifecycle integration must not depend on MCP availability; any MCP integration may project the same governed context or diagnostic/advisory deltas without becoming semantic authority.
 ```
 
-Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `8af5ae6..afc7708`.
+Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `8af5ae6..ef3069e`.
 <!-- govenv-governance-impact:end -->
 
 
@@ -128,7 +128,7 @@ Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit
 * **architecture:** separate normative and experiment domains ([c916e8d](https://github.com/klarkc/govenv/commit/c916e8d03bc7b2f6721ceee581d1cf43c9391cb2))
 * **project:** align purpose and integration roadmap ([675c1ee](https://github.com/klarkc/govenv/commit/675c1ee71e0e5cbde0325ab323237394438418af))
 * **governance:** classify semantic authority domains ([36856d7](https://github.com/klarkc/govenv/commit/36856d7123c5578254129ff6043d047ad6c75876))
-* **authorization:** separate bootstrap from authorized effects ([afc7708](https://github.com/klarkc/govenv/commit/afc7708574551b0148edf992c48611b7d0bf585e))
+* **authorization:** separate bootstrap from authorized effects ([ef3069e](https://github.com/klarkc/govenv/commit/ef3069ee5b17d465d3ff9d04277203b4be12246e))
 
 
 ### Documentation
