@@ -7,7 +7,6 @@ open import Agda.Builtin.String using (String)
 open import Govenv.Materialization.Github.Administration.Setup
 
 projectStep : AdminSetupStep → String
-projectStep repositoryMetadataStep = ".govenv/admin-apply-build/MetadataApplication"
 projectStep adminEnvironmentStep = ".govenv/admin-apply-build/AdminEnvironment"
 projectStep materializerEnvironmentBoundaryStep =
   ".govenv/admin-apply-build/MaterializerEnvironmentBoundary"

@@ -1,6 +1,6 @@
 # Administrative materialization
 
-Administrative authority has one human-supplied root. `GOVENV_ADMIN_TOKEN` is the current credential representing that root; replacing or rotating the token changes the credential, never the identity of the administrative authority. Normal runtime workflows must never consume the root credential.
+Administrative authority has one human-supplied root. `GOVENV_ADMIN_TOKEN` is the current credential representing that root; replacing or rotating the token changes the credential, never the identity of the administrative authority. Candidate, agent, release, Pages, and repository Git-materializer paths must never consume the root credential. After human authorization, a dedicated main-only repository-administration effect job may consume it solely for deterministic GitHub API effects that require `Administration: write` and cannot be exercised by the derived deploy-key credential.
 
 ## Administrative root
 
@@ -10,7 +10,7 @@ From an `AuthorizedRevision`, `Admin Materialize` uses that root credential to d
 
 ## Convergent setup
 
-GV92 requires the human-facing administrative operation to become one revision-bound `setup`, not a menu of independent targets. Its governed plan owns ordering; adapters only apply, observe, and verify the effects selected by that plan. Re-running setup must converge partially configured external state toward the canonical state for the authorized revision.
+GV92 requires the human-facing administrative operation to become one revision-bound `setup`, not a menu of independent targets. That setup is limited to bootstrap, recovery, authority-boundary reconciliation, and subordinate credential rotation. Ordinary project-state effects such as description, website, and topics are reconciled automatically after an `AuthorizedRevision` and are not setup steps. Re-running setup must converge partially configured authority state toward the canonical state and rotates the governed materializer keypair.
 
 Every externally observable step retains apply → read-back → equality semantics. Secret values are not readable through GitHub and therefore are not constitutional data; governance owns their identity, placement, derivation procedure, and observable name boundary.
 

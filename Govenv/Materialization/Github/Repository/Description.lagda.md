@@ -1,6 +1,6 @@
 # GitHub repository description materialization
 
-This module is the canonical semantic definition of the GitHub repository description. Administrative privilege and read-back verification are properties of this materialization target, not decisions introduced by its adapter.
+This module is the canonical semantic definition of the GitHub repository description. Administrative privilege and read-back verification are properties of this materialization target, while application is automatic after an authorized revision.
 
 ```agda
 {-# OPTIONS --safe #-}
@@ -14,7 +14,7 @@ open import Govenv.Project using (description)
 materialization : Materialization String
 materialization = materialized
   (githubRepository repositoryDescription)
-  adminApplication
+  authorizedEffectApplication
   adminPrivilege
   adminAuthority
   descriptionReadBackEquality

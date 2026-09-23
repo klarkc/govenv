@@ -1,6 +1,6 @@
 # Administrative setup plan
 
-The administrative setup is the single human-facing administrative operation. Its ordered plan is governed state: adapters may interpret these steps, but they may not choose, omit, reorder, or introduce administrative effects independently.
+The administrative setup is the single human-facing bootstrap/recovery operation. Its ordered plan is governed authority state: adapters may interpret these steps, but they may not choose, omit, reorder, or introduce administrative effects independently. Ordinary project-state materializations, including repository metadata, do not belong to this setup.
 
 The current plan prepares every prerequisite that is sound before main-ruleset activation. GV91 intentionally keeps the three main rulesets out of this revision's setup plan until the authorized Stage B execution path exists. The materializer environment boundary is applied before cryptographic material is provisioned, so the private key is never introduced into an unrestricted environment. The final materializer-environment step performs complete read-back after credential provisioning.
 
@@ -13,7 +13,6 @@ open import Agda.Builtin.List using (List; []; _∷_)
 open import Agda.Builtin.String using (String)
 
 data AdminSetupStep : Set where
-  repositoryMetadataStep : AdminSetupStep
   adminEnvironmentStep : AdminSetupStep
   materializerEnvironmentBoundaryStep : AdminSetupStep
   materializerCredentialStep : AdminSetupStep
@@ -27,7 +26,6 @@ setupTarget = "setup"
 plan : List AdminSetupStep
 plan =
   adminEnvironmentStep
-  ∷ repositoryMetadataStep
   ∷ materializerEnvironmentBoundaryStep
   ∷ materializerCredentialStep
   ∷ materializerEnvironmentStep

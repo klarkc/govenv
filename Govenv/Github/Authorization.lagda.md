@@ -104,6 +104,13 @@ materializeJob = workflowSecurityProfile
   (authorizedEnvironment materializerEnvironment)
   readOnlyToken
 
+authorizedRepositoryAdministrationJob : WorkflowSecurityProfile
+authorizedRepositoryAdministrationJob = workflowSecurityProfile
+  "Materialize/repository-metadata"
+  authorizedSource
+  (authorizedEnvironment adminEnvironment)
+  readOnlyToken
+
 releaseJob : WorkflowSecurityProfile
 releaseJob = workflowSecurityProfile
   "Release/release-please"
