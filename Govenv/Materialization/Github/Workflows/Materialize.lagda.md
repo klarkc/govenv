@@ -78,7 +78,7 @@ repositoryMetadataEvidenceCommand =
   "  printf '%s\\n' \"- Repository: \\`${GITHUB_REPOSITORY}\\`\"\n" ++
   "  printf '%s\\n' \"- Workflow run: \\`${GITHUB_RUN_ID}\\`\"\n" ++
   "  printf '%s\\n' \"- Actor: \\`${GITHUB_ACTOR}\\`\"\n" ++
-  "  printf '%s\\n' '- Expected: `Govenv.Project.description`, `website`, `topics`'\n" ++
+  "  printf '%s\\n' '- Expected: `Govenv.Project.purpose`, `website`, `topics`'\n" ++
   "  printf '%s\\n' '- Observed: `all repository metadata read-back equal`'\n" ++
   "  printf '%s\\n' '- Assurance: `expected == observed`'\n" ++
   "} >> \"${GITHUB_STEP_SUMMARY}\""

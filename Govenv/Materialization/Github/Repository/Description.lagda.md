@@ -9,7 +9,7 @@ module Govenv.Materialization.Github.Repository.Description where
 
 open import Agda.Builtin.String using (String)
 open import Govenv.Materialization
-open import Govenv.Project using (description)
+open import Govenv.Project using (purpose)
 
 materialization : Materialization String
 materialization = materialized
@@ -18,5 +18,5 @@ materialization = materialized
   adminPrivilege
   adminAuthority
   descriptionReadBackEquality
-  description
+  purpose
 ```
