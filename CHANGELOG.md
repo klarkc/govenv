@@ -6,7 +6,7 @@
 ### Governance impact
 
 **Phase:** ▣ P1 — unchanged  
-**Items:** 1 advanced · 12 introduced · 9 superseded
+**Items:** 1 advanced · 13 introduced · 12 superseded
 
 #### Advanced · 1
 
@@ -14,12 +14,13 @@
 | :---: | --- |
 | **GV84 ◇ ↑** | Make observed invariant regressions counterexample-closing: once a contradiction to a governed or relied-upon invariant is recorded as an observed regression, its repair is incomplete until the counterexample is preserved as governed evidence, the missing or incorrectly scoped assurance boundary is corrected or overstated governance superseded, and candidate validation rejects recurrence before the affected workflow may succeed. |
 
-#### Introduced · 12
+#### Introduced · 13
 
 | GV | Proposition |
 | :---: | --- |
 | **+ GV101 ✓** | Partition project requirements and mechanisms into Governance, Protocol, and irreducible observation/effect execution: every expressible and checkable property of repository or system state, transition, effect, authorization, or semantic output that determines constitutional validity must be governed; contributor and agent process guidance remains Protocol even when machine-checkable, and compliance with that guidance must not itself determine repository validity, while Governance may independently require canonical Protocol materializations to match their source; adapters may only observe, apply, or verify effects and must not introduce semantic authority. |
 | **+ GV102 ◇** | Separate domain semantic authority from materialization binding: every state materialized by Govenv must have exactly one canonical `Govenv.Materialization.*` definition that binds authoritative semantic sources and any target-specific composition, ordering, or inclusion to its target, application mode, privilege, required authority, and verification; Governance, Protocol, and other governed project data retain ownership of their domain semantics and must not be duplicated or re-owned by materializations, projections, or adapters; projections encode target-format representation and adapters only observe, apply, or verify effects. |
+| **+ GV108 ✓** | Separate administrative bootstrap from authorized materialization around exactly one human-supplied administrative root, `GOVENV_ADMIN_TOKEN`: keep `Admin Materialize` as the single manually invoked setup/recovery/rotation boundary, limited to establishing, reconciling, and rotating subordinate authority and capability state; derive all subordinate credentials and boundaries without any additional manually supplied credential, and rotate governed subordinate credentials on rerun. Ordinary project state must not be an Admin Materialize setup step. Automatically reconcile every deterministic non-bootstrap materialization of an `AuthorizedRevision`, including versioned artifacts and GitHub repository description, website, and topics, with target-specific read-back verification. Automatic GitHub repository administration may consume `GOVENV_ADMIN_TOKEN` only inside the main-only administrative environment when GitHub exposes no narrower credential derivable without a second human bootstrap; candidate, agent, release, Pages, and repository Git-materializer paths must never receive it. |
 | **+ GV96 ◇** | Close versioned artifact authority: handwritten semantic authority is limited to code-first `.agda` modules and human-facing normative `.lagda.md` modules; implementation and experiment documentation must live in the owning `.agda`, while Governance, Protocol, and governed evidence keep prose and formalization together in the owning literate module. Every other versioned artifact must be produced by exactly one governed `Govenv.Materialization.*` definition and verified against it; transient `.govenv` state is forbidden from being versioned, with only the temporary root-level `devenv.nix`, `devenv.yaml`, and `devenv.lock` bootstrap escape hatch until GV38 completes. |
 | **+ GV97 ◇** | Model `Govenv.Governance` and `Govenv.Protocol` as distinct human-facing literate normative domains: Governance defines constitutional validity, while Protocol guides contributor and agent process without independently invalidating repository state. Materialize `AGENTS.md` exclusively from `Govenv.Protocol` and reject tracked divergence. |
 | **+ GV98 ◇** | Classify Agda semantic declarations by reflected `Name` into architectural roles for governance, protocol, assurance, materialization, kernel, experiment, projection, and adapters, and enforce allowed dependency directions between those roles. Source layout, the root closure, and generated artifacts are separate transport/composition concerns and must not determine semantic role. Experiments may depend on the reusable kernel, but kernel code must never depend on experiments. |
@@ -31,7 +32,7 @@
 | **+ GV105 ◇** | Expose anticipatory Governance and Protocol context through provider-neutral coding-agent lifecycle boundaries: before-tool integration may gate or rewrite governed effects using the same semantic rules, after-tool integration may attach scoped Protocol advice and context, provider capability and wire differences remain adapter concerns, and unsupported agents fall back to the available LSP, Git-hook, and authoritative check boundaries without weakening validation. |
 | **+ GV106 ◇** | Make `govenv shell` establish supported editor and coding-agent integrations through the active runtime backend for agents launched within that shell, including lifecycle hooks, LSP, and Git fallback boundaries, while never packaging or taking ownership of the coding-agent executable itself. |
 
-#### Superseded · 9
+#### Superseded · 12
 
 ##### GV57 ↪ GV101
 
@@ -68,6 +69,20 @@
 + Separate domain semantic authority from materialization binding: every state materialized by Govenv must have exactly one canonical `Govenv.Materialization.*` definition that binds authoritative semantic sources and any target-specific composition, ordering, or inclusion to its target, application mode, privilege, required authority, and verification; Governance, Protocol, and other governed project data retain ownership of their domain semantics and must not be duplicated or re-owned by materializations, projections, or adapters; projections encode target-format representation and adapters only observe, apply, or verify effects.
 ```
 
+##### GV22 ↪ GV108
+
+```diff
+- Require admin-privileged external materializations to run only through the manual, target-restricted `Admin Materialize` workflow.
++ Separate administrative bootstrap from authorized materialization around exactly one human-supplied administrative root, `GOVENV_ADMIN_TOKEN`: keep `Admin Materialize` as the single manually invoked setup/recovery/rotation boundary, limited to establishing, reconciling, and rotating subordinate authority and capability state; derive all subordinate credentials and boundaries without any additional manually supplied credential, and rotate governed subordinate credentials on rerun. Ordinary project state must not be an Admin Materialize setup step. Automatically reconcile every deterministic non-bootstrap materialization of an `AuthorizedRevision`, including versioned artifacts and GitHub repository description, website, and topics, with target-specific read-back verification. Automatic GitHub repository administration may consume `GOVENV_ADMIN_TOKEN` only inside the main-only administrative environment when GitHub exposes no narrower credential derivable without a second human bootstrap; candidate, agent, release, Pages, and repository Git-materializer paths must never receive it.
+```
+
+##### GV44 ↪ GV108
+
+```diff
+- Automatically apply versioned non-admin materializations on `main` using only repository-scoped CI permission; validation and publication workflows run after Materialize completes, while admin materializations remain manual.
++ Separate administrative bootstrap from authorized materialization around exactly one human-supplied administrative root, `GOVENV_ADMIN_TOKEN`: keep `Admin Materialize` as the single manually invoked setup/recovery/rotation boundary, limited to establishing, reconciling, and rotating subordinate authority and capability state; derive all subordinate credentials and boundaries without any additional manually supplied credential, and rotate governed subordinate credentials on rerun. Ordinary project state must not be an Admin Materialize setup step. Automatically reconcile every deterministic non-bootstrap materialization of an `AuthorizedRevision`, including versioned artifacts and GitHub repository description, website, and topics, with target-specific read-back verification. Automatic GitHub repository administration may consume `GOVENV_ADMIN_TOKEN` only inside the main-only administrative environment when GitHub exposes no narrower credential derivable without a second human bootstrap; candidate, agent, release, Pages, and repository Git-materializer paths must never receive it.
+```
+
 ##### GV71 ↪ GV96
 
 ```diff
@@ -80,6 +95,13 @@
 ```diff
 - Require every versioned repository artifact not permitted as handwritten source by GV71, except the temporary root-level `devenv.nix`, `devenv.yaml`, and `devenv.lock` bootstrap escape hatch, to be produced by exactly one governed `Govenv.Materialization.*` definition and verified against its materialized state; transient `.govenv` state is forbidden from being versioned.
 + Close versioned artifact authority: handwritten semantic authority is limited to code-first `.agda` modules and human-facing normative `.lagda.md` modules; implementation and experiment documentation must live in the owning `.agda`, while Governance, Protocol, and governed evidence keep prose and formalization together in the owning literate module. Every other versioned artifact must be produced by exactly one governed `Govenv.Materialization.*` definition and verified against it; transient `.govenv` state is forbidden from being versioned, with only the temporary root-level `devenv.nix`, `devenv.yaml`, and `devenv.lock` bootstrap escape hatch until GV38 completes.
+```
+
+##### GV92 ↪ GV108
+
+```diff
+- Require administrative bootstrap and continued administration to have exactly one human-supplied root authority, represented by `GOVENV_ADMIN_TOKEN`. Provisioning, replacing, or rotating the credential representing that root preserves the identity of the same administrative authority and must never constitute a new independent authority. From this root and an `AuthorizedRevision`, `Admin Materialize` must deterministically derive the required subordinate authority graph and must materialize, generate where cryptographic material is required, provision, rotate, order, and read-back verify every subordinate credential, capability boundary, identity, environment, variable, secret, policy, and persistent administrative effect required by Govenv. Generated credential material carries no independent semantic authority and must remain bound to governed identity and capability state. No additional manually supplied credential, token, key, secret, application identity, environment mutation, or per-target administrative intervention may become a prerequisite for normal operation. Any required authority that cannot be derived or materialized from this root must be treated as an architectural incompleteness unless a hosting-platform impossibility is explicitly governed.
++ Separate administrative bootstrap from authorized materialization around exactly one human-supplied administrative root, `GOVENV_ADMIN_TOKEN`: keep `Admin Materialize` as the single manually invoked setup/recovery/rotation boundary, limited to establishing, reconciling, and rotating subordinate authority and capability state; derive all subordinate credentials and boundaries without any additional manually supplied credential, and rotate governed subordinate credentials on rerun. Ordinary project state must not be an Admin Materialize setup step. Automatically reconcile every deterministic non-bootstrap materialization of an `AuthorizedRevision`, including versioned artifacts and GitHub repository description, website, and topics, with target-specific read-back verification. Automatic GitHub repository administration may consume `GOVENV_ADMIN_TOKEN` only inside the main-only administrative environment when GitHub exposes no narrower credential derivable without a second human bootstrap; candidate, agent, release, Pages, and repository Git-materializer paths must never receive it.
 ```
 
 ##### GV30 ↪ GV103
@@ -96,7 +118,7 @@
 + Keep MCP strictly optional and adapter-only: core Governance and Protocol semantics, `govenv check`, scoped advice, LSP/editor integration, Git boundaries, and coding-agent lifecycle integration must not depend on MCP availability; any MCP integration may project the same governed context or diagnostic/advisory deltas without becoming semantic authority.
 ```
 
-Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `8af5ae6..36856d7`.
+Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `8af5ae6..afc7708`.
 <!-- govenv-governance-impact:end -->
 
 
@@ -106,6 +128,7 @@ Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit
 * **architecture:** separate normative and experiment domains ([c916e8d](https://github.com/klarkc/govenv/commit/c916e8d03bc7b2f6721ceee581d1cf43c9391cb2))
 * **project:** align purpose and integration roadmap ([675c1ee](https://github.com/klarkc/govenv/commit/675c1ee71e0e5cbde0325ab323237394438418af))
 * **governance:** classify semantic authority domains ([36856d7](https://github.com/klarkc/govenv/commit/36856d7123c5578254129ff6043d047ad6c75876))
+* **authorization:** separate bootstrap from authorized effects ([afc7708](https://github.com/klarkc/govenv/commit/afc7708574551b0148edf992c48611b7d0bf585e))
 
 
 ### Documentation
