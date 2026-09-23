@@ -2,6 +2,52 @@
 
 ## [Unreleased]
 
+<!-- govenv-governance-impact:start -->
+### Governance impact
+
+**Phase:** ▣ P1 — unchanged  
+**Items:** 4 introduced · 3 superseded
+
+#### Introduced · 4
+
+| GV | Proposition |
+| :---: | --- |
+| **+ GV111 ◇** | Replace the mechanically derived README Current/Next status of GV94 with a governed project-direction review while preserving roadmap structural validity: Current is a bounded human-facing summary anchored by typed coverage of the exact governed project and roadmap state; Next is a bounded human-facing summary of the selected gap between Purpose and Current; every relevant source subject must receive an explicit typed disposition, source changes invalidate review freshness, and the compiler verifies bounds, provenance, coverage, references, and vigilance freshness while the agent supplies semantic judgment and the human authorizes that judgment through the pull request. |
+| **+ GV112 ◇** | Require consolidation closure for every declared session, handoff, recovery corpus, or other project-knowledge snapshot before semantic roadmap evolution: bind the corpus to immutable provenance and require every declared observation to receive exactly one explicit disposition as represented by governed state, superseded by an identified decision, rejected with rationale, or irrelevant with rationale; any undisposed observation keeps project direction stale and blocks semantic roadmap evolution, without claiming that the compiler can prove completeness of unobservable model memory or natural-language extraction. |
+| **+ GV114 ◇** | Generalize administrative bootstrap across independent external providers while preserving one human-facing convergent setup: model one human administrative authority with explicit irreducible provider grants only where one provider cannot derive another provider credential; each bootstrap grant may enter only the main-only `admin-materialization` boundary, and `Admin Materialize / setup` must deterministically create, restrict, populate, and read-back verify the least-privileged target capability boundary for that provider. Provider grant fields may be packaged as one opaque secret when they jointly represent one authorization; target jobs receive only their own provider grant and never `GOVENV_ADMIN_TOKEN` or unrelated grants. Provider credentials create no semantic authority, and provider identity must be read back when the provider exposes a sound verification boundary. |
+| **+ GV115 ◇** | Simplify developer-journal authorization into the existing pull-request lifecycle: every ordinary candidate pull request must include its own journal post text and square image bound to the exact candidate delta and current project direction, with typed coverage/disposition for every relevant change; human merge of that same pull request is the sole editorial authorization, after which only the exact reviewed artifacts may be published automatically to X without a second approval pull request or environment approval. Release Please pull requests substitute a release-journal preview for the ordinary PR post: each major or minor release preview must derive from the exact frozen typed ReleaseDocument, approval/merge of that Release Please pull request authorizes the exact release post, and publication occurs only after the corresponding release boundary; patch releases may omit a release post unless another rule requires one. Publication must be idempotent through the dedicated social capability boundary and retain revision-addressable read-back evidence of the resulting X post. |
+
+#### Superseded · 3
+
+##### GV113 ↪ GV115
+
+```diff
+- Govern the developer journal as an approved projection of project evolution: every semantic Next change requires a direction post bound to the exact project-direction delta, and every major or minor release requires a release post bound to the exact frozen typed ReleaseDocument. Each draft must stay within the target platform limit, carry typed coverage/disposition for every relevant source change, use the canonical Govenv logo and square journal-image brief, be reviewed in the authorizing pull request or release candidate, and only the exact approved text/image may be published after authorization; publication credentials remain external secrets and successful publication is read back into revision-addressable evidence.
++ Simplify developer-journal authorization into the existing pull-request lifecycle: every ordinary candidate pull request must include its own journal post text and square image bound to the exact candidate delta and current project direction, with typed coverage/disposition for every relevant change; human merge of that same pull request is the sole editorial authorization, after which only the exact reviewed artifacts may be published automatically to X without a second approval pull request or environment approval. Release Please pull requests substitute a release-journal preview for the ordinary PR post: each major or minor release preview must derive from the exact frozen typed ReleaseDocument, approval/merge of that Release Please pull request authorizes the exact release post, and publication occurs only after the corresponding release boundary; patch releases may omit a release post unless another rule requires one. Publication must be idempotent through the dedicated social capability boundary and retain revision-addressable read-back evidence of the resulting X post.
+```
+
+##### GV108 ↪ GV114
+
+```diff
+- Separate administrative bootstrap from authorized materialization around exactly one human-supplied administrative root, `GOVENV_ADMIN_TOKEN`: keep `Admin Materialize` as the single manually invoked setup/recovery/rotation boundary, limited to establishing, reconciling, and rotating subordinate authority and capability state; derive all subordinate credentials and boundaries without any additional manually supplied credential, and rotate governed subordinate credentials on rerun. Ordinary project state must not be an Admin Materialize setup step. Automatically reconcile every deterministic non-bootstrap materialization of an `AuthorizedRevision`, including versioned artifacts and GitHub repository description, website, and topics, with target-specific read-back verification. Automatic GitHub repository administration may consume `GOVENV_ADMIN_TOKEN` only inside the main-only administrative environment when GitHub exposes no narrower credential derivable without a second human bootstrap; candidate, agent, release, Pages, and repository Git-materializer paths must never receive it.
++ Generalize administrative bootstrap across independent external providers while preserving one human-facing convergent setup: model one human administrative authority with explicit irreducible provider grants only where one provider cannot derive another provider credential; each bootstrap grant may enter only the main-only `admin-materialization` boundary, and `Admin Materialize / setup` must deterministically create, restrict, populate, and read-back verify the least-privileged target capability boundary for that provider. Provider grant fields may be packaged as one opaque secret when they jointly represent one authorization; target jobs receive only their own provider grant and never `GOVENV_ADMIN_TOKEN` or unrelated grants. Provider credentials create no semantic authority, and provider identity must be read back when the provider exposes a sound verification boundary.
+```
+
+##### GV94 ↪ GV111
+
+```diff
+- Make roadmap current state derived and self-consistent: while governance work remains, the active phase must contain non-terminal governance work, finished phases must remain terminal, and a complete roadmap may contain no non-terminal work. Every `Current` projection, including README status and next-work information, must be derived from typed roadmap state and may contain no independently maintained progress summary.
++ Replace the mechanically derived README Current/Next status of GV94 with a governed project-direction review while preserving roadmap structural validity: Current is a bounded human-facing summary anchored by typed coverage of the exact governed project and roadmap state; Next is a bounded human-facing summary of the selected gap between Purpose and Current; every relevant source subject must receive an explicit typed disposition, source changes invalidate review freshness, and the compiler verifies bounds, provenance, coverage, references, and vigilance freshness while the agent supplies semantic judgment and the human authorizes that judgment through the pull request.
+```
+
+Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `79c0803..24fe90c`.
+<!-- govenv-governance-impact:end -->
+
+
+### Governance
+
+* **direction:** establish review and journal protocol ([24fe90c](https://github.com/klarkc/govenv/commit/24fe90c8f0daceeb3d6b7783ee9ef63ff87dcb91))
+
 ## [0.2.8](https://github.com/klarkc/govenv/compare/v0.2.7...v0.2.8) (2026-09-23)
 <!-- govenv-release-freeze: version=0.2.8 base=v0.2.7 authorized=3a3974a8db6896dce3c556c13b4346c4e78a2099 -->
 
