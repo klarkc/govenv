@@ -1,0 +1,410 @@
+diff --git a/Govenv.lagda.md b/Govenv.lagda.md
+index c8c9c7a..bb77d8c 100644
+--- a/Govenv.lagda.md
++++ b/Govenv.lagda.md
+@@ -7,6 +7,8 @@ module Govenv where
+ 
+ open import Agda.Builtin.Unit
+ open import Govenv.Architecture
++open import Govenv.Authorization
++open import Govenv.Github.Authorization
+ open import Govenv.Administration
+ open import Govenv.Assurance
+ open import Govenv.Materialization
+@@ -14,6 +16,18 @@ open import Govenv.Materialization.Readme
+ open import Govenv.Materialization.RoadmapSnapshot
+ open import Govenv.Materialization.ReleaseGovernance
+ open import Govenv.Materialization.Github.Repository.Description
++open import Govenv.Materialization.Github.Repository.MainAuthorization
++open import Govenv.Materialization.Github.Repository.MainAuthorityBoundary
++open import Govenv.Materialization.Github.Repository.MainIntegrity
++open import Govenv.Materialization.Github.Workflows.Materialize
++open import Govenv.Materialization.Github.Workflows.Test
++open import Govenv.Materialization.Github.Workflows.Release
++open import Govenv.Materialization.Github.Workflows.Pages
++open import Govenv.Materialization.Github.Workflows.AdminMaterialize
++open import Govenv.Materialization.Github.Actions.AdminEnvironment
++open import Govenv.Materialization.Github.Actions.AuthorizedEffectsEnvironment
++open import Govenv.Materialization.Github.Actions.MaterializerEnvironment
++open import Govenv.Materialization.Github.Actions.PagesEnvironment
+ open import Govenv.Project
+ open import Govenv.Roadmap
+ open import Govenv.Readme
+diff --git a/Govenv/Administration.lagda.md b/Govenv/Administration.lagda.md
+index 3401628..8ef2713 100644
+--- a/Govenv/Administration.lagda.md
++++ b/Govenv/Administration.lagda.md
+@@ -1,24 +1,54 @@
+ # Administrative materialization
+ 
+-Administrative materializations are governed targets whose canonical definitions require permissions broader than normal CI should hold. Their credentials stay behind an explicit manual privilege boundary; adapters only apply and verify the governed target state.
++Administrative materializations are governed targets whose canonical definitions require permissions broader than normal CI should hold. Their credentials stay behind an explicit manual privilege boundary; adapters only apply and verify governed target state.
+ 
+-## Stage 0 setup
++## Stage 0 credential bootstrap
+ 
+-The current GitHub bootstrap is intentionally manual:
++The irreducible initial GitHub credential setup is manual because Govenv cannot safely create the credential that authorizes its own first administrative effect:
+ 
+-1. Open the repository **Settings → Environments** and create `admin-materialization`.
+-2. Add the environment secret `GOVENV_ADMIN_TOKEN`.
+-3. Create a fine-grained personal access token with **Resource owner** set to `klarkc` and repository access explicitly including `klarkc/govenv`.
+-4. Grant only **Repository permissions → Administration: read and write** beyond GitHub's implicit minimum metadata access.
+-5. Give the token a finite expiration and rotate it before expiry. The current repository setup uses a one-year expiration.
+-6. Prefer protecting the environment with required admin reviewers when repository settings allow it.
+-7. Run **Actions → Admin Materialize → Run workflow** and select a declared target.
++1. Create the `admin-materialization` environment and add the environment secret `GOVENV_ADMIN_TOKEN`.
++2. Create a fine-grained personal access token owned by `klarkc`, restricted to `klarkc/govenv`, with **Administration: read and write** plus **Environments: read**. Administration write is required to materialize repository environments, deployment branch policies, and repository rulesets; Environments read is required only to verify the exact names of environment secrets and variables. Secret values are never read back.
++3. Give the token a finite expiration and rotate it before expiry. No normal Test, Materialize, Pages, or Release job may consume this credential.
++4. After the governed Stage A `Admin Materialize` workflow is present on an authorized `main`, dispatch the `admin-environment` target from `main` as the first administrative effect. It deterministically restricts `admin-materialization` itself to `main` and verifies the boundary plus the exact credential-name set.
+ 
+-The token must not be exposed to normal Test, Pages, or Release workflows. `Admin Materialize` is the only Stage 0 workflow allowed to consume it.
++The repository predates step 4: the externally observed `admin-materialization` environment currently contains `GOVENV_ADMIN_TOKEN` but is not branch-restricted. Until the self-hardening target has succeeded, the environment must not be treated as the authorization boundary described below.
+ 
+-## Current targets
++## Stage A executable targets
+ 
+-`github-description` is canonically defined by `Govenv.Materialization.Github.Repository.Description`, including its expected state, manual/admin capability, and read-back equality verification. The workflow applies only that projected value to GitHub repository metadata, verifies the observed value, and records the execution context as evidence.
++`Admin Materialize` is manual, target-restricted, checks the authorized repository state before compiling effect adapters, and exposes `GOVENV_ADMIN_TOKEN` only to the selected application step. Its Stage A target set is deliberately limited to:
++
++- `github-description` — apply and read back the canonical repository description;
++- `admin-environment` — self-harden the administrative environment to `main`;
++- `materializer-environment` — create/verify the main-only `authorized-materialization` boundary and the exact name `GOVENV_MATERIALIZER_PRIVATE_KEY`;
++- `authorized-effects-environment` — create/verify the main-only Release/Pages-build boundary;
++- `pages-environment` — create/verify the main-only `github-pages` deployment boundary.
++
++Every target is applied by an Agda adapter derived from a canonical `Govenv.Materialization.*` state, is read back after the effect, and fails unless the governed observable state equals the target. A successful workflow records the constitution SHA, target, repository, workflow run, and read-back-equality result as execution evidence.
++
++Credential values remain irreducibly external. In particular, the materializer environment can be created by Govenv before its private key exists, but that first application remains incomplete and therefore fails read-back equality until a human provisions `GOVENV_MATERIALIZER_PRIVATE_KEY`; rerunning the same target then verifies the complete governed boundary. No second semantic state is introduced for this bootstrap transition.
++
++## Candidate authoring boundary
++
++Automated candidate authorship uses the dedicated `govenv-author` GitHub App rather than a credential that acts as the human authorizer. It may write ordinary repository contents and pull requests, but it has no Actions, Workflows, Administration, Pages, or OIDC capability. It is never a bypass actor for `main`; therefore it can propose a candidate but cannot merge or directly create semantic authority. Human interactive authorship may use the human account, but automated agents must not receive that human credential.
++
++## Authorized materializer boundary
++
++GV90 introduces a separate non-admin capability boundary for deterministic post-merge repository materialization. The dedicated `govenv-materializer` GitHub App must be installed only on this repository and needs repository Contents write plus Workflows write capability, but no repository Administration capability. Its private key lives only in the `authorized-materialization` environment.
++
++The App's public `client_id` is not stored as configuration: Materialize resolves it from the governed `govenv-materializer` slug immediately before minting a short-lived token and then verifies that the token reports the same App slug. The environment is restricted to `main`, so candidate pull-request refs cannot obtain the App credential while code already accepted onto `main` may use it for deterministic materialization effects.
++
++## Monotonic authorization rollout
++
++GV91 forbids activating an enforcement before the execution path that must survive it is already authorized and verified. The GitHub rollout is therefore staged:
++
++1. **Stage A — administrative path:** merge the governed Admin Materialize/environment adapters while the legacy repository materializer remains usable; dispatch `admin-environment` from `main` and verify its read-back.
++2. **Credential boundary:** create/install `govenv-materializer` with only Contents write + Workflows write, dispatch `materializer-environment` to establish its main-only boundary, provision `GOVENV_MATERIALIZER_PRIVATE_KEY`, and rerun the target until read-back equality succeeds. Establish and verify `authorized-effects` and `github-pages` the same way. Create/install `govenv-author` before any automated candidate author receives repository write capability.
++3. **Stage B — authorized workflows:** merge the governed Materialize/Test/Release/Pages workflows. Materialize now evaluates with a read-only `GITHUB_TOKEN` and obtains the Materializer App token only when deterministic tracked drift exists; Release and Pages can run only from the authorized post-Materialize path.
++4. **Stage C — main enforcement:** only after Stage B is present on an `AuthorizedRevision` and its prerequisite environments/App identity are read-back verified may the three main rulesets become executable targets and be activated.
++
++Three independent rulesets define that final enforcement. `govenv-main-authorization` requires a pull request plus the governed `test` check and lets only the materializer App bypass those candidate gates. `govenv-main-authority` restricts default-branch updates to the governed human principal in pull-request-only bypass mode and the materializer App in always-bypass mode, so generic machine credentials with `Contents: write` cannot create authority. `govenv-main-integrity` blocks deletion and non-fast-forward updates with no bypass actor.
++
++The ruleset semantic states, pure projections, identity-resolution plans, effect adapters, and read-back equality logic are already defined locally, but **the rulesets are intentionally not exposed by the Stage A Admin Materialize target list**. Exposing/activating them before Stage B would violate GV91.
+ 
+ ```agda
+ {-# OPTIONS --safe #-}
+@@ -26,9 +56,37 @@ The token must not be exposed to normal Test, Pages, or Release workflows. `Admi
+ module Govenv.Administration where
+ 
+ open import Agda.Builtin.String using (String)
++
+ adminEnvironment : String
+ adminEnvironment = "admin-materialization"
+ 
+ adminTokenSecret : String
+ adminTokenSecret = "GOVENV_ADMIN_TOKEN"
++
++authorizedBranch : String
++authorizedBranch = "main"
++
++candidateAuthorAppSlug : String
++candidateAuthorAppSlug = "govenv-author"
++
++materializerAppSlug : String
++materializerAppSlug = "govenv-materializer"
++
++materializerEnvironment : String
++materializerEnvironment = "authorized-materialization"
++
++materializerPrivateKeySecret : String
++materializerPrivateKeySecret = "GOVENV_MATERIALIZER_PRIVATE_KEY"
++
++materializerBranch : String
++materializerBranch = authorizedBranch
++
++authorizedEffectsEnvironment : String
++authorizedEffectsEnvironment = "authorized-effects"
++
++pagesEnvironment : String
++pagesEnvironment = "github-pages"
++
++authorizationHumanLogin : String
++authorizationHumanLogin = "klarkc"
+ ```
+diff --git a/Govenv/Materialization.lagda.md b/Govenv/Materialization.lagda.md
+index 8dca3cc..fb7051f 100644
+--- a/Govenv/Materialization.lagda.md
++++ b/Govenv/Materialization.lagda.md
+@@ -1,6 +1,6 @@
+ # Materialization
+ 
+-Materialization defines canonical semantic target state from governed project data. Projection only encodes that state for a concrete target format, while adapters only observe, apply, or verify effects. Application, privilege, and verification are governed properties of each materialization target.
++Materialization defines canonical semantic target state from governed project data. Projection only encodes that state for a concrete target format, while adapters only observe, apply, or verify effects. Application mode, privilege, authority requirement, and verification are governed properties of each materialization target. Computing or rendering a candidate materialization does not itself require authority; `ApplicationPlan` governs only application to an authoritative repository or persistent external target.
+ 
+ ```agda
+ {-# OPTIONS --safe #-}
+@@ -9,6 +9,7 @@ module Govenv.Materialization where
+ 
+ open import Agda.Builtin.Nat using (Nat)
+ open import Agda.Builtin.String using (String)
++open import Govenv.Authorization using (AuthorizedRevision)
+ 
+ data Application : Set where
+   automatic manual : Application
+@@ -16,6 +17,13 @@ data Application : Set where
+ data Privilege : Set where
+   repository admin : Privilege
+ 
++data ApplicationAuthority : Set where
++  unprivileged authorizedOnly : ApplicationAuthority
++
++data ApplicationAuthorization : ApplicationAuthority → Set where
++  unprivilegedApplication : ApplicationAuthorization unprivileged
++  authorizedApplication : AuthorizedRevision → ApplicationAuthorization authorizedOnly
++
+ data GithubRepositoryProperty : Set where
+   repositoryDescription : GithubRepositoryProperty
+ 
+@@ -42,6 +50,8 @@ data Target : Set where
+   repositoryFileSection :
+     String → RepositoryFileSection → RepositoryFileSectionPlacement → Target
+   githubRepository : GithubRepositoryProperty → Target
++  githubRepositoryRuleset : String → Target
++  githubActionsEnvironment : String → Target
+   githubPullRequestBodySection :
+     Nat → GithubPullRequestSection → GithubPullRequestBodyPlacement → Target
+   githubReleaseBodySection :
+@@ -55,6 +65,10 @@ data Verification : Target → Set where
+     Verification (repositoryFileSection path section placement)
+   readBackEquality : {property : GithubRepositoryProperty} →
+     Verification (githubRepository property)
++  rulesetReadBackEquality : {name : String} →
++    Verification (githubRepositoryRuleset name)
++  environmentBoundaryReadBackEquality : {name : String} →
++    Verification (githubActionsEnvironment name)
+   pullRequestBodySectionEquality :
+     {number : Nat} {section : GithubPullRequestSection}
+     {placement : GithubPullRequestBodyPlacement} →
+@@ -70,18 +84,34 @@ record Materialization (State : Set) : Set where
+     target : Target
+     application : Application
+     privilege : Privilege
++    authority : ApplicationAuthority
+     verification : Verification target
+     state : State
+ 
++record ApplicationPlan
++  {State : Set}
++  (materialization : Materialization State)
++  : Set where
++  constructor applicationPlan
++  field
++    authorization :
++      ApplicationAuthorization (Materialization.authority materialization)
++
+ versionedApplication : Application
+ versionedApplication = automatic
+ 
+ versionedPrivilege : Privilege
+ versionedPrivilege = repository
+ 
++versionedAuthority : ApplicationAuthority
++versionedAuthority = authorizedOnly
++
+ adminApplication : Application
+ adminApplication = manual
+ 
+ adminPrivilege : Privilege
+ adminPrivilege = admin
++
++adminAuthority : ApplicationAuthority
++adminAuthority = authorizedOnly
+ ```
+diff --git a/Govenv/Materialization/Github/Repository/Description.lagda.md b/Govenv/Materialization/Github/Repository/Description.lagda.md
+index 7fd1824..b983547 100644
+--- a/Govenv/Materialization/Github/Repository/Description.lagda.md
++++ b/Govenv/Materialization/Github/Repository/Description.lagda.md
+@@ -16,6 +16,7 @@ materialization = materialized
+   (githubRepository repositoryDescription)
+   adminApplication
+   adminPrivilege
++  adminAuthority
+   readBackEquality
+   description
+ ```
+diff --git a/Govenv/Materialization/Readme.lagda.md b/Govenv/Materialization/Readme.lagda.md
+index bcfc526..f122dcd 100644
+--- a/Govenv/Materialization/Readme.lagda.md
++++ b/Govenv/Materialization/Readme.lagda.md
+@@ -69,6 +69,7 @@ materialization = materialized
+   (repositoryFile "README.md")
+   versionedApplication
+   versionedPrivilege
++  versionedAuthority
+   trackedEquality
+   ( comment "Generated from Govenv.Materialization.Readme. Do not edit manually."
+   ∷ heading title centered name
+diff --git a/Govenv/Materialization/ReleaseGovernance.lagda.md b/Govenv/Materialization/ReleaseGovernance.lagda.md
+index aba1f61..2da1fb1 100644
+--- a/Govenv/Materialization/ReleaseGovernance.lagda.md
++++ b/Govenv/Materialization/ReleaseGovernance.lagda.md
+@@ -247,6 +247,7 @@ pullRequestBody number baseRevision headRevision roadmap delta = materialized
+   (githubPullRequestBodySection number releaseGovernanceImpact afterReleaseHeadingInBody)
+   automatic
+   repository
++  authorizedOnly
+   pullRequestBodySectionEquality
+   (document baseRevision headRevision roadmap delta)
+ 
+@@ -256,6 +257,7 @@ changelog baseRevision headRevision roadmap delta = materialized
+   (repositoryFileSection "CHANGELOG.md" releaseGovernanceImpactInChangelog afterReleaseHeadingInFile)
+   automatic
+   repository
++  authorizedOnly
+   repositoryFileSectionEquality
+   (document baseRevision headRevision roadmap delta)
+ 
+@@ -265,6 +267,7 @@ githubRelease tag baseRevision headRevision roadmap delta = materialized
+   (githubReleaseBodySection tag releaseGovernanceImpactInRelease replaceCarriedChangelogSection)
+   automatic
+   repository
++  authorizedOnly
+   githubReleaseBodySectionEquality
+   (document baseRevision headRevision roadmap delta)
+ ```
+diff --git a/Govenv/Materialization/RoadmapSnapshot.lagda.md b/Govenv/Materialization/RoadmapSnapshot.lagda.md
+index 8bdad9e..635b5cf 100644
+--- a/Govenv/Materialization/RoadmapSnapshot.lagda.md
++++ b/Govenv/Materialization/RoadmapSnapshot.lagda.md
+@@ -20,6 +20,7 @@ materialization = materialized
+   (repositoryFile ".govenv/roadmap.snapshot")
+   versionedApplication
+   versionedPrivilege
++  versionedAuthority
+   trackedEquality
+   snapshot
+ ```
+diff --git a/Govenv/Roadmap.lagda.md b/Govenv/Roadmap.lagda.md
+index 9889c13..cd7e89a 100644
+--- a/Govenv/Roadmap.lagda.md
++++ b/Govenv/Roadmap.lagda.md
+@@ -61,7 +61,11 @@ roadmap = roadmapOf (
+     ├ GV 73 "Require every persisted supporting artifact, including snapshots, fixtures, baselines, schemas, test vectors, and evidence, to be colocated with the module that semantically owns it; catch-all artifact directories are forbidden unless the artifact is genuinely project-global." ◇
+     ├ GV 74 "Make governance completion evidence-bearing and persistent: a governance item may transition to `done` only when governed evidence establishes its proposition for the candidate repository state, and every non-superseded `done` item, including items completed before this rule, must remain satisfied in every subsequent valid repository state." ◇
+     ├ GV 84 "Make observed invariant regressions counterexample-closing: once a contradiction to a governed or relied-upon invariant is recorded as an observed regression, its repair is incomplete until the counterexample is preserved as governed evidence, the missing or incorrectly scoped assurance boundary is corrected or overstated governance superseded, and candidate validation rejects recurrence before the affected workflow may succeed." ◇
+-    ├ GV 85 "Treat the case-insensitive standalone word `fix` in governed commit messages as a conservative regression signal: candidate commit validation must reject it unless the commit references governed regression evidence or carries an explicit justified non-regression exemption; no exemption may discharge an unresolved observed regression." ◇
++    ├ GV 85 "Treat the case-insensitive standalone word `fix` in governed commit messages as a conservative regression signal: candidate commit validation must reject it unless the commit references governed regression evidence or carries an explicit justified non-regression exemption; no exemption may discharge an unresolved observed regression." ↪ GVR 89
++    ├ GV 86 "Treat governance items as cumulative constitutional decisions: from introduction onward, every item is interpreted against the complete constitution at that revision, including `todo`, `done`, `superseded`, and `cancelled` history; lifecycle state determines operative effect rather than constitutional membership, completion records establishment rather than applicability, and explicit dependency relationships between governance items are neither required nor modeled." ◇
++    ├ GV 87 "Project the typed candidate governance delta of every governed pull request through a GitHub-native check derived from revision-aware governance state; workflow artifacts may provide transient inspection material, but finite external retention means they must never be the sole or authoritative governance evidence, and any evidence required for completion, regression closure, auditability, or future validation must persist in governed revision-addressable form from which transient projections can be reproduced." ◇
++    ├ GV 90 "Model human authorization as `AuthorizedRevision`: new semantic authority may originate only from the exact repository state accepted by an explicit human pull-request merge. Candidate revisions may perform unprivileged validation and transient non-authoritative projections, but automated candidate-authoring principals must be distinct from human authorizers and post-authorization materializers and must not receive capabilities that can alter executable automation, authorize or merge the candidate, mutate authoritative repository state, or mutate persistent governed external state; only after authorization may governed automation exercise the capabilities necessary to derive deterministic materialization revisions or external effects. Derived outcomes create no independent semantic authority, must not be treated as fresh human authorization, and must retain revision-addressable causal provenance to the authorizing revision." ◇
++    ├ GV 91 "Require authority-boundary migrations to be monotonic and non-self-locking: an enforcement or capability restriction may become active only after every authorized execution path required to operate, verify, and repair under that restriction is already present in an `AuthorizedRevision` and its prerequisite external capabilities have been applied and read-back verified; bootstrap stages must preserve a human-authorized recovery path, and no stage may depend on a capability whose establishment occurs only after the enforcement that requires it." ◇
+     ├ GV 75 "Render release governance item changes as compact semantic diffs: remove redundant per-item progress labels, align before/after propositions for supersessions, visually distinguish only changed spans, and deterministically wrap or elide common context while preserving the full typed governance delta." ◇
+     ├ GV 83 "Render governance deltas sparsely: project only semantic dimensions whose values change, keep unchanged dimensions implicit, and retain only the identity and context required to unambiguously interpret the change." ◇
+     ├ GV 76 "Make governance references in Git-derived projections revision-aware and navigable: linked identities, lifecycle states and operators, transitions, and elisions must resolve to documentation derived from the immutable Git revision or delta they represent; before-state references use the base revision and after-state references use the candidate or head revision." ↪ GVR 78
+@@ -85,6 +89,7 @@ roadmap = roadmapOf (
+     ├ GV 53 "Expose repository evaluation as `govenv check`, with deterministic exit status and source-mapped diagnostics while keeping observation and effects outside the pure evaluator." ◇
+     ├ GV 28 "Define governed commit policy with a simplified Conventional Commits vocabulary; governance changes must use `gov(...)`, and every governed commit must reference its related roadmap subitem(s) using a `Refs: GV…` footer." ↪ GVR 66
+     ├ GV 66 "Model governed commit policy as project data with a simplified Conventional Commits vocabulary; governance changes must use `gov(...)`, and every governed commit must reference its related roadmap subitem(s) using a `Refs: GV…` footer." ◇
++    ├ GV 89 "Treat the case-insensitive standalone word `fix` in governed commit messages as a conservative regression signal: candidate commit validation must reject it unless the commit references governed regression evidence or carries an explicit justified non-regression exemption; no exemption may discharge an unresolved observed regression." ◇
+     ├ GV 29 "Validate the staged candidate repository state using the candidate governance before accepting a commit." ◇
+     ├ GV 30 "Enforce commit governance transparently through a Git hook; Stage 0 installs it through devenv, and Govenv later owns the integration directly." ◇
+   ) ╟ (P 4 "Incremental governance" □
+@@ -92,6 +97,7 @@ roadmap = roadmapOf (
+     ├ GV 32 "Prove incremental checking equivalent to full checking." ◇
+     ├ GV 33 "Expose the checker through an LSP/editor loop." ◇
+     ├ GV 34 "Expose governance context and diagnostic deltas through an MCP adapter for agent clients." ◇
++    ├ GV 88 "Require every governable obligation to be enforced at its earliest sound information boundary while retaining `govenv check` as the authoritative repository evaluation and deriving every anticipatory enforcement from the same governed rule. Maintain an explicit enforcement inventory that anticipates, at minimum: construction-time Agda constraints for typed identities, roadmap/lifecycle validity, constitutional structure, evidence relationships, pure kernel boundaries, and projection/materialization structure; static candidate or incremental/LSP checks for governance evolution, immutable identity, architecture imports, handwritten-source restrictions, materialization ownership and drift, artifact colocation, documentation references, regression obligations, governance/release deltas, and release-progress classification; commit-boundary checks for staged candidate validity, commit policy, governance references, semantic commit classification, and regression signals; PR/CI checks only for information first available from GitHub or the remote candidate; and post-effect checks only for irreducible external observations such as read-back equality, publication state, admin effects, and runtime facts. Later stages may confirm earlier results but must not re-own, duplicate, or independently specify semantics that were soundly enforceable earlier." ◇
+   ) ╟ (P 5 "Governed runtime compiler" □
+     ┬ GV 35 "Define typed Environment/Runtime IR." ◇
+     ├ GV 67 "Keep runtime backends replaceable behind the typed IR boundary." ◇
+diff --git a/devenv.nix b/devenv.nix
+index 60f5a20..3013940 100644
+--- a/devenv.nix
++++ b/devenv.nix
+@@ -6,6 +6,24 @@ let
+     mkdir -p .govenv/materialize-build
+     agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/Readme.agda >/dev/null
+     agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/RoadmapSnapshot.agda >/dev/null
++    agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/Github/Workflows/Materialize.agda >/dev/null
++    agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/Github/Workflows/AdminMaterialize.agda >/dev/null
++    agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/Github/Workflows/Test.agda >/dev/null
++    agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/Github/Workflows/Release.agda >/dev/null
++    agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/Github/Workflows/Pages.agda >/dev/null
++  '';
++
++  buildAdminAdapters = ''
++    rm -rf .govenv/admin-apply-build
++    mkdir -p .govenv/admin-apply-build
++    agda -i . -i src --compile --compile-dir=.govenv/admin-apply-build src/Govenv/Adapter/Github/Repository/DescriptionApplication.agda >/dev/null
++    agda -i . -i src --compile --compile-dir=.govenv/admin-apply-build src/Govenv/Adapter/Github/Actions/AdminEnvironment.agda >/dev/null
++    agda -i . -i src --compile --compile-dir=.govenv/admin-apply-build src/Govenv/Adapter/Github/Actions/MaterializerEnvironment.agda >/dev/null
++    agda -i . -i src --compile --compile-dir=.govenv/admin-apply-build src/Govenv/Adapter/Github/Actions/AuthorizedEffectsEnvironment.agda >/dev/null
++    agda -i . -i src --compile --compile-dir=.govenv/admin-apply-build src/Govenv/Adapter/Github/Actions/PagesEnvironment.agda >/dev/null
++    agda -i . -i src --compile --compile-dir=.govenv/admin-apply-build src/Govenv/Adapter/Github/Repository/MainAuthorization.agda >/dev/null
++    agda -i . -i src --compile --compile-dir=.govenv/admin-apply-build src/Govenv/Adapter/Github/Repository/MainAuthorityBoundary.agda >/dev/null
++    agda -i . -i src --compile --compile-dir=.govenv/admin-apply-build src/Govenv/Adapter/Github/Repository/MainIntegrity.agda >/dev/null
+   '';
+ 
+   validateRoadmapEvolution = ''
+@@ -17,8 +35,18 @@ let
+     ${validateRoadmapEvolution}
+     .govenv/materialize-build/Readme > .govenv/README.generated.md
+     .govenv/materialize-build/RoadmapSnapshot > .govenv/roadmap.generated.snapshot
++    .govenv/materialize-build/Materialize > .govenv/materialize.generated.yml
++    .govenv/materialize-build/AdminMaterialize > .govenv/admin-materialize.generated.yml
++    .govenv/materialize-build/Test > .govenv/test.generated.yml
++    .govenv/materialize-build/Release > .govenv/release.generated.yml
++    .govenv/materialize-build/Pages > .govenv/pages.generated.yml
+     diff -u README.md .govenv/README.generated.md
+     diff -u .govenv/roadmap.snapshot .govenv/roadmap.generated.snapshot
++    diff -u .github/workflows/materialize.yml .govenv/materialize.generated.yml
++    diff -u .github/workflows/admin-materialize.yml .govenv/admin-materialize.generated.yml
++    diff -u .github/workflows/test.yml .govenv/test.generated.yml
++    diff -u .github/workflows/release.yml .govenv/release.generated.yml
++    diff -u .github/workflows/pages.yml .govenv/pages.generated.yml
+   '';
+ 
+   materializeGithubDescription = ''
+@@ -35,7 +63,9 @@ in
+   packages = [
+     pkgs.agda
+     pkgs.diffutils
++    pkgs.gh
+     pkgs.ghc
++    pkgs.jq
+     pkgs.pandoc
+   ];
+ 
+@@ -44,15 +74,23 @@ in
+     ${validateRoadmapEvolution}
+     .govenv/materialize-build/Readme > README.md
+     .govenv/materialize-build/RoadmapSnapshot > .govenv/roadmap.snapshot
++    .govenv/materialize-build/Materialize > .github/workflows/materialize.yml
++    .govenv/materialize-build/AdminMaterialize > .github/workflows/admin-materialize.yml
++    .govenv/materialize-build/Test > .github/workflows/test.yml
++    .govenv/materialize-build/Release > .github/workflows/release.yml
++    .govenv/materialize-build/Pages > .github/workflows/pages.yml
+   '';
+ 
+   tasks."govenv:materialize:check".exec = checkMaterializations;
+ 
+   tasks."govenv:materialize:admin:github-description".exec = materializeGithubDescription;
+ 
++  tasks."govenv:admin:build".exec = buildAdminAdapters;
++
+   tasks."govenv:check".exec = ''
+     agda -i . -i src Govenv.lagda.md
+     ${checkMaterializations}
++    ${buildAdminAdapters}
+   '';
+ 
+   tasks."govenv:docs".exec = ''
