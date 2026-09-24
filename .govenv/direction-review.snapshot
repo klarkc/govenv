@@ -1,4 +1,4 @@
 govenv-direction-review-snapshot-v1
 review-index 0
-current "Govenv is in P1 with typed governance, materialization and release boundaries, and transient candidate validation established. Project direction is now reviewed as governed semantic state; declared session knowledge still needs consolidation before broader architectural work resumes."
-next "Close GV112 by requiring explicit typed disposition for every declared session, handoff, and recovery-corpus observation before semantic roadmap evolution; then use that closure to reconcile the preserved baseline before resuming broader architecture and social publishing work."
+current "Govenv is in P1 with compiler-checked project direction and consolidation closure established. The declared observations extracted from the 2026-09-23 recovery corpus are fully dispositioned; remaining gaps are explicit roadmap work led by constitutional-history migration and dependency/environment authority classification."
+next "Migrate roadmap and release governance to append-only constitutional history in GV116, then resolve dependency/environment authority in GV117 before resuming broader agent/runtime and social-publishing work."

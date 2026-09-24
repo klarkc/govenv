@@ -6,7 +6,7 @@
 ### Governance impact
 
 **Phase:** ▣ P1 — unchanged  
-**Items:** 1 completed · 4 introduced · 3 superseded
+**Items:** 1 completed · 1 advanced · 6 introduced · 3 superseded
 
 #### Completed · 1
 
@@ -14,14 +14,22 @@
 | :---: | --- |
 | **GV18 ◇ → ✓** | Allow versioned materializations to follow their governing source change in the immediately subsequent `chore(materialize)` commit; the final pushed or reviewed state must contain canonical materializations. |
 
-#### Introduced · 4
+#### Advanced · 1
+
+| GV | Proposition |
+| :---: | --- |
+| **GV84 ◇ ↑** | Make observed invariant regressions counterexample-closing: once a contradiction to a governed or relied-upon invariant is recorded as an observed regression, its repair is incomplete until the counterexample is preserved as governed evidence, the missing or incorrectly scoped assurance boundary is corrected or overstated governance superseded, and candidate validation rejects recurrence before the affected workflow may succeed. |
+
+#### Introduced · 6
 
 | GV | Proposition |
 | :---: | --- |
 | **+ GV111 ✓** | Replace the mechanically derived README Current/Next status of GV94 with a governed project-direction review while preserving roadmap structural validity: Current is a bounded human-facing summary anchored by typed coverage of the exact governed project and roadmap state; Next is a bounded human-facing summary of the selected gap between Purpose and Current; every relevant source subject must receive an explicit typed disposition, source changes invalidate review freshness, and the compiler verifies bounds, provenance, coverage, references, and vigilance freshness while the agent supplies semantic judgment and the human authorizes that judgment through the pull request. |
-| **+ GV112 ◇** | Require consolidation closure for every declared session, handoff, recovery corpus, or other project-knowledge snapshot before semantic roadmap evolution: bind the corpus to immutable provenance and require every declared observation to receive exactly one explicit disposition as represented by governed state, superseded by an identified decision, rejected with rationale, or irrelevant with rationale; any undisposed observation keeps project direction stale and blocks semantic roadmap evolution, without claiming that the compiler can prove completeness of unobservable model memory or natural-language extraction. |
+| **+ GV112 ✓** | Require consolidation closure for every declared session, handoff, recovery corpus, or other project-knowledge snapshot before semantic roadmap evolution: bind the corpus to immutable provenance and require every declared observation to receive exactly one explicit disposition as represented by governed state, superseded by an identified decision, rejected with rationale, or irrelevant with rationale; any undisposed observation keeps project direction stale and blocks semantic roadmap evolution, without claiming that the compiler can prove completeness of unobservable model memory or natural-language extraction. |
 | **+ GV114 ◇** | Generalize administrative bootstrap across independent external providers while preserving one human-facing convergent setup: model one human administrative authority with explicit irreducible provider grants only where one provider cannot derive another provider credential; each bootstrap grant may enter only the main-only `admin-materialization` boundary, and `Admin Materialize / setup` must deterministically create, restrict, populate, and read-back verify the least-privileged target capability boundary for that provider. Provider grant fields may be packaged as one opaque secret when they jointly represent one authorization; target jobs receive only their own provider grant and never `GOVENV_ADMIN_TOKEN` or unrelated grants. Provider credentials create no semantic authority, and provider identity must be read back when the provider exposes a sound verification boundary. |
 | **+ GV115 ◇** | Simplify developer-journal authorization into the existing pull-request lifecycle: every ordinary candidate pull request must include its own journal post text and square image bound to the exact candidate delta and current project direction, with typed coverage/disposition for every relevant change; human merge of that same pull request is the sole editorial authorization, after which only the exact reviewed artifacts may be published automatically to X without a second approval pull request or environment approval. Release Please pull requests substitute a release-journal preview for the ordinary PR post: each major or minor release preview must derive from the exact frozen typed ReleaseDocument, approval/merge of that Release Please pull request authorizes the exact release post, and publication occurs only after the corresponding release boundary; patch releases may omit a release post unless another rule requires one. Publication must be idempotent through the dedicated social capability boundary and retain revision-addressable read-back evidence of the resulting X post. |
+| **+ GV116 ◇** | Migrate governance lifecycle, roadmap status, snapshots, and release deltas to append-only constitutional history: give formal Propositions identity independent from GovernanceId, treat the GovernanceId description as the human contract rather than formal truth, establish Obligations only through Proposition evidence, represent declaration/establishment/abandonment/disposition/supersession as validated history events, require atomic supersession coverage of outgoing responsibility, derive governance lifecycle and glyphs from that history rather than stored ItemState, preserve history-prefix snapshots, and derive constitutional release deltas from introduced governance, establishments, dispositions, supersessions, and phase progress while keeping activity-only advancement outside constitutional delta. |
+| **+ GV117 ◇** | Classify dependency and environment authority according to GV101: keep reuse preference, ecosystem investigation, and contributor dependency-selection guidance in Protocol, but move repository-validity properties into Governance when they determine canonical project state, including the target absence of versioned devenv.yaml, governed materialization ownership of devenv.nix, transient non-authoritative devenv.lock state, and the prohibition on competing package-manager dependency authority; materialization and runtime backends must project those governed decisions without re-owning them. |
 
 #### Superseded · 3
 
@@ -46,7 +54,7 @@
 + Replace the mechanically derived README Current/Next status of GV94 with a governed project-direction review while preserving roadmap structural validity: Current is a bounded human-facing summary anchored by typed coverage of the exact governed project and roadmap state; Next is a bounded human-facing summary of the selected gap between Purpose and Current; every relevant source subject must receive an explicit typed disposition, source changes invalidate review freshness, and the compiler verifies bounds, provenance, coverage, references, and vigilance freshness while the agent supplies semantic judgment and the human authorizes that judgment through the pull request.
 ```
 
-Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `79c0803..08da4e6`.
+Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `79c0803..2ece2d3`.
 <!-- govenv-governance-impact:end -->
 
 
@@ -60,6 +68,14 @@ Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit
 * **direction:** establish review and journal protocol ([badf7ea](https://github.com/klarkc/govenv/commit/badf7eaf4d8cc30b8d6dcd00536eaaa89773f768))
 * **direction:** refine journal authorization and provider grants ([cee3af0](https://github.com/klarkc/govenv/commit/cee3af0a237135d1f46a1a43d918d8c948c9bbe9))
 * **direction:** establish compiler-checked direction review ([08da4e6](https://github.com/klarkc/govenv/commit/08da4e6db65b18a77f86976bac341a90b3ca1a17))
+* **consolidation:** close recovered project context ([3622c38](https://github.com/klarkc/govenv/commit/3622c3871af947a1377a6bdd6165a9ce10b6bebf))
+
+
+### Miscellaneous
+
+* **recovery:** preserve Govenv baseline state ([c52978a](https://github.com/klarkc/govenv/commit/c52978a1a3e37ed6ce06744805e593d4f2570a18))
+* **recovery:** add session corpus archive ([2dbf893](https://github.com/klarkc/govenv/commit/2dbf8937fc43e8fa035e8f7575e0e8fe81b2b92c))
+* **recovery:** retire consolidated corpus ([2ece2d3](https://github.com/klarkc/govenv/commit/2ece2d3d123d25e43d87bb700a739895454ab54f))
 
 ## [0.2.8](https://github.com/klarkc/govenv/compare/v0.2.7...v0.2.8) (2026-09-23)
 <!-- govenv-release-freeze: version=0.2.8 base=v0.2.7 authorized=3a3974a8db6896dce3c556c13b4346c4e78a2099 -->
