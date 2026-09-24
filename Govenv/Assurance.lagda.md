@@ -21,6 +21,7 @@ import Govenv.Assurance.GV5 as GV5
 import Govenv.Assurance.GV6 as GV6
 import Govenv.Assurance.GV15 as GV15
 import Govenv.Assurance.GV16 as GV16
+import Govenv.Assurance.GV18 as GV18
 import Govenv.Assurance.GV20 as GV20
 import Govenv.Assurance.GV21 as GV21
 import Govenv.Assurance.GV44 as GV44
@@ -62,6 +63,7 @@ assurances =
   ∷ assures (statically GV6.evidence)
   ∷ assures (statically GV15.evidence)
   ∷ assures (statically GV16.evidence)
+  ∷ assures (statically GV18.evidence)
   ∷ assures (inherited legacyGV19)
   ∷ assures (statically GV20.evidence)
   ∷ assures (statically GV21.evidence)

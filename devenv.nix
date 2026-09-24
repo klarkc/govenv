@@ -376,6 +376,27 @@ let
       bash src/Govenv/Adapter/release-governance-pr.sh >/dev/null
   '';
 
+  validateCandidateTransientMaterializationRegression = ''
+    fixture=Govenv/Assurance/GV18/candidate-materialization-counterexample.md
+    grep -Fq '35996248284' "$fixture"
+    grep -Fq '5770bc35976c73a883dc1728ad5cc3c5a363a68a' "$fixture"
+
+    materialize_line="$(grep -n 'name: "Materialize candidate transiently"' .govenv/test.generated.yml | cut -d: -f1)"
+    preview_line="$(grep -n 'name: "Record candidate materialization preview"' .govenv/test.generated.yml | cut -d: -f1)"
+    check_line="$(grep -n 'name: "Check materialized candidate"' .govenv/test.generated.yml | cut -d: -f1)"
+
+    if [[ -z "$materialize_line" || -z "$preview_line" || -z "$check_line" ||
+          "$materialize_line" -ge "$preview_line" || "$preview_line" -ge "$check_line" ]]; then
+      echo 'Candidate Test must materialize, preview, then validate in that order.' >&2
+      exit 5
+    fi
+
+    if grep -Fq 'git push' .govenv/test.generated.yml; then
+      echo 'Candidate Test must never push transient materializations.' >&2
+      exit 5
+    fi
+  '';
+
   checkArchitectureAssurance = ''
     rm -rf .govenv/architecture-assurance-build
     mkdir -p .govenv/architecture-assurance-build
@@ -474,6 +495,7 @@ in
     ${validateReleasePublishedRendererRegression}
     ${validateReleasePublishedBodyReadbackRegression}
     ${validateReleasePushAuthorizationRegression}
+    ${validateCandidateTransientMaterializationRegression}
   '';
 
   tasks."govenv:docs".exec = ''
