@@ -3,6 +3,7 @@
 module Govenv.Kernel.Roadmap where
 
 open import Agda.Builtin.Bool using (Bool; true; false)
+open import Agda.Builtin.Equality using (_≡_)
 open import Agda.Builtin.List using (List; []; _∷_)
 open import Agda.Builtin.Maybe using (Maybe; just; nothing)
 open import Agda.Builtin.Nat using (Nat; zero; suc)
@@ -152,6 +153,18 @@ lookupGovernance idx (complete finishedPhases) =
 lookupGovernanceRef : GovernanceRef → Roadmap → Maybe SomeGovernanceId
 lookupGovernanceRef replacement =
   lookupGovernance (IdentifierRef.referenceIndex replacement)
+
+governanceReferenceExists : GovernanceRef → Roadmap → Bool
+governanceReferenceExists reference roadmap
+  with lookupGovernanceRef reference roadmap
+... | just governance = true
+... | nothing = false
+
+record GovernanceTarget (roadmap : Roadmap) : Set where
+  constructor governanceTarget
+  field
+    reference : GovernanceRef
+    validReference : governanceReferenceExists reference roadmap ≡ true
 
 data ChainShape : Set where
   finishedOnly activeAndFuture futureOnly progressingShape invalidShape : ChainShape
