@@ -2,6 +2,7 @@
 .govenv/*
 !.govenv/roadmap.snapshot
 !.govenv/project-purpose.snapshot
+!.govenv/direction-review.snapshot
 *.agdai
 .docs-build/
 _site/

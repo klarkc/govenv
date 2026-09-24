@@ -9,12 +9,13 @@ module Govenv.Materialization.Readme where
 
 open import Agda.Builtin.List using (List; []; _∷_)
 open import Agda.Builtin.Maybe using (Maybe; just; nothing)
-open import Agda.Builtin.Nat using (Nat)
 open import Agda.Builtin.String using (String; primStringAppend)
-open import Govenv.Kernel.Identifier using (PhaseId; SomePhaseId; SomeGovernanceId; someIdentifier)
+open import Govenv.DirectionReview using (currentSummary; nextSummary)
+open import Govenv.Kernel.DirectionReview using (BoundedText)
+open BoundedText
 open import Govenv.Kernel.Readme
 open Readme
-open import Govenv.Kernel.Roadmap using (Roadmap; Membership; progressing; complete; phaseNode; membership; done; todo; cancelled; superseded)
+open import Govenv.Kernel.Roadmap using (Roadmap)
 open import Govenv.Materialization
 open import Govenv.Project using (name; purpose)
 open import Govenv.Readme using (readme)
@@ -43,8 +44,7 @@ record Badge : Set where
     targetUrl : Maybe String
 
 data Current : Set where
-  activeCurrent : String → SomePhaseId → List SomeGovernanceId → Current
-  roadmapComplete : String → String → Current
+  directionCurrent : String → String → Current
 
 data Block : Set where
   comment : String → Block
@@ -59,22 +59,9 @@ data Block : Set where
 Document : Set
 Document = List Block
 
-pendingGovernance : {phaseIdx : Nat} {phaseDescription : String}
-  {phase : PhaseId phaseIdx phaseDescription} →
-  List (Membership phase) → List SomeGovernanceId
-pendingGovernance [] = []
-pendingGovernance (membership governanceId done relation ∷ rest) = pendingGovernance rest
-pendingGovernance (membership governanceId todo relation ∷ rest) =
-  someIdentifier governanceId ∷ pendingGovernance rest
-pendingGovernance (membership governanceId cancelled relation ∷ rest) = pendingGovernance rest
-pendingGovernance (membership governanceId (superseded replacement) relation ∷ rest) =
-  pendingGovernance rest
-
-currentOf : Roadmap → Current
-currentOf (progressing _ (phaseNode phaseId items) _) =
-  activeCurrent "Current" (someIdentifier phaseId) (pendingGovernance items)
-currentOf (complete _) =
-  roadmapComplete "Current" "Roadmap complete."
+directionStatus : Current
+directionStatus =
+  directionCurrent (value currentSummary) (value nextSummary)
 
 materialization : Materialization Document
 materialization = materialized
@@ -93,7 +80,7 @@ materialization = materialized
       ∷ badge "https://img.shields.io/badge/license-Apache--2.0-blue" (licenseName readme) nothing
       ∷ [] )
   ∷ heading section normal "Roadmap"
-  ∷ current (currentOf (roadmap readme))
+  ∷ current directionStatus
   ∷ blockQuote (roadmapNote readme)
   ∷ roadmapTree (roadmap readme)
   ∷ heading section normal (gettingStartedTitle readme)

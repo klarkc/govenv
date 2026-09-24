@@ -10,6 +10,7 @@ let
     agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/Agents.agda >/dev/null
     agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/RoadmapSnapshot.agda >/dev/null
     agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/ProjectPurposeSnapshot.agda >/dev/null
+    agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/DirectionReviewSnapshot.agda >/dev/null
     agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/Github/Workflows/Materialize.agda >/dev/null
     agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/Github/Workflows/AdminMaterialize.agda >/dev/null
     agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/Github/Workflows/Test.agda >/dev/null
@@ -419,6 +420,7 @@ let
     .govenv/materialize-build/Agents > .govenv/AGENTS.generated.md
     .govenv/materialize-build/RoadmapSnapshot > .govenv/roadmap.generated.snapshot
     .govenv/materialize-build/ProjectPurposeSnapshot > .govenv/project-purpose.generated.snapshot
+    .govenv/materialize-build/DirectionReviewSnapshot > .govenv/direction-review.generated.snapshot
     .govenv/materialize-build/Materialize > .govenv/materialize.generated.yml
     .govenv/materialize-build/AdminMaterialize > .govenv/admin-materialize.generated.yml
     .govenv/materialize-build/Test > .govenv/test.generated.yml
@@ -430,6 +432,7 @@ let
     diff -u CHANGELOG.md .govenv/CHANGELOG.generated.md
     diff -u .govenv/roadmap.snapshot .govenv/roadmap.generated.snapshot
     diff -u .govenv/project-purpose.snapshot .govenv/project-purpose.generated.snapshot
+    diff -u .govenv/direction-review.snapshot .govenv/direction-review.generated.snapshot
     diff -u .github/workflows/materialize.yml .govenv/materialize.generated.yml
     diff -u .github/workflows/admin-materialize.yml .govenv/admin-materialize.generated.yml
     diff -u .github/workflows/test.yml .govenv/test.generated.yml
@@ -462,6 +465,7 @@ in
     .govenv/materialize-build/Agents > AGENTS.md
     .govenv/materialize-build/RoadmapSnapshot > .govenv/roadmap.snapshot
     .govenv/materialize-build/ProjectPurposeSnapshot > .govenv/project-purpose.snapshot
+    .govenv/materialize-build/DirectionReviewSnapshot > .govenv/direction-review.snapshot
     .govenv/materialize-build/Materialize > .github/workflows/materialize.yml
     .govenv/materialize-build/AdminMaterialize > .github/workflows/admin-materialize.yml
     .govenv/materialize-build/Test > .github/workflows/test.yml
