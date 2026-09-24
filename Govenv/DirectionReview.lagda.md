@@ -18,6 +18,7 @@ open import Agda.Builtin.Nat using (zero)
 open import Govenv.Kernel.DirectionReview
 open import Govenv.Kernel.Identifier using (GVR)
 open import Govenv.Kernel.Release using (snapshotRoadmap)
+open import Govenv.Kernel.Roadmap using (GovernanceTarget; governanceTarget)
 open import Govenv.Project using (purpose)
 open import Govenv.Roadmap using (roadmap)
 
@@ -27,7 +28,7 @@ source =
 
 currentSummary : BoundedText 400
 currentSummary = boundedText
-  "Govenv is in P1 with typed governance, materialization and release boundaries, and transient candidate validation established. Project direction is now reviewed as governed semantic state; declared session knowledge still needs consolidation before broader architectural work resumes."
+  "Govenv is in P1 with compiler-checked project direction and consolidation closure established. The declared observations extracted from the 2026-09-23 recovery corpus are fully dispositioned; remaining gaps are explicit roadmap work led by constitutional-history migration and dependency/environment authority classification."
   refl
 
 currentSourceCoverage : CurrentCoverage
@@ -41,25 +42,25 @@ current : Current source
 current = currentReview currentSummary currentSourceCoverage
 
 nextTarget : GovernanceTarget roadmap
-nextTarget = governanceTarget (GVR 112) refl
+nextTarget = governanceTarget (GVR 116) refl
 
 nextSummary : BoundedText 400
 nextSummary = boundedText
-  "Close GV112 by requiring explicit typed disposition for every declared session, handoff, and recovery-corpus observation before semantic roadmap evolution; then use that closure to reconcile the preserved baseline before resuming broader architecture and social publishing work."
+  "Migrate roadmap and release governance to append-only constitutional history in GV116, then resolve dependency/environment authority in GV117 before resuming broader agent/runtime and social-publishing work."
   refl
 
 nextClaims : List (NextClaim roadmap)
 nextClaims =
   nextClaim (planned nextTarget)
-    "Session consolidation is the immediate missing memory-closure mechanism required before the preserved baseline can be safely reconciled."
+    "The recovery corpus is closed; its largest unresolved architectural gap is the history-first constitutional model tracked by GV116."
   ∷ []
 
 nextGapCoverage : GapCoverage roadmap
 nextGapCoverage = gapCoverage
   (addressedNow (planned nextTarget)
-    "The long-term purpose requires reliable governed context; GV112 closes the immediate memory gap before additional product expansion.")
+    "The long-term purpose now has a closed recovery context; GV116 addresses the most fundamental remaining semantic-model gap.")
   (addressedNow (planned nextTarget)
-    "Current state already exposes unconsolidated session knowledge as the next blocking project gap.")
+    "Current state records the recovery corpus as fully dispositioned and identifies constitutional-history migration as the next blocking gap.")
 
 next : Next roadmap
 next = nextReview nextSummary nextClaims nextGapCoverage

@@ -5,12 +5,10 @@ module Govenv.Kernel.DirectionReview where
 open import Agda.Builtin.Bool using (Bool; true; false)
 open import Agda.Builtin.Equality using (_≡_)
 open import Agda.Builtin.List using (List; []; _∷_)
-open import Agda.Builtin.Maybe using (just; nothing)
 open import Agda.Builtin.Nat using (Nat; zero; suc; _<_)
 open import Agda.Builtin.String using (String; primStringToList)
-open import Govenv.Kernel.Identifier using (GovernanceRef)
 open import Govenv.Kernel.Release using (RoadmapSnapshot; snapshotRoadmap)
-open import Govenv.Kernel.Roadmap using (Roadmap; lookupGovernanceRef)
+open import Govenv.Kernel.Roadmap using (Roadmap; GovernanceTarget)
 
 private
   length : {A : Set} → List A → Nat
@@ -44,18 +42,6 @@ record Current (source : DirectionSource) : Set where
   field
     summary : BoundedText 400
     coverage : CurrentCoverage
-
-governanceReferenceExists : GovernanceRef → Roadmap → Bool
-governanceReferenceExists reference roadmap
-  with lookupGovernanceRef reference roadmap
-... | just governance = true
-... | nothing = false
-
-record GovernanceTarget (roadmap : Roadmap) : Set where
-  constructor governanceTarget
-  field
-    reference : GovernanceRef
-    validReference : governanceReferenceExists reference roadmap ≡ true
 
 data NextTarget (roadmap : Roadmap) : Set where
   planned : GovernanceTarget roadmap → NextTarget roadmap
