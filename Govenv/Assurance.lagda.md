@@ -39,6 +39,7 @@ import Govenv.Assurance.GV110 as GV110
 import Govenv.Assurance.GV111 as GV111
 import Govenv.Assurance.GV111.Counterexample.StaleTarget
 import Govenv.Assurance.GV112 as GV112
+import Govenv.Assurance.GV116
 open import Govenv.Kernel.Assurance
 open import Govenv.Kernel.Identifier using (P; GV)
 open import Govenv.Kernel.Roadmap using (Roadmap; roadmapOf; _▣; _◇; _✓; _├_)
