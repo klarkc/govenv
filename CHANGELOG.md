@@ -40,13 +40,14 @@
 + Replace the mechanically derived README Current/Next status of GV94 with a governed project-direction review while preserving roadmap structural validity: Current is a bounded human-facing summary anchored by typed coverage of the exact governed project and roadmap state; Next is a bounded human-facing summary of the selected gap between Purpose and Current; every relevant source subject must receive an explicit typed disposition, source changes invalidate review freshness, and the compiler verifies bounds, provenance, coverage, references, and vigilance freshness while the agent supplies semantic judgment and the human authorizes that judgment through the pull request.
 ```
 
-Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `79c0803..24fe90c`.
+Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `79c0803..5770bc3`.
 <!-- govenv-governance-impact:end -->
 
 
 ### Governance
 
 * **direction:** establish review and journal protocol ([24fe90c](https://github.com/klarkc/govenv/commit/24fe90c8f0daceeb3d6b7783ee9ef63ff87dcb91))
+* **direction:** refine journal authorization and provider grants ([5770bc3](https://github.com/klarkc/govenv/commit/5770bc35976c73a883dc1728ad5cc3c5a363a68a))
 
 ## [0.2.8](https://github.com/klarkc/govenv/compare/v0.2.7...v0.2.8) (2026-09-23)
 <!-- govenv-release-freeze: version=0.2.8 base=v0.2.7 authorized=3a3974a8db6896dce3c556c13b4346c4e78a2099 -->
