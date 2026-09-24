@@ -6,7 +6,13 @@
 ### Governance impact
 
 **Phase:** ▣ P1 — unchanged  
-**Items:** 4 introduced · 3 superseded
+**Items:** 1 completed · 4 introduced · 3 superseded
+
+#### Completed · 1
+
+| GV | Proposition |
+| :---: | --- |
+| **GV18 ◇ → ✓** | Allow versioned materializations to follow their governing source change in the immediately subsequent `chore(materialize)` commit; the final pushed or reviewed state must contain canonical materializations. |
 
 #### Introduced · 4
 
@@ -40,8 +46,13 @@
 + Replace the mechanically derived README Current/Next status of GV94 with a governed project-direction review while preserving roadmap structural validity: Current is a bounded human-facing summary anchored by typed coverage of the exact governed project and roadmap state; Next is a bounded human-facing summary of the selected gap between Purpose and Current; every relevant source subject must receive an explicit typed disposition, source changes invalidate review freshness, and the compiler verifies bounds, provenance, coverage, references, and vigilance freshness while the agent supplies semantic judgment and the human authorizes that judgment through the pull request.
 ```
 
-Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `79c0803..5770bc3`.
+Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `79c0803..befee63`.
 <!-- govenv-governance-impact:end -->
+
+
+### Bug Fixes
+
+* **ci:** validate transient candidate materializations ([befee63](https://github.com/klarkc/govenv/commit/befee63da8d616a16b6955ad98fbad24137624f6))
 
 
 ### Governance
