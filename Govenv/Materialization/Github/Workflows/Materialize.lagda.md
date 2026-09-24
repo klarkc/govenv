@@ -101,12 +101,18 @@ materializerCommitName = "govenv-materializer"
 materializerCommitEmail : String
 materializerCommitEmail = "govenv-materializer@users.noreply.github.com"
 
+materializerCommitSubject : String
+materializerCommitSubject = "chore(materialize): update governed materializations"
+
+derivedFromParentMarker : String
+derivedFromParentMarker = "Derived-From-Parent: true"
+
 commitCommand : String
 commitCommand =
   "git config user.name \"" ++ materializerCommitName ++ "\"\n" ++
   "git config user.email \"" ++ materializerCommitEmail ++ "\"\n" ++
   "git add --all\n" ++
-  "printf '%s\\n' \\\n  'chore(materialize): update governed materializations' \\\n  '' \\\n  '' \\\n  \"Derived-From-Parent: true\" \\\n  'Refs: GV44 GV51 GV90 GV92 GV93' \\\n  'skip-checks: true' > .govenv/materialization-commit-message\n" ++
+  "printf '%s\\n' \\\n  '" ++ materializerCommitSubject ++ "' \\\n  '' \\\n  '' \\\n  \"" ++ derivedFromParentMarker ++ "\" \\\n  'Refs: GV44 GV51 GV90 GV92 GV93' \\\n  'skip-checks: true' > .govenv/materialization-commit-message\n" ++
   "git commit --cleanup=verbatim -F .govenv/materialization-commit-message\n" ++
   "rm .govenv/materialization-commit-message\n" ++
   "git push origin HEAD:main"
@@ -139,8 +145,10 @@ materializerPushIdentityCondition =
 derivedPushCondition : String
 derivedPushCondition =
   materializerPushIdentityCondition ++ " && " ++
-  "startsWith(github.event.head_commit.message, 'chore(materialize): update governed materializations') && " ++
-  "contains(github.event.head_commit.message, 'Derived-From-Parent: true')"
+  "startsWith(github.event.head_commit.message, '" ++
+    materializerCommitSubject ++ "') && " ++
+  "contains(github.event.head_commit.message, '" ++
+    derivedFromParentMarker ++ "')"
 
 materializeConcurrencyGroup : String
 materializeConcurrencyGroup =
