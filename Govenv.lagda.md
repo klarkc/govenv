@@ -13,10 +13,12 @@ open import Govenv.Authorization
 open import Govenv.Github.Authorization
 open import Govenv.Administration
 open import Govenv.Assurance
+open import Govenv.DirectionReview
 open import Govenv.Materialization
 open import Govenv.Materialization.Agents
 open import Govenv.Materialization.Readme
 open import Govenv.Materialization.ProjectPurposeSnapshot
+open import Govenv.Materialization.DirectionReviewSnapshot
 open import Govenv.Materialization.RoadmapSnapshot
 open import Govenv.Materialization.ReleaseGovernance
 open import Govenv.Materialization.Github.Repository.Description

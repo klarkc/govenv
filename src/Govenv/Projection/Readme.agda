@@ -112,18 +112,10 @@ renderBadges : List Badge → String
 renderBadges [] = ""
 renderBadges (x ∷ xs) = "  " ++ renderBadge x ++ "\n" ++ renderBadges xs
 
-renderNext : List SomeGovernanceId → String
-renderNext [] = ""
-renderNext (someIdentifier governanceId ∷ rest) =
-  " Next: **" ++ renderGovernanceId governanceId ++ "** — " ++
-  descriptionOf governanceId
-
 renderCurrent : Current → String
-renderCurrent (activeCurrent label (someIdentifier phaseId) pending) =
-  "**" ++ label ++ ":** ▣ " ++ renderPhaseId phaseId ++ " — " ++
-  descriptionOf phaseId ++ "." ++ renderNext pending ++ "\n\n"
-renderCurrent (roadmapComplete label message) =
-  "**" ++ label ++ ":** ■ " ++ message ++ "\n\n"
+renderCurrent (directionCurrent currentText nextText) =
+  "**Current:** " ++ currentText ++ "\n\n" ++
+  "**Next:** " ++ nextText ++ "\n\n"
 
 renderHeading : HeadingLevel → Alignment → String → String
 renderHeading title centered value = "<h1 align=\"center\">" ++ value ++ "</h1>\n\n"
