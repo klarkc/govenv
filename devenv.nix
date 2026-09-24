@@ -410,7 +410,6 @@ let
     agda -i . -i src -i ${agdaStdlib}/src src/Govenv/Experiment/ConstitutionalHistory/BaselineScenarios.agda
     agda -i . -i src -i ${agdaStdlib}/src src/Govenv/Experiment/ConstitutionalHistory/EcosystemReuse.agda
     agda -i . -i src -i ${agdaStdlib}/src src/Govenv/Experiment/ConstitutionalHistory/StdlibScenarios.agda
-    agda -i . -i src -i ${agdaStdlib}/src src/Govenv/Experiment/ConstitutionalHistory/PropositionalScenarios.agda
   '';
 
   checkMaterializations = ''
@@ -481,7 +480,7 @@ in
   tasks."govenv:admin:build".exec = buildAdminAdapters;
 
   tasks."govenv:check".exec = ''
-    agda -i . -i src Govenv.lagda.md
+    agda -i . -i src -i ${agdaStdlib}/src Govenv.lagda.md
     ${checkArchitectureAssurance}
     ${checkConstitutionalHistoryExperiment}
     ${checkMaterializations}
@@ -505,7 +504,7 @@ in
   tasks."govenv:docs".exec = ''
     rm -rf .docs-build _site
     mkdir -p .docs-build _site
-    agda -i . -i src --html --html-highlight=auto --html-dir=.docs-build Govenv.lagda.md
+    agda -i . -i src -i ${agdaStdlib}/src --html --html-highlight=auto --html-dir=.docs-build Govenv.lagda.md
     cp .docs-build/*.html _site/
     cp .docs-build/Agda.css _site/Agda.css
     for source in .docs-build/*.md; do
@@ -517,7 +516,7 @@ in
   '';
 
   enterTest = ''
-    agda -i . -i src Govenv.lagda.md
+    agda -i . -i src -i ${agdaStdlib}/src Govenv.lagda.md
     ${checkMaterializations}
   '';
 }

@@ -2,25 +2,17 @@
 
 module Govenv.Experiment.ConstitutionalHistory where
 
--- Constitutional-history redesign experiment.
+-- Historical constitutional-history design experiments.
 --
--- This namespace is intentionally experimental and is not part of the reusable
--- Govenv kernel. It compares three implementations before any kernel migration:
+-- Baseline preserves the original bespoke Bool/list model. Stdlib rebuilds
+-- that behavior with the pinned Agda standard library. Their scenarios remain
+-- as design archaeology and regression references rather than constitutional
+-- authority.
 --
---   Baseline       behavioral reference with bespoke Bool/list machinery.
---   Stdlib         the same behavior rebuilt from Agda stdlib primitives.
---   Propositional  preferred direction: constitutional validity in Set,
---                  decision procedures in Dec, Bool only at executable edges.
---
--- Matching *Scenarios modules preserve the compile-time examples and
--- regressions used to compare the variants. EcosystemReuse records stdlib APIs
--- checked against the dependency pinned by the Govenv environment.
---
--- The experiment currently favors Propositional. Promotion into Kernel requires
--- a separate semantic decision; Kernel must never depend on Experiment.
+-- The proposition-first variant graduated from Experiment into
+-- Govenv.Kernel.Constitution under GV116. Its authoritative scenarios now live
+-- in Govenv.Assurance.GV116. Kernel must never depend on this Experiment
+-- namespace.
 
-data Variant : Set where
-  baseline stdlib propositional : Variant
-
-preferred : Variant
-preferred = propositional
+data HistoricalVariant : Set where
+  baseline stdlib : HistoricalVariant

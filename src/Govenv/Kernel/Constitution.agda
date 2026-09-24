@@ -1,12 +1,16 @@
 {-# OPTIONS --safe #-}
 
-module Govenv.Experiment.ConstitutionalHistory.Propositional where
+module Govenv.Kernel.Constitution where
+
+-- Append-only constitutional history. Raw History is descriptive data;
+-- Constitution is the authoritative boundary because it carries a proof that
+-- every extension is structurally ready and supplies the required formal evidence.
 
 open import Agda.Builtin.Equality using (_≡_)
 open import Agda.Builtin.Maybe using (Maybe; just; nothing)
 open import Agda.Builtin.Nat using (Nat)
 open import Agda.Builtin.String using (String)
-open import Level using (Lift; lift; lower; zero; suc)
+open import Agda.Builtin.Unit using (⊤)
 open import Data.Bool.Base using (Bool; true; false)
 open import Data.Bool.ListAction using (all; any)
 open import Data.Empty using (⊥)
@@ -24,9 +28,14 @@ open import Data.List.Relation.Unary.Unique.Propositional using (Unique)
 open import Data.List.Relation.Unary.Unique.DecPropositional _≟_
   using (unique?)
 import Data.Maybe.Properties as MaybeProperties
-open import Relation.Nullary using (Dec; ¬_; no; map′)
+open import Relation.Nullary using (Dec; ¬_; no)
 open import Relation.Nullary.Decidable
   using (does; _×-dec_; _⊎-dec_; ¬?)
+open import Govenv.Kernel.Identifier using
+  (GovernanceId; GovernanceRef; PhaseId; IdentifierRef; indexOf)
+
+Contract : Set
+Contract = String
 
 data PropositionId : Nat → Set where
   Prop : (idx : Nat) → PropositionId idx
@@ -43,24 +52,24 @@ record SomeProposition : Set₁ where
     {idx} : Nat
     value : Proposition idx
 
-record Evidence {idx : Nat} (p : Proposition idx) : Set₁ where
-  constructor evidence
-  field
-    proof : Proposition.Statement p
+Evidence : {idx : Nat} → Proposition idx → Set
+Evidence = Proposition.Statement
+
 record GovernanceDeclaration : Set₁ where
   constructor governanceDeclaration
   field
-    governance   : Nat
-    contract     : String
-    phase        : Nat
+    {governanceIndex} : Nat
+    {contract} : Contract
+    governance : GovernanceId governanceIndex contract
+    {phaseIndex} : Nat
+    {phaseDescription} : String
+    phase : PhaseId phaseIndex phaseDescription
     propositions : List SomeProposition
 
-record Establishment : Set₁ where
+record Establishment : Set where
   constructor establishment
   field
-    {idx}      : Nat
-    subject    : Proposition idx
-    evidenceOf : Evidence subject
+    propositionIndex : Nat
 
 data Disposition : Set where
   preserved abandoned withdrawn : Disposition
@@ -75,10 +84,11 @@ record PropositionDisposition : Set where
 record Supersession : Set₁ where
   constructor supersession
   field
-    previous       : Nat
-    successor      : Nat
+    previous       : GovernanceRef
+    successor      : GovernanceRef
     establishments : List Establishment
     dispositions   : List PropositionDisposition
+
 data HistoryEntry : Set₁ where
   declare   : GovernanceDeclaration → HistoryEntry
   establish : Establishment → HistoryEntry
@@ -102,7 +112,13 @@ private
   propositionIndexOf (someProposition {idx = idx} _) = idx
 
   establishmentIndex : Establishment → Nat
-  establishmentIndex (establishment {idx = idx} _ _) = idx
+  establishmentIndex = Establishment.propositionIndex
+
+  governanceIndexOf : GovernanceDeclaration → Nat
+  governanceIndexOf d = indexOf (GovernanceDeclaration.governance d)
+
+  governanceRefIndex : GovernanceRef → Nat
+  governanceRefIndex = IdentifierRef.referenceIndex
 
   declarationIndices : GovernanceDeclaration → List Nat
   declarationIndices d =
@@ -132,6 +148,26 @@ private
   ... | false = dispositionFor n ds
 
 private
+  lookupProposition : Nat → List SomeProposition → Maybe SomeProposition
+  lookupProposition p [] = nothing
+  lookupProposition p (candidate ∷ rest)
+    with sameNat p (propositionIndexOf candidate)
+  ... | true = just candidate
+  ... | false = lookupProposition p rest
+
+declaredProposition : History → Nat → Maybe SomeProposition
+declaredProposition ε p = nothing
+declaredProposition (h ▻ declare d) p with declaredProposition h p
+... | just declared = just declared
+... | nothing = lookupProposition p (GovernanceDeclaration.propositions d)
+declaredProposition (h ▻ _) p = declaredProposition h p
+
+EvidenceAt : History → Nat → Set
+EvidenceAt h p with declaredProposition h p
+... | nothing = ⊥
+... | just (someProposition subject) = Evidence subject
+
+private
   abandonedSubjects : List PropositionDisposition → List Nat
   abandonedSubjects [] = []
   abandonedSubjects (d ∷ ds) with PropositionDisposition.disposition d
@@ -158,6 +194,12 @@ private
   allPropositions (h ▻ declare d) =
     allPropositions h ++ declarationIndices d
   allPropositions (h ▻ _) = allPropositions h
+
+  allGovernanceIndices : History → List Nat
+  allGovernanceIndices ε = []
+  allGovernanceIndices (h ▻ declare d) =
+    allGovernanceIndices h ++ (governanceIndexOf d ∷ [])
+  allGovernanceIndices (h ▻ _) = allGovernanceIndices h
 
   allEstablished : History → List Nat
   allEstablished ε = []
@@ -257,7 +299,7 @@ origin ε _ = nothing
 origin (h ▻ declare d) p with origin h p
 ... | just g = just g
 ... | nothing with declaredHere p d
-...   | true = just (GovernanceDeclaration.governance d)
+...   | true = just (governanceIndexOf d)
 ...   | false = nothing
 origin (h ▻ _) p = origin h p
 
@@ -265,14 +307,14 @@ private
   currentResponsibilityMaybe : History → Nat → Maybe Nat
   currentResponsibilityMaybe ε _ = nothing
   currentResponsibilityMaybe (h ▻ declare d) p with declaredHere p d
-  ... | true = just (GovernanceDeclaration.governance d)
+  ... | true = just (governanceIndexOf d)
   ... | false = currentResponsibilityMaybe h p
   currentResponsibilityMaybe (h ▻ abandon q) p with sameNat p q
   ... | true = nothing
   ... | false = currentResponsibilityMaybe h p
   currentResponsibilityMaybe (h ▻ supersede s) p
     with dispositionFor p (Supersession.dispositions s)
-  ... | just preserved = just (Supersession.successor s)
+  ... | just preserved = just (governanceRefIndex (Supersession.successor s))
   ... | just abandoned = nothing
   ... | just withdrawn = nothing
   ... | just (reformulated _) = nothing
@@ -296,10 +338,10 @@ outgoing h g = filterOutgoing h g (allPropositions h)
 
 GovernanceSubjects : History → Nat → List Nat
 GovernanceSubjects ε _ = []
-GovernanceSubjects (h ▻ declare d) g with sameNat g (GovernanceDeclaration.governance d)
+GovernanceSubjects (h ▻ declare d) g with sameNat g (governanceIndexOf d)
 ... | true = GovernanceSubjects h g ++ declarationIndices d
 ... | false = GovernanceSubjects h g
-GovernanceSubjects (h ▻ supersede s) g with sameNat g (Supersession.successor s)
+GovernanceSubjects (h ▻ supersede s) g with sameNat g (governanceRefIndex (Supersession.successor s))
 ... | true = GovernanceSubjects h g ++ dispositionSubjects (Supersession.dispositions s)
 ... | false = GovernanceSubjects h g
 GovernanceSubjects (h ▻ _) g = GovernanceSubjects h g
@@ -342,28 +384,48 @@ governanceGlyph h g with GovernanceSubjects h g
     (anyEstablished h subjects)
     (anyAbandoned h subjects)
 
+GovernanceDeclared : History → Nat → Set
+GovernanceDeclared h g = g ∈ allGovernanceIndices h
+
+governanceDeclared? : (h : History) → (g : Nat) → Dec (GovernanceDeclared h g)
+governanceDeclared? h g = g ∈? allGovernanceIndices h
+
 Fresh : History → Nat → Set
 Fresh h p = ¬ Declared h p
 
 fresh? : (h : History) → (p : Nat) → Dec (Fresh h p)
 fresh? h p = ¬? (declared? h p)
 
+GovernanceFresh : History → GovernanceDeclaration → Set
+GovernanceFresh h d = ¬ GovernanceDeclared h (governanceIndexOf d)
+
+governanceFresh? :
+  (h : History) → (d : GovernanceDeclaration) → Dec (GovernanceFresh h d)
+governanceFresh? h d = ¬? (governanceDeclared? h (governanceIndexOf d))
+
 DeclarationValid : History → GovernanceDeclaration → Set
 DeclarationValid h d =
-  All (Fresh h) (declarationIndices d) × Unique (declarationIndices d)
+  GovernanceFresh h d ×
+  All (Fresh h) (declarationIndices d) ×
+  Unique (declarationIndices d)
 
 declarationValid? :
   (h : History) → (d : GovernanceDeclaration) → Dec (DeclarationValid h d)
 declarationValid? h d =
+  governanceFresh? h d ×-dec
   all? (fresh? h) (declarationIndices d) ×-dec
   unique? (declarationIndices d)
 
-EstablishmentValid : History → Establishment → Set
-EstablishmentValid h e = Pending h (establishmentIndex e)
+EstablishmentReady : History → Establishment → Set
+EstablishmentReady h e = Pending h (establishmentIndex e)
 
-establishmentValid? :
-  (h : History) → (e : Establishment) → Dec (EstablishmentValid h e)
-establishmentValid? h e = pending? h (establishmentIndex e)
+establishmentReady? :
+  (h : History) → (e : Establishment) → Dec (EstablishmentReady h e)
+establishmentReady? h e = pending? h (establishmentIndex e)
+
+EstablishmentValid : History → Establishment → Set
+EstablishmentValid h e =
+  EstablishmentReady h e × EvidenceAt h (establishmentIndex e)
 
 AbandonmentValid : History → Nat → Set
 AbandonmentValid h p = Pending h p
@@ -396,7 +458,7 @@ private
   EstablishmentUsed : List PropositionDisposition → Establishment → Set
   EstablishmentUsed ds e = TargetUsed (establishmentIndex e) ds
 
-  AllEstablishmentsUsed : Supersession → Set₁
+  AllEstablishmentsUsed : Supersession → Set
   AllEstablishmentsUsed s =
     All
       (EstablishmentUsed (Supersession.dispositions s))
@@ -409,22 +471,28 @@ private
       (λ e → targetUsed? (establishmentIndex e) (Supersession.dispositions s))
       (Supersession.establishments s)
 
-  EmbeddedEstablishmentsValid : History → Supersession → Set₁
-  EmbeddedEstablishmentsValid h s =
-    All (EstablishmentValid h) (Supersession.establishments s) ×
+  EmbeddedEstablishmentsReady : History → Supersession → Set
+  EmbeddedEstablishmentsReady h s =
+    All (EstablishmentReady h) (Supersession.establishments s) ×
     Unique (establishmentIndices (Supersession.establishments s))
 
-  embeddedEstablishmentsValid? :
+  embeddedEstablishmentsReady? :
     (h : History) → (s : Supersession) →
-    Dec (EmbeddedEstablishmentsValid h s)
-  embeddedEstablishmentsValid? h s =
-    all? (establishmentValid? h) (Supersession.establishments s) ×-dec
+    Dec (EmbeddedEstablishmentsReady h s)
+  embeddedEstablishmentsReady? h s =
+    all? (establishmentReady? h) (Supersession.establishments s) ×-dec
     unique? (establishmentIndices (Supersession.establishments s))
+
+  EmbeddedEstablishmentEvidence : History → Supersession → Set
+  EmbeddedEstablishmentEvidence h s =
+    All
+      (λ e → EvidenceAt h (establishmentIndex e))
+      (Supersession.establishments s)
 
   ReplacementReady : History → Supersession → Nat → Set
   ReplacementReady h s p =
     (Active h p ⊎ p ∈ establishmentIndices (Supersession.establishments s)) ×
-    ResponsibleTo h (Supersession.successor s) p
+    ResponsibleTo h (governanceRefIndex (Supersession.successor s)) p
 
   replacementReady? :
     (h : History) → (s : Supersession) → (p : Nat) →
@@ -432,7 +500,7 @@ private
   replacementReady? h s p =
     (active? h p ⊎-dec
       (p ∈? establishmentIndices (Supersession.establishments s))) ×-dec
-    responsibleTo? h (Supersession.successor s) p
+    responsibleTo? h (governanceRefIndex (Supersession.successor s)) p
 
   AllTargetsReady : History → Supersession → List Nat → Set
   AllTargetsReady h s = All (ReplacementReady h s)
@@ -448,8 +516,10 @@ private
   ... | preserved = Live h (PropositionDisposition.propositionIndex d)
   ... | abandoned = Pending h (PropositionDisposition.propositionIndex d)
   ... | withdrawn = Active h (PropositionDisposition.propositionIndex d)
-  ... | reformulated targets =
+  ... | reformulated [] = ⊥
+  ... | reformulated targets@(_ ∷ _) =
     Active h (PropositionDisposition.propositionIndex d) ×
+    Unique targets ×
     AllTargetsReady h s targets
 
   dispositionValid? :
@@ -459,8 +529,10 @@ private
   ... | preserved = live? h (PropositionDisposition.propositionIndex d)
   ... | abandoned = pending? h (PropositionDisposition.propositionIndex d)
   ... | withdrawn = active? h (PropositionDisposition.propositionIndex d)
-  ... | reformulated targets =
+  ... | reformulated [] = no (λ ())
+  ... | reformulated targets@(_ ∷ _) =
     active? h (PropositionDisposition.propositionIndex d) ×-dec
+    unique? targets ×-dec
     allTargetsReady? h s targets
 
   AllDispositionsValid : History → Supersession → Set
@@ -475,8 +547,8 @@ private
   SupersessionCoverage : History → Supersession → Set
   SupersessionCoverage h s =
     dispositionSubjects (Supersession.dispositions s) ⊆
-      outgoing h (Supersession.previous s)
-    × outgoing h (Supersession.previous s) ⊆
+      outgoing h (governanceRefIndex (Supersession.previous s))
+    × outgoing h (governanceRefIndex (Supersession.previous s)) ⊆
       dispositionSubjects (Supersession.dispositions s)
     × Unique (dispositionSubjects (Supersession.dispositions s))
 
@@ -484,43 +556,78 @@ private
     (h : History) → (s : Supersession) → Dec (SupersessionCoverage h s)
   supersessionCoverage? h s =
     dispositionSubjects (Supersession.dispositions s) ⊆?
-      outgoing h (Supersession.previous s)
-    ×-dec outgoing h (Supersession.previous s) ⊆?
+      outgoing h (governanceRefIndex (Supersession.previous s))
+    ×-dec outgoing h (governanceRefIndex (Supersession.previous s)) ⊆?
       dispositionSubjects (Supersession.dispositions s)
     ×-dec unique? (dispositionSubjects (Supersession.dispositions s))
 
-SupersessionValid : History → Supersession → Set₁
-SupersessionValid h s =
+SupersessionEndpointsValid : History → Supersession → Set
+SupersessionEndpointsValid h s =
+  GovernanceDeclared h (governanceRefIndex (Supersession.previous s)) ×
+  GovernanceDeclared h (governanceRefIndex (Supersession.successor s)) ×
+  ¬ (governanceRefIndex (Supersession.previous s) ≡
+     governanceRefIndex (Supersession.successor s))
+
+supersessionEndpointsValid? :
+  (h : History) → (s : Supersession) → Dec (SupersessionEndpointsValid h s)
+supersessionEndpointsValid? h s =
+  governanceDeclared? h (governanceRefIndex (Supersession.previous s)) ×-dec
+  governanceDeclared? h (governanceRefIndex (Supersession.successor s)) ×-dec
+  ¬? (governanceRefIndex (Supersession.previous s) ≟
+      governanceRefIndex (Supersession.successor s))
+
+SupersessionReady : History → Supersession → Set
+SupersessionReady h s =
+  SupersessionEndpointsValid h s ×
   SupersessionCoverage h s ×
   AllDispositionsValid h s ×
-  EmbeddedEstablishmentsValid h s ×
+  EmbeddedEstablishmentsReady h s ×
   AllEstablishmentsUsed s
 
-supersessionValid? :
-  (h : History) → (s : Supersession) → Dec (SupersessionValid h s)
-supersessionValid? h s =
+supersessionReady? :
+  (h : History) → (s : Supersession) → Dec (SupersessionReady h s)
+supersessionReady? h s =
+  supersessionEndpointsValid? h s ×-dec
   supersessionCoverage? h s ×-dec
   allDispositionsValid? h s ×-dec
-  embeddedEstablishmentsValid? h s ×-dec
+  embeddedEstablishmentsReady? h s ×-dec
   allEstablishmentsUsed? s
 
-ValidEntry : History → HistoryEntry → Set₁
-ValidEntry h (declare d) = Lift (suc zero) (DeclarationValid h d)
-ValidEntry h (establish e) = Lift (suc zero) (EstablishmentValid h e)
-ValidEntry h (abandon p) = Lift (suc zero) (AbandonmentValid h p)
-ValidEntry h (supersede s) = SupersessionValid h s
+EntryReady : History → HistoryEntry → Set
+EntryReady h (declare d) = DeclarationValid h d
+EntryReady h (establish e) = EstablishmentReady h e
+EntryReady h (abandon p) = AbandonmentValid h p
+EntryReady h (supersede s) = SupersessionReady h s
 
-validEntry? :
-  (h : History) → (entry : HistoryEntry) → Dec (ValidEntry h entry)
-validEntry? h (declare d) =
-  map′ lift lower (declarationValid? h d)
-validEntry? h (establish e) =
-  map′ lift lower (establishmentValid? h e)
-validEntry? h (abandon p) =
-  map′ lift lower (abandonmentValid? h p)
-validEntry? h (supersede s) = supersessionValid? h s
+entryReady? :
+  (h : History) → (entry : HistoryEntry) → Dec (EntryReady h entry)
+entryReady? h (declare d) = declarationValid? h d
+entryReady? h (establish e) = establishmentReady? h e
+entryReady? h (abandon p) = abandonmentValid? h p
+entryReady? h (supersede s) = supersessionReady? h s
+
+EntryEvidence : History → HistoryEntry → Set
+EntryEvidence h (declare d) = ⊤
+EntryEvidence h (establish e) = EvidenceAt h (establishmentIndex e)
+EntryEvidence h (abandon p) = ⊤
+EntryEvidence h (supersede s) = EmbeddedEstablishmentEvidence h s
+
+ValidEntry : History → HistoryEntry → Set
+ValidEntry h entry = EntryReady h entry × EntryEvidence h entry
 
 data ValidHistory : History → Set₁ where
   empty : ValidHistory ε
   extend : {h : History} → ValidHistory h → (entry : HistoryEntry) →
            ValidEntry h entry → ValidHistory (h ▻ entry)
+
+record Constitution : Set₁ where
+  constructor constitution
+  field
+    history : History
+    validHistory : ValidHistory history
+
+Obligation : Constitution → Nat → Set
+Obligation c p = Active (Constitution.history c) p
+
+constitutionGlyph : Constitution → Nat → GovernanceGlyph
+constitutionGlyph c g = governanceGlyph (Constitution.history c) g
