@@ -58,7 +58,7 @@
 + Replace the mechanically derived README Current/Next status of GV94 with a governed project-direction review while preserving roadmap structural validity: Current is a bounded human-facing summary anchored by typed coverage of the exact governed project and roadmap state; Next is a bounded human-facing summary of the selected gap between Purpose and Current; every relevant source subject must receive an explicit typed disposition, source changes invalidate review freshness, and the compiler verifies bounds, provenance, coverage, references, and vigilance freshness while the agent supplies semantic judgment and the human authorizes that judgment through the pull request.
 ```
 
-Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `79c0803..6f88389`.
+Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `79c0803..7ccf5e0`.
 <!-- govenv-governance-impact:end -->
 
 
@@ -84,6 +84,7 @@ Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit
 * **constitution:** allow late formal propositions ([a41faa5](https://github.com/klarkc/govenv/commit/a41faa57967b42546d0d922ebda6680d53f6042a))
 * **roadmap:** add language-neutral application phase ([5ca5af5](https://github.com/klarkc/govenv/commit/5ca5af592d6b3dc367339a92f358ba61a81c5311))
 * **constitution:** add one-shot genesis boundary ([6f88389](https://github.com/klarkc/govenv/commit/6f883899d1b680bb8e73ae7f486937edf7e19587))
+* **constitution:** add history-prefix snapshots ([7ccf5e0](https://github.com/klarkc/govenv/commit/7ccf5e04c364f2d710fb29f9918d0a4ae03f2760))
 
 
 ### Miscellaneous
