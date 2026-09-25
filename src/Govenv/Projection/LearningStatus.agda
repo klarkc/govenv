@@ -13,11 +13,16 @@ infixr 5 _++_
 _++_ : String → String → String
 _++_ = primStringAppend
 
+renderRequirementLines : LearningDebt → String
+renderRequirementLines [] = ""
+renderRequirementLines (learningRequirement claim revision ∷ rest) =
+  "- " ++ claim ++ " @ " ++ revision ++ "\n" ++
+  renderRequirementLines rest
+
 renderRequirements : LearningDebt → String
 renderRequirements [] = "Learning debt: clear\n"
-renderRequirements (learningRequirement claim revision ∷ rest) =
-  "Learning debt: open\n- " ++ claim ++ " @ " ++ revision ++ "\n" ++
-  renderRequirements rest
+renderRequirements debt =
+  "Learning debt: open\n" ++ renderRequirementLines debt
 
 renderStatus : String
 renderStatus = renderRequirements outstanding

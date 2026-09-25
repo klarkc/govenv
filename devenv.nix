@@ -530,6 +530,10 @@ in
     ${learningStatus}
   '';
 
+  tasks."govenv:learning:candidate".exec = ''
+    bash src/Govenv/Adapter/learning-candidate-gate.sh
+  '';
+
   tasks."govenv:learning:catch-up".exec = ''
     ${learningStatus}
     echo

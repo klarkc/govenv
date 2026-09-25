@@ -1,23 +1,31 @@
-# Learning debt snapshot materialization
+# Learning snapshot materialization
 
-The versioned snapshot exposes only the machine-decidable fact needed by outer
-release enforcement: whether governed learning debt is empty. It does not
-encode or infer human understanding.
+The versioned learning snapshot exposes the machine-decidable state needed by
+candidate and release enforcement: current debt closure, candidate eligibility,
+and the explicit candidate-learning assessment. The assessment remains a
+Protocol judgment; materialization preserves it for freshness and auditability
+without claiming the classification or human understanding is objectively
+proven.
 
 ```agda
 {-# OPTIONS --safe #-}
 
 module Govenv.Materialization.LearningSnapshot where
 
-open import Agda.Builtin.Bool using (Bool)
-open import Govenv.Kernel.Learning using (debtClear)
-open import Govenv.Learning using (outstanding)
+open import Govenv.Kernel.Learning using
+  (LearningSnapshot; learningSnapshot; debtClear)
+open import Govenv.Learning using
+  (assessment; candidateAllowed; outstanding)
 open import Govenv.Materialization
 
-snapshot : Bool
-snapshot = debtClear outstanding
+snapshot : LearningSnapshot
+snapshot =
+  learningSnapshot
+    (debtClear outstanding)
+    candidateAllowed
+    assessment
 
-materialization : Materialization Bool
+materialization : Materialization LearningSnapshot
 materialization = materialized
   (repositoryFile ".govenv/learning.snapshot")
   versionedApplication

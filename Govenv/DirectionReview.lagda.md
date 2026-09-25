@@ -29,7 +29,7 @@ source =
 
 currentSummary : BoundedText 400
 currentSummary = boundedText
-  "Govenv is in P1 with compiler-checked direction, consolidation closure, human-learning continuity, and Stage-0 GitHub collaboration available. Constitutional history remains partial; GV116 is the immediate gap, followed by dependency/environment authority in GV117 and the broader collaboration boundary in GV118."
+  "Govenv is in P1 with compiler-checked direction, consolidation closure, human-learning continuity enforced at candidate PRs, and Stage-0 GitHub collaboration available. Constitutional history remains partial; GV116 is still the immediate gap, followed by GV117 and GV118."
   refl
 
 currentSourceCoverage : CurrentCoverage
@@ -68,7 +68,7 @@ next = nextReview nextSummary nextClaims nextGapCoverage
 
 reviewRationale : String
 reviewRationale =
-  "GV119 made human authority over agent-paced evolution explicit in Purpose; GV118 adds governed collaboration runtime already covered by reproducible tooling/runtime. Current and Next were re-reviewed against both changes, with GV116 remaining the immediate gap."
+  "GV121 closes the candidate-enforcement gap in GV119 and therefore advances Current, but it does not displace the selected project gap: GV116 remains immediate, with GV117 and GV118 following."
 
 review : DirectionReview roadmap purpose
 review = directionReview source refl current next reviewRationale zero

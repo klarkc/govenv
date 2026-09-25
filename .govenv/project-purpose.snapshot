@@ -1,4 +1,4 @@
 govenv-project-purpose-snapshot-v2
-review-index 0
-review-rationale "Review of the complete resulting roadmap found GV119's bounded agent speed relative to human authority missing from the public purpose; GV118 remains covered by the existing reproducible tooling/runtime clause."
+review-index 1
+review-rationale "GV121 makes the already-stated human-authority promise enforceable at the pull-request candidate boundary; the complete resulting roadmap remains accurately covered by the current purpose."
 purpose "Turn every repository into a self-governing developer environment: define what valid means once, let agents move fast without outrunning human authority, and reproduce the same tooling, automation, and runtime anywhere."
