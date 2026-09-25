@@ -16,7 +16,8 @@ open import Data.Bool.ListAction using (all; any)
 open import Data.Empty using (⊥)
 open import Data.Product.Base using (_×_; _,_)
 open import Data.Sum.Base using (_⊎_)
-open import Data.Nat.Properties using (_≟_)
+open import Data.Nat.Base using (_<_)
+open import Data.Nat.Properties using (_≟_; _<?_)
 open import Data.List.Base using (List; []; _∷_; _++_; map; filterᵇ)
 open import Data.List.Membership.Propositional using (_∈_)
 open import Data.List.Membership.DecPropositional _≟_ using (_∈?_)
@@ -28,16 +29,18 @@ open import Data.List.Relation.Unary.Unique.Propositional using (Unique)
 open import Data.List.Relation.Unary.Unique.DecPropositional _≟_
   using (unique?)
 import Data.Maybe.Properties as MaybeProperties
+import Data.String.Properties as StringProperties
 open import Relation.Nullary using (Dec; ¬_; yes; no)
 open import Relation.Nullary.Decidable
   using (does; _×-dec_; _⊎-dec_; ¬?)
 open import Govenv.Kernel.Identifier using
-  (GovernanceId; GovernanceRef; PhaseId; IdentifierRef; indexOf)
+  (GovernanceId; GovernanceRef; PhaseId; IdentifierRef; indexOf; descriptionOf)
 open import Govenv.Kernel.Constitution.Genesis using
   ( Genesis; GenesisState; GenesisGovernance
   ; pendingAtCutover; completedAtCutover; abandonedAtCutover; supersededAtCutover
   ; governanceItems; governanceIndices; supersededIndices
   ; phaseIndices; currentPhaseIndex; owningPhaseIndex
+  ; phaseDescriptionFor; owningPhaseFor
   ; stateFor; successorFor; successorIndex; genesisGovernanceIndex
   )
 
@@ -61,6 +64,13 @@ record SomeProposition : Set₁ where
 
 Evidence : {idx : Nat} → Proposition idx → Set
 Evidence = Proposition.Statement
+
+record PhaseDeclaration : Set where
+  constructor phaseDeclaration
+  field
+    {phaseIndex} : Nat
+    {phaseDescription} : String
+    phase : PhaseId phaseIndex phaseDescription
 
 record GovernanceDeclaration : Set₁ where
   constructor governanceDeclaration
@@ -107,8 +117,9 @@ record Supersession : Set₁ where
     dispositions   : List PropositionDisposition
 
 data HistoryEntry : Set₁ where
-  bootstrap : Genesis → HistoryEntry
-  declare   : GovernanceDeclaration → HistoryEntry
+  bootstrap    : Genesis → HistoryEntry
+  declarePhase : PhaseDeclaration → HistoryEntry
+  declare      : GovernanceDeclaration → HistoryEntry
   propose   : PropositionDeclaration → HistoryEntry
   establish : Establishment → HistoryEntry
   abandon   : Nat → HistoryEntry
@@ -133,8 +144,20 @@ private
   establishmentIndex : Establishment → Nat
   establishmentIndex = Establishment.propositionIndex
 
+  phaseDeclarationIndex : PhaseDeclaration → Nat
+  phaseDeclarationIndex d = indexOf (PhaseDeclaration.phase d)
+
+  phaseDeclarationDescription : PhaseDeclaration → String
+  phaseDeclarationDescription d = descriptionOf (PhaseDeclaration.phase d)
+
   governanceIndexOf : GovernanceDeclaration → Nat
   governanceIndexOf d = indexOf (GovernanceDeclaration.governance d)
+
+  governancePhaseIndex : GovernanceDeclaration → Nat
+  governancePhaseIndex d = indexOf (GovernanceDeclaration.phase d)
+
+  governancePhaseDescription : GovernanceDeclaration → String
+  governancePhaseDescription d = descriptionOf (GovernanceDeclaration.phase d)
 
   governanceRefIndex : GovernanceRef → Nat
   governanceRefIndex = IdentifierRef.referenceIndex
@@ -227,6 +250,17 @@ private
     allPropositions h ++ (proposedIndex d ∷ [])
   allPropositions (h ▻ _) = allPropositions h
 
+  allPhaseIndices : History → List Nat
+  allPhaseIndices ε = []
+  allPhaseIndices (h ▻ bootstrap genesis) =
+    allPhaseIndices h ++ phaseIndices genesis
+  allPhaseIndices (h ▻ declarePhase d) =
+    allPhaseIndices h ++ (phaseDeclarationIndex d ∷ [])
+  allPhaseIndices (h ▻ declare d) with containsNat (governancePhaseIndex d) (allPhaseIndices h)
+  ... | true = allPhaseIndices h
+  ... | false = allPhaseIndices h ++ (governancePhaseIndex d ∷ [])
+  allPhaseIndices (h ▻ _) = allPhaseIndices h
+
   allGovernanceIndices : History → List Nat
   allGovernanceIndices ε = []
   allGovernanceIndices (h ▻ bootstrap genesis) =
@@ -271,6 +305,41 @@ private
   allReformulated (h ▻ supersede s) =
     allReformulated h ++ reformulatedSubjects (Supersession.dispositions s)
   allReformulated (h ▻ _) = allReformulated h
+
+phaseDescriptionAt : History → Nat → Maybe String
+phaseDescriptionAt ε p = nothing
+phaseDescriptionAt (h ▻ bootstrap genesis) p with phaseDescriptionAt h p
+... | just description = just description
+... | nothing = phaseDescriptionFor genesis p
+phaseDescriptionAt (h ▻ declarePhase d) p with phaseDescriptionAt h p
+... | just description = just description
+... | nothing with sameNat p (phaseDeclarationIndex d)
+...   | true = just (phaseDeclarationDescription d)
+...   | false = nothing
+phaseDescriptionAt (h ▻ declare d) p with phaseDescriptionAt h p
+... | just description = just description
+... | nothing with sameNat p (governancePhaseIndex d)
+...   | true = just (governancePhaseDescription d)
+...   | false = nothing
+phaseDescriptionAt (h ▻ _) p = phaseDescriptionAt h p
+
+governancePhase : History → Nat → Maybe Nat
+governancePhase ε g = nothing
+governancePhase (h ▻ bootstrap genesis) g with governancePhase h g
+... | just phase = just phase
+... | nothing = owningPhaseFor genesis g
+governancePhase (h ▻ declare d) g with governancePhase h g
+... | just phase = just phase
+... | nothing with sameNat g (governanceIndexOf d)
+...   | true = just (governancePhaseIndex d)
+...   | false = nothing
+governancePhase (h ▻ _) g = governancePhase h g
+
+PhaseDeclared : History → Nat → Set
+PhaseDeclared h p = p ∈ allPhaseIndices h
+
+phaseDeclared? : (h : History) → (p : Nat) → Dec (PhaseDeclared h p)
+phaseDeclared? h p = p ∈? allPhaseIndices h
 
 Declared : History → Nat → Set
 Declared h p = p ∈ allPropositions h
@@ -477,6 +546,42 @@ governanceSuperseded? :
   (h : History) → (g : Nat) → Dec (GovernanceSuperseded h g)
 governanceSuperseded? h g = g ∈? allSupersededGovernance h
 
+private
+  notBool : Bool → Bool
+  notBool true = false
+  notBool false = true
+
+  andBool : Bool → Bool → Bool
+  andBool true right = right
+  andBool false right = false
+
+  governanceOpenᵇ : History → Nat → Bool
+  governanceOpenᵇ h g with governanceLifecycle h g
+  ... | completed = false
+  ... | mixedCompleted = false
+  ... | abandoned = false
+  ... | pending = notBool (does (governanceSuperseded? h g))
+
+  governanceInPhaseᵇ : History → Nat → Nat → Bool
+  governanceInPhaseᵇ h phase g with governancePhase h g
+  ... | nothing = false
+  ... | just owner = sameNat phase owner
+
+  phaseOpenᵇ : History → Nat → Bool
+  phaseOpenᵇ h phase =
+    any
+      (λ g → andBool (governanceInPhaseᵇ h phase g) (governanceOpenᵇ h g))
+      (allGovernanceIndices h)
+
+  currentPhaseFrom : History → List Nat → Maybe Nat
+  currentPhaseFrom h [] = nothing
+  currentPhaseFrom h (phase ∷ rest) with phaseOpenᵇ h phase
+  ... | true = just phase
+  ... | false = currentPhaseFrom h rest
+
+currentPhase : History → Maybe Nat
+currentPhase h = currentPhaseFrom h (allPhaseIndices h)
+
 GovernanceOpenForPropositions : History → Nat → Set
 GovernanceOpenForPropositions h g = governanceLifecycle h g ≡ pending
 
@@ -526,8 +631,20 @@ private
     target ∈? governanceIndices genesis ×-dec
     ¬? (genesisGovernanceIndex item ≟ target)
 
+private
+  StrictlyIncreasing : List Nat → Set
+  StrictlyIncreasing [] = ⊤
+  StrictlyIncreasing (phase ∷ rest) =
+    All (λ later → phase < later) rest × StrictlyIncreasing rest
+
+  strictlyIncreasing? : (phases : List Nat) → Dec (StrictlyIncreasing phases)
+  strictlyIncreasing? [] = yes tt
+  strictlyIncreasing? (phase ∷ rest) =
+    all? (λ later → phase <? later) rest ×-dec strictlyIncreasing? rest
+
 GenesisValid : Genesis → Set
 GenesisValid genesis =
+  StrictlyIncreasing (phaseIndices genesis) ×
   Unique (phaseIndices genesis) ×
   currentPhaseIndex genesis ∈ phaseIndices genesis ×
   Unique (governanceIndices genesis) ×
@@ -536,6 +653,7 @@ GenesisValid genesis =
 
 genesisValid? : (genesis : Genesis) → Dec (GenesisValid genesis)
 genesisValid? genesis =
+  strictlyIncreasing? (phaseIndices genesis) ×-dec
   unique? (phaseIndices genesis) ×-dec
   currentPhaseIndex genesis ∈? phaseIndices genesis ×-dec
   unique? (governanceIndices genesis) ×-dec
@@ -555,11 +673,45 @@ BootstrapValid h genesis = BootstrapAllowed h × GenesisValid genesis
 bootstrapValid? : (h : History) → (genesis : Genesis) → Dec (BootstrapValid h genesis)
 bootstrapValid? h genesis = bootstrapAllowed? h ×-dec genesisValid? genesis
 
+PhaseAfterExisting : History → Nat → Set
+PhaseAfterExisting h phase = All (λ prior → prior < phase) (allPhaseIndices h)
+
+phaseAfterExisting? :
+  (h : History) → (phase : Nat) → Dec (PhaseAfterExisting h phase)
+phaseAfterExisting? h phase = all? (λ prior → prior <? phase) (allPhaseIndices h)
+
+PhaseFresh : History → PhaseDeclaration → Set
+PhaseFresh h d = ¬ PhaseDeclared h (phaseDeclarationIndex d)
+
+phaseFresh? : (h : History) → (d : PhaseDeclaration) → Dec (PhaseFresh h d)
+phaseFresh? h d = ¬? (phaseDeclared? h (phaseDeclarationIndex d))
+
+PhaseDeclarationValid : History → PhaseDeclaration → Set
+PhaseDeclarationValid h d =
+  PhaseFresh h d × PhaseAfterExisting h (phaseDeclarationIndex d)
+
+phaseDeclarationValid? :
+  (h : History) → (d : PhaseDeclaration) → Dec (PhaseDeclarationValid h d)
+phaseDeclarationValid? h d =
+  phaseFresh? h d ×-dec phaseAfterExisting? h (phaseDeclarationIndex d)
+
 Fresh : History → Nat → Set
 Fresh h p = ¬ Declared h p
 
 fresh? : (h : History) → (p : Nat) → Dec (Fresh h p)
 fresh? h p = ¬? (declared? h p)
+
+GovernancePhaseValid : History → GovernanceDeclaration → Set
+GovernancePhaseValid h d with phaseDescriptionAt h (governancePhaseIndex d)
+... | nothing = PhaseAfterExisting h (governancePhaseIndex d)
+... | just description = description ≡ governancePhaseDescription d
+
+governancePhaseValid? :
+  (h : History) → (d : GovernanceDeclaration) → Dec (GovernancePhaseValid h d)
+governancePhaseValid? h d with phaseDescriptionAt h (governancePhaseIndex d)
+... | nothing = phaseAfterExisting? h (governancePhaseIndex d)
+... | just description =
+  StringProperties._≟_ description (governancePhaseDescription d)
 
 GovernanceFresh : History → GovernanceDeclaration → Set
 GovernanceFresh h d = ¬ GovernanceDeclared h (governanceIndexOf d)
@@ -571,6 +723,7 @@ governanceFresh? h d = ¬? (governanceDeclared? h (governanceIndexOf d))
 DeclarationValid : History → GovernanceDeclaration → Set
 DeclarationValid h d =
   GovernanceFresh h d ×
+  GovernancePhaseValid h d ×
   All (Fresh h) (declarationIndices d) ×
   Unique (declarationIndices d)
 
@@ -578,6 +731,7 @@ declarationValid? :
   (h : History) → (d : GovernanceDeclaration) → Dec (DeclarationValid h d)
 declarationValid? h d =
   governanceFresh? h d ×-dec
+  governancePhaseValid? h d ×-dec
   all? (fresh? h) (declarationIndices d) ×-dec
   unique? (declarationIndices d)
 
@@ -778,6 +932,7 @@ supersessionReady? h s =
 
 EntryReady : History → HistoryEntry → Set
 EntryReady h (bootstrap genesis) = BootstrapValid h genesis
+EntryReady h (declarePhase d) = PhaseDeclarationValid h d
 EntryReady h (declare d) = DeclarationValid h d
 EntryReady h (propose d) = PropositionDeclarationValid h d
 EntryReady h (establish e) = EstablishmentReady h e
@@ -787,6 +942,7 @@ EntryReady h (supersede s) = SupersessionReady h s
 entryReady? :
   (h : History) → (entry : HistoryEntry) → Dec (EntryReady h entry)
 entryReady? h (bootstrap genesis) = bootstrapValid? h genesis
+entryReady? h (declarePhase d) = phaseDeclarationValid? h d
 entryReady? h (declare d) = declarationValid? h d
 entryReady? h (propose d) = propositionDeclarationValid? h d
 entryReady? h (establish e) = establishmentReady? h e
@@ -795,6 +951,7 @@ entryReady? h (supersede s) = supersessionReady? h s
 
 EntryEvidence : History → HistoryEntry → Set
 EntryEvidence h (bootstrap genesis) = ⊤
+EntryEvidence h (declarePhase d) = ⊤
 EntryEvidence h (declare d) = ⊤
 EntryEvidence h (propose d) = ⊤
 EntryEvidence h (establish e) = EvidenceAt h (establishmentIndex e)
@@ -823,6 +980,9 @@ constitutionLifecycle c g = governanceLifecycle (Constitution.history c) g
 
 constitutionSuccessor : Constitution → Nat → Maybe GovernanceRef
 constitutionSuccessor c g = successorOf (Constitution.history c) g
+
+constitutionCurrentPhase : Constitution → Maybe Nat
+constitutionCurrentPhase c = currentPhase (Constitution.history c)
 
 constitutionGlyph : Constitution → Nat → GovernanceGlyph
 constitutionGlyph c g = glyphForLifecycle (constitutionLifecycle c g)

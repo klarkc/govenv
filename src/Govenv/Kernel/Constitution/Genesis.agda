@@ -13,6 +13,7 @@ open import Govenv.Kernel.Identifier using
   ; GovernanceRef
   ; IdentifierRef
   ; indexOf
+  ; descriptionOf
   ; someIdentifier
   )
 
@@ -56,12 +57,24 @@ owningPhaseIndex = GenesisGovernance.owningPhase
 phaseIndexOf : SomePhaseId → Nat
 phaseIndexOf (someIdentifier phaseId) = indexOf phaseId
 
+phaseDescriptionOf : SomePhaseId → String
+phaseDescriptionOf (someIdentifier phaseId) = descriptionOf phaseId
+
 phaseIndices : Genesis → List Nat
 phaseIndices genesis = indices (Genesis.phases genesis)
   where
   indices : List SomePhaseId → List Nat
   indices [] = []
   indices (phase ∷ rest) = phaseIndexOf phase ∷ indices rest
+
+phaseDescriptionFor : Genesis → Nat → Maybe String
+phaseDescriptionFor genesis idx = lookup (Genesis.phases genesis)
+  where
+  lookup : List SomePhaseId → Maybe String
+  lookup [] = nothing
+  lookup (phase ∷ rest) with idx == phaseIndexOf phase
+  ... | true = just (phaseDescriptionOf phase)
+  ... | false = lookup rest
 
 currentPhaseIndex : Genesis → Nat
 currentPhaseIndex genesis with Genesis.phaseState genesis
@@ -80,6 +93,15 @@ successorIndex item with successor item
 
 governanceItems : Genesis → List GenesisGovernance
 governanceItems = Genesis.governance
+
+owningPhaseFor : Genesis → Nat → Maybe Nat
+owningPhaseFor genesis idx = lookup (governanceItems genesis)
+  where
+  lookup : List GenesisGovernance → Maybe Nat
+  lookup [] = nothing
+  lookup (item ∷ rest) with idx == genesisGovernanceIndex item
+  ... | true = just (owningPhaseIndex item)
+  ... | false = lookup rest
 
 governanceIndices : Genesis → List Nat
 governanceIndices genesis = indices (governanceItems genesis)
