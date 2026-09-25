@@ -3,7 +3,7 @@
 <h1 align="center">Govenv</h1>
 
 <p align="center">
-  <strong>Turn every repository into a self-governing developer environment: define what valid means once, catch problems early, and reproduce the same tooling, automation, and runtime anywhere.</strong>
+  <strong>Turn every repository into a self-governing developer environment: define what valid means once, let agents move fast without outrunning human authority, and reproduce the same tooling, automation, and runtime anywhere.</strong>
 </p>
 
 <p align="center">
@@ -15,9 +15,9 @@
 
 ## Roadmap
 
-**Current:** Govenv is in P1 with compiler-checked project direction and consolidation closure established. The declared observations extracted from the 2026-09-23 recovery corpus are fully dispositioned; remaining gaps are explicit roadmap work led by constitutional-history migration and dependency/environment authority classification.
+**Current:** Govenv is in P1 with compiler-checked project direction, consolidation closure, and human-learning continuity established. Constitutional history is partially migrated; GV116 remains the immediate gap before dependency/environment authority classification in GV117.
 
-**Next:** Migrate roadmap and release governance to append-only constitutional history in GV116, then resolve dependency/environment authority in GV117 before resuming broader agent/runtime and social-publishing work.
+**Next:** Complete GV116 by deriving the remaining roadmap and release lifecycle from append-only constitutional history, then resolve dependency/environment authority in GV117 before broader runtime and journal work.
 
 > Governance IDs are immutable historical references. Definitions and owning phases never change after introduction; abandoned work is cancelled, while corrections or changed intent require a newer GV and explicit supersession.
 

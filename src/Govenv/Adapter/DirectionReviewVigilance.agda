@@ -9,10 +9,10 @@ open import Agda.Builtin.Nat using (Nat)
 open import Agda.Builtin.String using (primStringEquality)
 open import Govenv.Adapter.RoadmapEvolutionObservation
 open import Govenv.DirectionReview using
-  (currentSummary; nextSummary; review)
+  (currentSummary; nextSummary; review; reviewRationale)
 open import Govenv.Kernel.DirectionReview using
   (BoundedText; DirectionReview)
-open import Govenv.Kernel.Protocol using (protocolVigilanceFresh)
+open import Govenv.Kernel.Protocol using (protocolReviewFresh)
 open import Govenv.Kernel.Release using
   (governanceDelta; governanceDeltaChanged; validDelta; invalidDelta)
 open import Govenv.Project using (purpose)
@@ -53,6 +53,11 @@ reviewChanged =
         (BoundedText.value nextSummary)
     )
 
+reviewEvidenceChanged : Bool
+reviewEvidenceChanged =
+  not
+    (primStringEquality previousDirectionReviewRationale reviewRationale)
+
 currentReviewIndex : Nat
 currentReviewIndex = DirectionReview.reviewIndex review
 
@@ -60,9 +65,10 @@ directionReviewFresh : Bool
 directionReviewFresh with previousDirectionReviewAvailable
 ... | false = true
 ... | true =
-  protocolVigilanceFresh
+  protocolReviewFresh
     sourceChanged
     reviewChanged
+    reviewEvidenceChanged
     previousDirectionReviewIndex
     currentReviewIndex
 

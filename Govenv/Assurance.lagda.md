@@ -36,6 +36,7 @@ import Govenv.Assurance.GV101 as GV101
 import Govenv.Assurance.GV108 as GV108
 import Govenv.Assurance.GV109 as GV109
 import Govenv.Assurance.GV110 as GV110
+import Govenv.Assurance.GV110.Counterexample.MechanicalBump
 import Govenv.Assurance.GV111 as GV111
 import Govenv.Assurance.GV111.Counterexample.StaleTarget
 import Govenv.Assurance.GV112 as GV112

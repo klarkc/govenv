@@ -1,4 +1,5 @@
-govenv-direction-review-snapshot-v1
-review-index 1
-current "Govenv is in P1 with compiler-checked project direction and consolidation closure established. The declared observations extracted from the 2026-09-23 recovery corpus are fully dispositioned; remaining gaps are explicit roadmap work led by constitutional-history migration and dependency/environment authority classification."
-next "Migrate roadmap and release governance to append-only constitutional history in GV116, then resolve dependency/environment authority in GV117 before resuming broader agent/runtime and social-publishing work."
+govenv-direction-review-snapshot-v2
+review-index 0
+review-rationale "GV119 changed the public project identity by making bounded agent speed relative to human authority explicit; Current and Next were re-reviewed against that purpose while GV116 remains the immediate project gap."
+current "Govenv is in P1 with compiler-checked project direction, consolidation closure, and human-learning continuity established. Constitutional history is partially migrated; GV116 remains the immediate gap before dependency/environment authority classification in GV117."
+next "Complete GV116 by deriving the remaining roadmap and release lifecycle from append-only constitutional history, then resolve dependency/environment authority in GV117 before broader runtime and journal work."

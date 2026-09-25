@@ -17,9 +17,11 @@ _++_ : String → String → String
 _++_ = primStringAppend
 
 renderProjectPurposeSnapshot : ProjectPurposeSnapshot → String
-renderProjectPurposeSnapshot (projectPurposeSnapshot purpose reviewIndex) =
-  "govenv-project-purpose-snapshot-v1\n" ++
+renderProjectPurposeSnapshot
+  (projectPurposeSnapshot purpose reviewRationale reviewIndex) =
+  "govenv-project-purpose-snapshot-v2\n" ++
   "review-index " ++ primShowNat reviewIndex ++ "\n" ++
+  "review-rationale " ++ primShowString reviewRationale ++ "\n" ++
   "purpose " ++ primShowString purpose ++ "\n"
 
 renderSnapshot : String

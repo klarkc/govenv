@@ -7,10 +7,11 @@ open import Agda.Builtin.Equality using (_≡_; refl)
 open import Agda.Builtin.List using ([])
 open import Agda.Builtin.String using (primStringEquality)
 open import Govenv.Adapter.RoadmapEvolutionObservation
-open import Govenv.Kernel.Protocol using (protocolVigilanceFresh)
+open import Govenv.Kernel.Protocol using (protocolReviewFresh)
 open import Govenv.Kernel.Release using
   (governanceDelta; governanceDeltaChanged; validDelta; invalidDelta)
-open import Govenv.Project using (purpose; purposeReviewIndex)
+open import Govenv.Project using
+  (purpose; purposeReviewRationale; purposeReviewIndex)
 open import Govenv.Roadmap using (roadmap)
 
 not : Bool → Bool
@@ -25,13 +26,21 @@ roadmapChanged with governanceDelta previous [] roadmap
 purposeChanged : Bool
 purposeChanged = not (primStringEquality previousPurpose purpose)
 
+reviewEvidenceChanged : Bool
+reviewEvidenceChanged =
+  not
+    (primStringEquality
+      previousPurposeReviewRationale
+      purposeReviewRationale)
+
 purposeReviewFresh : Bool
 purposeReviewFresh with previousPurposeAvailable
 ... | false = true
 ... | true =
-  protocolVigilanceFresh
+  protocolReviewFresh
     roadmapChanged
     purposeChanged
+    reviewEvidenceChanged
     previousPurposeReviewIndex
     purposeReviewIndex
 
