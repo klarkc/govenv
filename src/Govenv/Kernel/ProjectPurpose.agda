@@ -9,4 +9,5 @@ record ProjectPurposeSnapshot : Set where
   constructor projectPurposeSnapshot
   field
     snapshotPurpose : String
+    snapshotReviewRationale : String
     snapshotReviewIndex : Nat

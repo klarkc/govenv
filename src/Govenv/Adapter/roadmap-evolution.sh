@@ -120,6 +120,7 @@ fi
 
 previous_purpose_available=false
 previous_purpose_expr='""'
+previous_purpose_review_rationale_expr='""'
 previous_purpose_review_index=0
 if [[ -n "${purpose_snapshot_path}" ]]; then
   [[ -f "${purpose_snapshot_path}" ]] || {
@@ -129,10 +130,11 @@ if [[ -n "${purpose_snapshot_path}" ]]; then
 
   purpose_header=""
   purpose_expr=""
+  purpose_review_rationale_expr=""
   purpose_review_index=""
   while IFS= read -r line; do
     case "${line}" in
-      govenv-project-purpose-snapshot-v1)
+      govenv-project-purpose-snapshot-v1|govenv-project-purpose-snapshot-v2)
         [[ -z "${purpose_header}" ]] || {
           echo "Duplicate project purpose snapshot header." >&2
           exit 3
@@ -150,6 +152,18 @@ if [[ -n "${purpose_snapshot_path}" ]]; then
           exit 3
         }
         purpose_review_index="${value}"
+        ;;
+      "review-rationale "*)
+        value="${line#review-rationale }"
+        [[ "${value}" =~ ^\".*\"$ ]] || {
+          echo "Invalid project purpose review rationale: ${line}" >&2
+          exit 3
+        }
+        [[ -z "${purpose_review_rationale_expr}" ]] || {
+          echo "Duplicate project purpose review rationale." >&2
+          exit 3
+        }
+        purpose_review_rationale_expr="${value}"
         ;;
       "purpose "*)
         value="${line#purpose }"
@@ -171,10 +185,19 @@ if [[ -n "${purpose_snapshot_path}" ]]; then
     esac
   done < "${purpose_snapshot_path}"
 
-  [[ "${purpose_header}" == "govenv-project-purpose-snapshot-v1" ]] || {
+  [[ "${purpose_header}" == "govenv-project-purpose-snapshot-v1" ||
+     "${purpose_header}" == "govenv-project-purpose-snapshot-v2" ]] || {
     echo "Unsupported project purpose snapshot format." >&2
     exit 3
   }
+  if [[ "${purpose_header}" == "govenv-project-purpose-snapshot-v2" &&
+        -z "${purpose_review_rationale_expr}" ]]; then
+    echo "Project purpose snapshot has no review rationale." >&2
+    exit 3
+  fi
+  if [[ "${purpose_header}" == "govenv-project-purpose-snapshot-v1" ]]; then
+    purpose_review_rationale_expr='""'
+  fi
   [[ -n "${purpose_expr}" ]] || {
     echo "Project purpose snapshot has no purpose." >&2
     exit 3
@@ -186,11 +209,13 @@ if [[ -n "${purpose_snapshot_path}" ]]; then
 
   previous_purpose_available=true
   previous_purpose_expr="${purpose_expr}"
+  previous_purpose_review_rationale_expr="${purpose_review_rationale_expr}"
   previous_purpose_review_index="${purpose_review_index}"
 fi
 
 previous_direction_available=false
 previous_direction_review_index=0
+previous_direction_review_rationale_expr='""'
 previous_current_expr='""'
 previous_next_expr='""'
 if [[ -n "${direction_snapshot_path}" ]]; then
@@ -201,11 +226,12 @@ if [[ -n "${direction_snapshot_path}" ]]; then
 
   direction_header=""
   direction_review_index=""
+  direction_review_rationale_expr=""
   direction_current_expr=""
   direction_next_expr=""
   while IFS= read -r line; do
     case "${line}" in
-      govenv-direction-review-snapshot-v1)
+      govenv-direction-review-snapshot-v1|govenv-direction-review-snapshot-v2)
         [[ -z "${direction_header}" ]] || {
           echo "Duplicate direction review snapshot header." >&2
           exit 3
@@ -223,6 +249,18 @@ if [[ -n "${direction_snapshot_path}" ]]; then
           exit 3
         }
         direction_review_index="${value}"
+        ;;
+      "review-rationale "*)
+        value="${line#review-rationale }"
+        [[ "${value}" =~ ^\".*\"$ ]] || {
+          echo "Invalid direction review rationale: ${line}" >&2
+          exit 3
+        }
+        [[ -z "${direction_review_rationale_expr}" ]] || {
+          echo "Duplicate direction review rationale." >&2
+          exit 3
+        }
+        direction_review_rationale_expr="${value}"
         ;;
       "current "*)
         value="${line#current }"
@@ -256,10 +294,19 @@ if [[ -n "${direction_snapshot_path}" ]]; then
     esac
   done < "${direction_snapshot_path}"
 
-  [[ "${direction_header}" == "govenv-direction-review-snapshot-v1" ]] || {
+  [[ "${direction_header}" == "govenv-direction-review-snapshot-v1" ||
+     "${direction_header}" == "govenv-direction-review-snapshot-v2" ]] || {
     echo "Unsupported direction review snapshot format." >&2
     exit 3
   }
+  if [[ "${direction_header}" == "govenv-direction-review-snapshot-v2" &&
+        -z "${direction_review_rationale_expr}" ]]; then
+    echo "Direction review snapshot has no review rationale." >&2
+    exit 3
+  fi
+  if [[ "${direction_header}" == "govenv-direction-review-snapshot-v1" ]]; then
+    direction_review_rationale_expr='""'
+  fi
   [[ -n "${direction_review_index}" && -n "${direction_current_expr}" &&
      -n "${direction_next_expr}" ]] || {
     echo "Direction review snapshot is incomplete." >&2
@@ -268,6 +315,7 @@ if [[ -n "${direction_snapshot_path}" ]]; then
 
   previous_direction_available=true
   previous_direction_review_index="${direction_review_index}"
+  previous_direction_review_rationale_expr="${direction_review_rationale_expr}"
   previous_current_expr="${direction_current_expr}"
   previous_next_expr="${direction_next_expr}"
 fi
@@ -311,6 +359,9 @@ previousPurposeAvailable = ${previous_purpose_available}
 previousPurpose : String
 previousPurpose = ${previous_purpose_expr}
 
+previousPurposeReviewRationale : String
+previousPurposeReviewRationale = ${previous_purpose_review_rationale_expr}
+
 previousPurposeReviewIndex : Nat
 previousPurposeReviewIndex = ${previous_purpose_review_index}
 
@@ -319,6 +370,9 @@ previousDirectionReviewAvailable = ${previous_direction_available}
 
 previousDirectionReviewIndex : Nat
 previousDirectionReviewIndex = ${previous_direction_review_index}
+
+previousDirectionReviewRationale : String
+previousDirectionReviewRationale = ${previous_direction_review_rationale_expr}
 
 previousCurrentSummary : String
 previousCurrentSummary = ${previous_current_expr}
@@ -333,12 +387,12 @@ agda -i "${input_root}" -i . -i src --compile \
 
 if ! agda -i "${input_root}" -i . -i src \
     src/Govenv/Adapter/PurposeVigilance.agda >/dev/null; then
-  echo "Project purpose vigilance failed: review the complete resulting roadmap, then either advance purposeReviewIndex by one when reaffirming the current purpose or change purpose and reset the index to zero." >&2
+  echo "Project purpose vigilance failed: execute the 'Project purpose stewardship' Protocol review over the complete resulting roadmap. Record fresh purposeReviewRationale, then either advance purposeReviewIndex by one when reaffirming the unchanged purpose or revise purpose and reset the index to zero. Never change the counter alone." >&2
   exit 4
 fi
 
 if ! agda -i "${input_root}" -i . -i src \
     src/Govenv/Adapter/DirectionReviewVigilance.agda >/dev/null; then
-  echo "Project direction review is stale: review Purpose × Current against the resulting roadmap, then update Current/Next or advance the direction-review witness exactly once when reaffirming them." >&2
+  echo "Project direction review is stale: execute the 'Project direction review' Protocol over Purpose × Current against the resulting roadmap. Record fresh reviewRationale, then update Current/Next and reset the witness or advance it exactly once when reaffirming them. Never change the counter alone." >&2
   exit 4
 fi

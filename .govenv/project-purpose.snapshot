@@ -1,3 +1,4 @@
-govenv-project-purpose-snapshot-v1
-review-index 7
-purpose "Turn every repository into a self-governing developer environment: define what valid means once, catch problems early, and reproduce the same tooling, automation, and runtime anywhere."
+govenv-project-purpose-snapshot-v2
+review-index 0
+review-rationale "Review of the complete resulting roadmap found GV119's bounded agent speed relative to human authority missing from the public purpose; GV118 remains covered by the existing reproducible tooling/runtime clause."
+purpose "Turn every repository into a self-governing developer environment: define what valid means once, let agents move fast without outrunning human authority, and reproduce the same tooling, automation, and runtime anywhere."

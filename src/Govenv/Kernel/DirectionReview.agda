@@ -80,12 +80,14 @@ record DirectionReview (roadmap : Roadmap) (purpose : String) : Set where
       source ≡ directionSource purpose (snapshotRoadmap roadmap)
     current : Current source
     next : Next roadmap
+    reviewRationale : String
     reviewIndex : Nat
 
 record DirectionReviewSnapshot : Set where
   constructor directionReviewSnapshot
   field
     snapshotReviewIndex : Nat
+    snapshotReviewRationale : String
     snapshotCurrent : String
     snapshotNext : String
 
@@ -96,5 +98,6 @@ snapshotDirectionReview :
 snapshotDirectionReview review =
   directionReviewSnapshot
     (DirectionReview.reviewIndex review)
+    (DirectionReview.reviewRationale review)
     (BoundedText.value (Current.summary (DirectionReview.current review)))
     (BoundedText.value (Next.summary (DirectionReview.next review)))

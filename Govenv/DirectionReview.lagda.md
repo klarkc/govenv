@@ -14,7 +14,8 @@ module Govenv.DirectionReview where
 
 open import Agda.Builtin.Equality using (refl)
 open import Agda.Builtin.List using (List; []; _∷_)
-open import Agda.Builtin.Nat using (zero; suc)
+open import Agda.Builtin.Nat using (zero)
+open import Agda.Builtin.String using (String)
 open import Govenv.Kernel.DirectionReview
 open import Govenv.Kernel.Identifier using (GVR)
 open import Govenv.Kernel.Release using (snapshotRoadmap)
@@ -28,7 +29,7 @@ source =
 
 currentSummary : BoundedText 400
 currentSummary = boundedText
-  "Govenv is in P1 with compiler-checked project direction and consolidation closure established. The declared observations extracted from the 2026-09-23 recovery corpus are fully dispositioned; remaining gaps are explicit roadmap work led by constitutional-history migration and dependency/environment authority classification."
+  "Govenv is in P1 with compiler-checked direction, consolidation closure, human-learning continuity, and Stage-0 GitHub collaboration available. Constitutional history remains partial; GV116 is the immediate gap, followed by dependency/environment authority in GV117 and the broader collaboration boundary in GV118."
   refl
 
 currentSourceCoverage : CurrentCoverage
@@ -46,7 +47,7 @@ nextTarget = governanceTarget (GVR 116) refl
 
 nextSummary : BoundedText 400
 nextSummary = boundedText
-  "Migrate roadmap and release governance to append-only constitutional history in GV116, then resolve dependency/environment authority in GV117 and the governed collaboration-tool boundary in GV118 before resuming broader agent/runtime and social-publishing work."
+  "Complete GV116 by deriving the remaining roadmap and release lifecycle from append-only constitutional history, then resolve dependency/environment authority in GV117 and close GV118's governed collaboration boundary before broader runtime and journal work."
   refl
 
 nextClaims : List (NextClaim roadmap)
@@ -65,6 +66,10 @@ nextGapCoverage = gapCoverage
 next : Next roadmap
 next = nextReview nextSummary nextClaims nextGapCoverage
 
+reviewRationale : String
+reviewRationale =
+  "GV119 made human authority over agent-paced evolution explicit in Purpose; GV118 adds governed collaboration runtime already covered by reproducible tooling/runtime. Current and Next were re-reviewed against both changes, with GV116 remaining the immediate gap."
+
 review : DirectionReview roadmap purpose
-review = directionReview source refl current next zero
+review = directionReview source refl current next reviewRationale zero
 ```

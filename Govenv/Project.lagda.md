@@ -7,10 +7,11 @@ including the README hero and GitHub repository description. Public repository
 metadata is governed project state rather than independently maintained GitHub
 configuration.
 
-`purposeReviewIndex` is a vigilance witness for Protocol stewardship. It does
-not claim that the purpose is objectively correct; it records that a roadmap
-change explicitly reaffirmed the current purpose, or resets when the purpose is
-revised.
+`purposeReviewIndex` is the freshness counter for Protocol stewardship and
+`purposeReviewRationale` is the explicit evidence that the triggered review was
+actually exercised. Neither claims that the purpose is objectively correct.
+The rationale must change whenever the review is triggered; the counter alone
+must never satisfy vigilance.
 
 ```agda
 {-# OPTIONS --safe #-}
@@ -36,10 +37,14 @@ purposeCharacterLimit : Nat
 purposeCharacterLimit = 250
 
 purpose : String
-purpose = "Turn every repository into a self-governing developer environment: define what valid means once, catch problems early, and reproduce the same tooling, automation, and runtime anywhere."
+purpose = "Turn every repository into a self-governing developer environment: define what valid means once, let agents move fast without outrunning human authority, and reproduce the same tooling, automation, and runtime anywhere."
+
+purposeReviewRationale : String
+purposeReviewRationale =
+  "Review of the complete resulting roadmap found GV119's bounded agent speed relative to human authority missing from the public purpose; GV118 remains covered by the existing reproducible tooling/runtime clause."
 
 purposeReviewIndex : Nat
-purposeReviewIndex = suc (suc (suc (suc (suc (suc (suc zero))))))
+purposeReviewIndex = zero
 
 website : String
 website = "https://klarkc.github.io/govenv/"
