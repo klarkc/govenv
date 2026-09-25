@@ -399,6 +399,25 @@ let
     fi
   '';
 
+  validateGithubAuthOnboarding = ''
+    auth_tmp="$(mktemp -d)"
+    trap 'rm -rf "$auth_tmp"' EXIT
+
+    BASH_ENV=/dev/null GH_CONFIG_DIR="$auth_tmp/config" \
+      env -u GH_TOKEN -u GITHUB_TOKEN \
+      bash src/Govenv/Adapter/github-auth-onboarding.sh > "$auth_tmp/missing"
+
+    grep -Fq 'contents=read&issues=write&pull_requests=write' "$auth_tmp/missing"
+    grep -Fq 'gh auth login --git-protocol ssh --skip-ssh-key' "$auth_tmp/missing"
+
+    BASH_ENV=/dev/null GH_CONFIG_DIR="$auth_tmp/config" GH_TOKEN=github_pat_test \
+      bash src/Govenv/Adapter/github-auth-onboarding.sh > "$auth_tmp/present"
+
+    test ! -s "$auth_tmp/present"
+    trap - EXIT
+    rm -rf "$auth_tmp"
+  '';
+
   checkArchitectureAssurance = ''
     rm -rf .govenv/architecture-assurance-build
     mkdir -p .govenv/architecture-assurance-build
@@ -578,6 +597,7 @@ in
     ${validateReleasePublishedBodyReadbackRegression}
     ${validateReleasePushAuthorizationRegression}
     ${validateCandidateTransientMaterializationRegression}
+    ${validateGithubAuthOnboarding}
   '';
 
   tasks."govenv:docs".exec = ''
@@ -592,6 +612,10 @@ in
     done
     cp _site/Govenv.html _site/index.html
     touch _site/.nojekyll
+  '';
+
+  enterShell = ''
+    bash src/Govenv/Adapter/github-auth-onboarding.sh
   '';
 
   enterTest = ''
