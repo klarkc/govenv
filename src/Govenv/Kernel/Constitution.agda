@@ -10,7 +10,7 @@ open import Agda.Builtin.Equality using (_≡_; refl)
 open import Agda.Builtin.Maybe using (Maybe; just; nothing)
 open import Agda.Builtin.Nat using (Nat)
 open import Agda.Builtin.String using (String)
-open import Agda.Builtin.Unit using (⊤)
+open import Agda.Builtin.Unit using (⊤; tt)
 open import Data.Bool.Base using (Bool; true; false)
 open import Data.Bool.ListAction using (all; any)
 open import Data.Empty using (⊥)
@@ -33,6 +33,13 @@ open import Relation.Nullary.Decidable
   using (does; _×-dec_; _⊎-dec_; ¬?)
 open import Govenv.Kernel.Identifier using
   (GovernanceId; GovernanceRef; PhaseId; IdentifierRef; indexOf)
+open import Govenv.Kernel.Constitution.Genesis using
+  ( Genesis; GenesisState; GenesisGovernance
+  ; pendingAtCutover; completedAtCutover; abandonedAtCutover; supersededAtCutover
+  ; governanceItems; governanceIndices; supersededIndices
+  ; phaseIndices; currentPhaseIndex; owningPhaseIndex
+  ; stateFor; successorFor; successorIndex; genesisGovernanceIndex
+  )
 
 Contract : Set
 Contract = String
@@ -100,6 +107,7 @@ record Supersession : Set₁ where
     dispositions   : List PropositionDisposition
 
 data HistoryEntry : Set₁ where
+  bootstrap : Genesis → HistoryEntry
   declare   : GovernanceDeclaration → HistoryEntry
   propose   : PropositionDeclaration → HistoryEntry
   establish : Establishment → HistoryEntry
@@ -221,12 +229,16 @@ private
 
   allGovernanceIndices : History → List Nat
   allGovernanceIndices ε = []
+  allGovernanceIndices (h ▻ bootstrap genesis) =
+    allGovernanceIndices h ++ governanceIndices genesis
   allGovernanceIndices (h ▻ declare d) =
     allGovernanceIndices h ++ (governanceIndexOf d ∷ [])
   allGovernanceIndices (h ▻ _) = allGovernanceIndices h
 
   allSupersededGovernance : History → List Nat
   allSupersededGovernance ε = []
+  allSupersededGovernance (h ▻ bootstrap genesis) =
+    allSupersededGovernance h ++ supersededIndices genesis
   allSupersededGovernance (h ▻ supersede s) =
     allSupersededGovernance h ++
     (governanceRefIndex (Supersession.previous s) ∷ [])
@@ -404,6 +416,13 @@ data GovernanceLifecycle : Set where
 data GovernanceGlyph : Set where
   diamond check mixed cross : GovernanceGlyph
 
+genesisState : History → Nat → Maybe GenesisState
+genesisState ε g = nothing
+genesisState (h ▻ bootstrap genesis) g with genesisState h g
+... | just inherited = just inherited
+... | nothing = stateFor genesis g
+genesisState (h ▻ _) g = genesisState h g
+
 private
   anyPending : History → List Nat → Bool
   anyPending h = any (pendingᵇ h)
@@ -426,9 +445,16 @@ private
   glyphForLifecycle mixedCompleted = mixed
   glyphForLifecycle abandoned = cross
 
+  inheritedLifecycle : Maybe GenesisState → GovernanceLifecycle
+  inheritedLifecycle nothing = pending
+  inheritedLifecycle (just pendingAtCutover) = pending
+  inheritedLifecycle (just completedAtCutover) = completed
+  inheritedLifecycle (just abandonedAtCutover) = abandoned
+  inheritedLifecycle (just (supersededAtCutover _)) = pending
+
 governanceLifecycle : History → Nat → GovernanceLifecycle
 governanceLifecycle h g with GovernanceSubjects h g
-... | [] = pending
+... | [] = inheritedLifecycle (genesisState h g)
 ... | subjects =
   lifecycleFor
     (anyPending h subjects)
@@ -464,12 +490,70 @@ governanceOpenForPropositions? h g with governanceLifecycle h g
 
 successorOf : History → Nat → Maybe GovernanceRef
 successorOf ε g = nothing
+successorOf (h ▻ bootstrap genesis) g with successorOf h g
+... | just inherited = just inherited
+... | nothing = successorFor genesis g
 successorOf (h ▻ supersede s) g with successorOf h g
 ... | just successor = just successor
 ... | nothing with sameNat g (governanceRefIndex (Supersession.previous s))
 ...   | true = just (Supersession.successor s)
 ...   | false = nothing
 successorOf (h ▻ _) g = successorOf h g
+
+private
+  GenesisPhaseValid : Genesis → GenesisGovernance → Set
+  GenesisPhaseValid genesis item =
+    owningPhaseIndex item ∈ phaseIndices genesis
+
+  genesisPhaseValid? :
+    (genesis : Genesis) → (item : GenesisGovernance) →
+    Dec (GenesisPhaseValid genesis item)
+  genesisPhaseValid? genesis item =
+    owningPhaseIndex item ∈? phaseIndices genesis
+
+  GenesisSuccessorValid : Genesis → GenesisGovernance → Set
+  GenesisSuccessorValid genesis item with successorIndex item
+  ... | nothing = ⊤
+  ... | just target =
+    target ∈ governanceIndices genesis × ¬ (genesisGovernanceIndex item ≡ target)
+
+  genesisSuccessorValid? :
+    (genesis : Genesis) → (item : GenesisGovernance) →
+    Dec (GenesisSuccessorValid genesis item)
+  genesisSuccessorValid? genesis item with successorIndex item
+  ... | nothing = yes tt
+  ... | just target =
+    target ∈? governanceIndices genesis ×-dec
+    ¬? (genesisGovernanceIndex item ≟ target)
+
+GenesisValid : Genesis → Set
+GenesisValid genesis =
+  Unique (phaseIndices genesis) ×
+  currentPhaseIndex genesis ∈ phaseIndices genesis ×
+  Unique (governanceIndices genesis) ×
+  All (GenesisPhaseValid genesis) (governanceItems genesis) ×
+  All (GenesisSuccessorValid genesis) (governanceItems genesis)
+
+genesisValid? : (genesis : Genesis) → Dec (GenesisValid genesis)
+genesisValid? genesis =
+  unique? (phaseIndices genesis) ×-dec
+  currentPhaseIndex genesis ∈? phaseIndices genesis ×-dec
+  unique? (governanceIndices genesis) ×-dec
+  all? (genesisPhaseValid? genesis) (governanceItems genesis) ×-dec
+  all? (genesisSuccessorValid? genesis) (governanceItems genesis)
+
+data BootstrapAllowed : History → Set where
+  atBeginning : BootstrapAllowed ε
+
+bootstrapAllowed? : (h : History) → Dec (BootstrapAllowed h)
+bootstrapAllowed? ε = yes atBeginning
+bootstrapAllowed? (_ ▻ _) = no (λ ())
+
+BootstrapValid : History → Genesis → Set
+BootstrapValid h genesis = BootstrapAllowed h × GenesisValid genesis
+
+bootstrapValid? : (h : History) → (genesis : Genesis) → Dec (BootstrapValid h genesis)
+bootstrapValid? h genesis = bootstrapAllowed? h ×-dec genesisValid? genesis
 
 Fresh : History → Nat → Set
 Fresh h p = ¬ Declared h p
@@ -693,6 +777,7 @@ supersessionReady? h s =
   allEstablishmentsUsed? s
 
 EntryReady : History → HistoryEntry → Set
+EntryReady h (bootstrap genesis) = BootstrapValid h genesis
 EntryReady h (declare d) = DeclarationValid h d
 EntryReady h (propose d) = PropositionDeclarationValid h d
 EntryReady h (establish e) = EstablishmentReady h e
@@ -701,6 +786,7 @@ EntryReady h (supersede s) = SupersessionReady h s
 
 entryReady? :
   (h : History) → (entry : HistoryEntry) → Dec (EntryReady h entry)
+entryReady? h (bootstrap genesis) = bootstrapValid? h genesis
 entryReady? h (declare d) = declarationValid? h d
 entryReady? h (propose d) = propositionDeclarationValid? h d
 entryReady? h (establish e) = establishmentReady? h e
@@ -708,6 +794,7 @@ entryReady? h (abandon p) = abandonmentValid? h p
 entryReady? h (supersede s) = supersessionReady? h s
 
 EntryEvidence : History → HistoryEntry → Set
+EntryEvidence h (bootstrap genesis) = ⊤
 EntryEvidence h (declare d) = ⊤
 EntryEvidence h (propose d) = ⊤
 EntryEvidence h (establish e) = EvidenceAt h (establishmentIndex e)
