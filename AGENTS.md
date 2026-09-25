@@ -49,6 +49,16 @@ Do not rely on an agent remembering prior sessions. When a session, handoff, rec
 
 An undisposed observation keeps the direction review stale. Absence from Current, Next, or Roadmap is never by itself evidence that an observation was considered. This protocol does not claim that a compiler can observe private model state or prove perfect natural-language extraction; it requires complete treatment of the declared observation set and preserves provenance so a human or later agent can audit the judgment.
 
+## Human learning continuity
+
+Treat human learning as part of preserving meaningful human authorization, not as an agent self-report. A conceptual change may derive learning requirements from the semantic delta and from substrate techniques, such as Agda constructs, only when those techniques are necessary to understand or review the governed property. Preserve the exact challenge and human response as revision-bound evidence; an agent or tutor may generate challenges and explanations, but its confidence or assertion that the human understood something is never canonical evidence.
+
+Pull requests use a soft learning gate. If governed learning debt is empty, work may proceed normally. If debt is open, feature work and concept-expanding refactors must not merge. Urgent corrective work may bypass the gate only through the explicit corrective bypass and must preserve every unsatisfied requirement as outstanding debt; bypass never closes, rewrites, or hides debt. Patch releases may carry known debt, while major and minor releases require zero outstanding learning debt.
+
+The developer environment must expose a human-facing learning surface. Inside `devenv shell`, use `govenv-learning status` to inspect debt, `govenv-learning catch-up` to start from the exact outstanding claims, and `govenv-learning review` before closing evidence or authorizing conceptual work. Equivalent `govenv:learning:*` tasks remain available for automation. The future `govenv shell` must preserve the same semantic capability, preferably as `govenv learning ...`, rather than creating a second learning authority.
+
+Learning evidence proves only that the recorded human principal produced the recorded response to the recorded challenge at the bound revision. The compiler may prove provenance, coverage, freshness, gate decisions, and release eligibility; it must never claim to prove the human's mental state.
+
 ## Developer journal and social posts
 
 Treat Govenv social posts as a technical development journal, not advertising. Write for developers who should be able to see what changed, why it matters, what the project is doing now, and where it is going next without hype, unsupported claims, or generic promotional language.

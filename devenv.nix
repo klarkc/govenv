@@ -11,6 +11,7 @@ let
     agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/RoadmapSnapshot.agda >/dev/null
     agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/ProjectPurposeSnapshot.agda >/dev/null
     agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/DirectionReviewSnapshot.agda >/dev/null
+    agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/LearningSnapshot.agda >/dev/null
     agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/Github/Workflows/Materialize.agda >/dev/null
     agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/Github/Workflows/AdminMaterialize.agda >/dev/null
     agda -i . -i src --compile --compile-dir=.govenv/materialize-build src/Govenv/Adapter/Github/Workflows/Test.agda >/dev/null
@@ -412,6 +413,13 @@ let
     agda -i . -i src -i ${agdaStdlib}/src src/Govenv/Experiment/ConstitutionalHistory/StdlibScenarios.agda
   '';
 
+  learningStatus = ''
+    rm -rf .govenv/learning-status-build
+    mkdir -p .govenv/learning-status-build
+    agda -i . -i src --compile --compile-dir=.govenv/learning-status-build src/Govenv/Adapter/LearningStatus.agda >/dev/null
+    .govenv/learning-status-build/LearningStatus
+  '';
+
   checkMaterializations = ''
     ${buildMaterializers}
     ${validateRoadmapEvolution}
@@ -420,6 +428,7 @@ let
     .govenv/materialize-build/RoadmapSnapshot > .govenv/roadmap.generated.snapshot
     .govenv/materialize-build/ProjectPurposeSnapshot > .govenv/project-purpose.generated.snapshot
     .govenv/materialize-build/DirectionReviewSnapshot > .govenv/direction-review.generated.snapshot
+    .govenv/materialize-build/LearningSnapshot > .govenv/learning.generated.snapshot
     .govenv/materialize-build/Materialize > .govenv/materialize.generated.yml
     .govenv/materialize-build/AdminMaterialize > .govenv/admin-materialize.generated.yml
     .govenv/materialize-build/Test > .govenv/test.generated.yml
@@ -432,6 +441,7 @@ let
     diff -u .govenv/roadmap.snapshot .govenv/roadmap.generated.snapshot
     diff -u .govenv/project-purpose.snapshot .govenv/project-purpose.generated.snapshot
     diff -u .govenv/direction-review.snapshot .govenv/direction-review.generated.snapshot
+    diff -u .govenv/learning.snapshot .govenv/learning.generated.snapshot
     diff -u .github/workflows/materialize.yml .govenv/materialize.generated.yml
     diff -u .github/workflows/admin-materialize.yml .govenv/admin-materialize.generated.yml
     diff -u .github/workflows/test.yml .govenv/test.generated.yml
@@ -457,6 +467,74 @@ in
     pkgs.pandoc
   ];
 
+  scripts."govenv-learning".exec = ''
+    if [ "$#" -eq 0 ]; then
+      command=status
+    else
+      command="$1"
+    fi
+
+    case "$command" in
+      status)
+        ${learningStatus}
+        ;;
+      catch-up)
+        ${learningStatus}
+        echo
+        echo "Work through each outstanding claim from its bound revision."
+        echo "Preserve the challenge and the human response as learning evidence; agent confidence is not evidence."
+        ;;
+      review)
+        ${learningStatus}
+        debt_clear="$(awk '$1 == "debt-clear" { print $2; exit }' .govenv/learning.snapshot)"
+        kind="$(printenv GOVENV_LEARNING_CANDIDATE_KIND 2>/dev/null || true)"
+        bypass="$(printenv GOVENV_LEARNING_BYPASS 2>/dev/null || true)"
+        if [ "$debt_clear" = true ]; then
+          echo "Learning review: clear."
+          exit 0
+        fi
+        if [ "$kind" = corrective ] && [ "$bypass" = urgent-corrective ]; then
+          echo "Learning review: explicit urgent corrective bypass; debt remains open."
+          exit 0
+        fi
+        echo "Learning review blocked: close outstanding debt, or use the urgent corrective bypass for corrective work only." >&2
+        exit 5
+        ;;
+      *)
+        echo "usage: govenv-learning {status|catch-up|review}" >&2
+        exit 2
+        ;;
+    esac
+  '';
+
+  tasks."govenv:learning:status".exec = ''
+    ${learningStatus}
+  '';
+
+  tasks."govenv:learning:catch-up".exec = ''
+    ${learningStatus}
+    echo
+    echo "Work through each outstanding claim from its bound revision."
+    echo "Preserve the challenge and the human response as learning evidence; agent confidence is not evidence."
+  '';
+
+  tasks."govenv:learning:review".exec = ''
+    ${learningStatus}
+    debt_clear="$(awk '$1 == "debt-clear" { print $2; exit }' .govenv/learning.snapshot)"
+    if [ "$debt_clear" = true ]; then
+      echo "Learning review: clear."
+      exit 0
+    fi
+    kind="$(printenv GOVENV_LEARNING_CANDIDATE_KIND 2>/dev/null || true)"
+    bypass="$(printenv GOVENV_LEARNING_BYPASS 2>/dev/null || true)"
+    if [ "$kind" = corrective ] && [ "$bypass" = urgent-corrective ]; then
+      echo "Learning review: explicit urgent corrective bypass; debt remains open."
+      exit 0
+    fi
+    echo "Learning review blocked: close outstanding debt, or use the urgent corrective bypass for corrective work only." >&2
+    exit 5
+  '';
+
   tasks."govenv:materialize".exec = ''
     ${buildMaterializers}
     ${validateRoadmapEvolution}
@@ -465,6 +543,7 @@ in
     .govenv/materialize-build/RoadmapSnapshot > .govenv/roadmap.snapshot
     .govenv/materialize-build/ProjectPurposeSnapshot > .govenv/project-purpose.snapshot
     .govenv/materialize-build/DirectionReviewSnapshot > .govenv/direction-review.snapshot
+    .govenv/materialize-build/LearningSnapshot > .govenv/learning.snapshot
     .govenv/materialize-build/Materialize > .github/workflows/materialize.yml
     .govenv/materialize-build/AdminMaterialize > .github/workflows/admin-materialize.yml
     .govenv/materialize-build/Test > .github/workflows/test.yml

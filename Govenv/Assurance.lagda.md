@@ -40,6 +40,7 @@ import Govenv.Assurance.GV111 as GV111
 import Govenv.Assurance.GV111.Counterexample.StaleTarget
 import Govenv.Assurance.GV112 as GV112
 import Govenv.Assurance.GV116
+import Govenv.Assurance.GV119 as GV119
 open import Govenv.Kernel.Assurance
 open import Govenv.Kernel.Identifier using (P; GV)
 open import Govenv.Kernel.Roadmap using (Roadmap; roadmapOf; _▣; _◇; _✓; _├_)
@@ -88,6 +89,7 @@ assurances =
   ∷ assures (statically GV110.evidence)
   ∷ assures (statically GV111.evidence)
   ∷ assures (statically GV112.evidence)
+  ∷ assures (statically GV119.evidence)
   ∷ []
 
 pendingRoadmap : Roadmap
