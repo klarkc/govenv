@@ -10,7 +10,9 @@ if [[ ! -f "${snapshot}" ]]; then
   exit 4
 fi
 
-if ! grep -Fxq 'govenv-learning-snapshot-v1' "${snapshot}"; then
+snapshot_header="$(sed -n '1p' "${snapshot}")"
+if [[ "${snapshot_header}" != "govenv-learning-snapshot-v1" &&
+      "${snapshot_header}" != "govenv-learning-snapshot-v2" ]]; then
   echo "Unsupported learning snapshot format." >&2
   exit 4
 fi

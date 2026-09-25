@@ -1,2 +1,10 @@
-govenv-learning-snapshot-v1
-debt-clear true
+govenv-learning-snapshot-v2
+debt-clear false
+candidate-allowed true
+assessment-kind corrective
+assessment-impact expands
+assessment-bypass urgent-corrective
+review-index 0
+review-rationale "GV119 promised a soft PR learning gate but candidate CI did not enforce it; this corrective candidate adds the missing typed assessment and PR boundary, while preserving its own new learning requirements as debt through the urgent corrective bypass."
+requirement "Explain why candidate learning classification remains a Protocol judgment while the resulting PR and release gates are governed." "14559ee1fd1786bf12635d98968d2b52514aca1a"
+requirement "Explain why an urgent corrective bypass preserves learning debt and therefore blocks later conceptual expansion until catch-up closes it." "14559ee1fd1786bf12635d98968d2b52514aca1a"

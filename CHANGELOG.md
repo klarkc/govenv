@@ -6,7 +6,7 @@
 ### Governance impact
 
 **Phase:** ▣ P1 — unchanged  
-**Items:** 1 completed · 1 advanced · 8 introduced · 3 superseded
+**Items:** 1 completed · 1 advanced · 9 introduced · 3 superseded
 
 #### Completed · 1
 
@@ -20,7 +20,7 @@
 | :---: | --- |
 | **GV84 ◇ ↑** | Make observed invariant regressions counterexample-closing: once a contradiction to a governed or relied-upon invariant is recorded as an observed regression, its repair is incomplete until the counterexample is preserved as governed evidence, the missing or incorrectly scoped assurance boundary is corrected or overstated governance superseded, and candidate validation rejects recurrence before the affected workflow may succeed. |
 
-#### Introduced · 8
+#### Introduced · 9
 
 | GV | Proposition |
 | :---: | --- |
@@ -31,6 +31,7 @@
 | **+ GV116 ◇** | Migrate governance lifecycle, roadmap status, snapshots, and release deltas to append-only constitutional history: give formal Propositions identity independent from GovernanceId, treat the GovernanceId description as the human contract rather than formal truth, establish Obligations only through Proposition evidence, represent declaration/establishment/abandonment/disposition/supersession as validated history events, require atomic supersession coverage of outgoing responsibility, derive governance lifecycle and glyphs from that history rather than stored ItemState, preserve history-prefix snapshots, and derive constitutional release deltas from introduced governance, establishments, dispositions, supersessions, and phase progress while keeping activity-only advancement outside constitutional delta. |
 | **+ GV117 ◇** | Classify dependency and environment authority according to GV101: keep reuse preference, ecosystem investigation, and contributor dependency-selection guidance in Protocol, but move repository-validity properties into Governance when they determine canonical project state, including the target absence of versioned devenv.yaml, governed materialization ownership of devenv.nix, transient non-authoritative devenv.lock state, and the prohibition on competing package-manager dependency authority; materialization and runtime backends must project those governed decisions without re-owning them. |
 | **+ GV119 ✓** | Keep human learning coupled to conceptual project evolution: represent revision-bound learning requirements, human-produced challenge/response evidence, and outstanding learning debt without claiming to prove a principal's mental state; pull-request learning is a soft gate that may be bypassed only explicitly for urgent corrective work while preserving the resulting debt, feature and concept-expanding refactor work is blocked while debt remains, patch releases may carry known debt, and major or minor releases require zero outstanding learning debt. Expose status, catch-up, and review entrypoints from the governed developer environment. |
+| **+ GV121 ✓** | Enforce GV119 at the exact pull-request candidate boundary: every substantive candidate must carry a fresh explicit learning assessment whose classification and rationale remain Protocol judgment, while Governance checks the recorded impact, requirements, human-produced evidence, outstanding debt, and any urgent-corrective bypass; concept-expanding feature/refactor candidates may merge only after their requirements are evidenced and all learning debt is closed, urgent corrective candidates may merge with unresolved requirements only when the same requirements are preserved as debt, and direct pull-request Test CI must apply this gate before ordinary candidate validation without re-owning its semantics. |
 | **+ GV118 ◇** | Make repository-collaboration tooling an explicit governed runtime capability: the active shell must provide the project-selected provider CLI needed for candidate publication, beginning with GitHub pull-request authoring through `gh` in the devenv backend and later through `govenv shell`; agents must be able to discover and use that capability from Protocol without depending on a ChatGPT connector, IDE integration, or other out-of-band tool, while authentication remains an external runtime concern and collaboration tooling creates no semantic or authorization authority beyond the governed candidate and explicit human merge boundaries. |
 
 #### Superseded · 3
