@@ -59,6 +59,20 @@ The developer environment must expose a human-facing learning surface. Inside `d
 
 Learning evidence proves only that the recorded human principal produced the recorded response to the recorded challenge at the bound revision. The compiler may prove provenance, coverage, freshness, gate decisions, and release eligibility; it must never claim to prove the human's mental state.
 
+## Repository collaboration
+
+Treat repository-collaboration tooling as part of the project environment, not as an undeclared capability of a particular chat client, IDE, or coding-agent host. For GitHub candidate publication, use the project-provided `gh` CLI from the active Govenv environment. During Stage 0 that means the `gh` executable supplied by the devenv shell; when `govenv shell` owns the runtime boundary, obtain the same governed capability through that shell.
+
+An agent with shell access must be able to discover this path from Protocol and must not require a ChatGPT GitHub connector, IDE-specific integration, or another out-of-band tool merely to create or inspect a pull request. Host integrations may be used as convenience transports when available, but they must not become the only operational path or a second semantic authority. Authentication is external user runtime state. In an interactive developer environment, prefer GitHub CLI's native authenticated state established once with `gh auth login`; when Git transport is already managed through SSH, prefer `gh auth login --git-protocol ssh --skip-ssh-key` so `gh` uses SSH for Git operations without generating or uploading SSH keys. Plain `gh auth login` remains valid when the user deliberately selects equivalent choices. Govenv must never version, copy, or independently persist that credential. In headless or ephemeral environments, `GH_TOKEN` may provide API authentication to the active shell. Provider authentication establishes provider identity and capability only; it never grants semantic authority or authorization to merge.
+
+Before publishing a candidate, use `gh` to inspect the authenticated GitHub context when relevant, push the candidate branch through the normal Git transport, and create or update the pull request from the exact candidate branch. The pull request may be opened under the authenticated developer account; human merge remains the explicit authorization event defined by Governance.
+
+## Commit assistance provenance
+
+Whenever an AI agent or other automated assistant materially contributes to the content, design, diagnosis, or implementation represented by a commit, record that assistance in the commit message with one or more `Assisted-by:` footers. Use the most specific stable human-readable assistant identity available, for example `Assisted-by: ChatGPT (GPT-5.6 Sol)`. Do not use `Co-authored-by` merely to record assistance: authorship and assistance are distinct provenance claims.
+
+Add the footer before creating the commit rather than amending it as cleanup later. Preserve every other governed footer, including `Refs: GV…`, and keep trailer spelling exactly `Assisted-by:` so later commit-governance work can parse it deterministically. If multiple assistants materially contributed, emit one `Assisted-by:` footer per assistant. Do not add a footer for tools that only executed deterministic commands without contributing judgment or content.
+
 ## Developer journal and social posts
 
 Treat Govenv social posts as a technical development journal, not advertising. Write for developers who should be able to see what changed, why it matters, what the project is doing now, and where it is going next without hype, unsupported claims, or generic promotional language.
