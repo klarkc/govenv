@@ -56,7 +56,7 @@
 + Replace the mechanically derived README Current/Next status of GV94 with a governed project-direction review while preserving roadmap structural validity: Current is a bounded human-facing summary anchored by typed coverage of the exact governed project and roadmap state; Next is a bounded human-facing summary of the selected gap between Purpose and Current; every relevant source subject must receive an explicit typed disposition, source changes invalidate review freshness, and the compiler verifies bounds, provenance, coverage, references, and vigilance freshness while the agent supplies semantic judgment and the human authorizes that judgment through the pull request.
 ```
 
-Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `79c0803..c9837df`.
+Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `79c0803..201f88d`.
 <!-- govenv-governance-impact:end -->
 
 
@@ -76,6 +76,7 @@ Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit
 * **constitution:** derive lifecycle from history ([91fe283](https://github.com/klarkc/govenv/commit/91fe283c47ce00028f445dccbd1472139f6cf5f0))
 * **roadmap:** project lifecycle from constitution ([efc39e5](https://github.com/klarkc/govenv/commit/efc39e56dd3597695aa69dcfd8cbda35d0c7bc22))
 * **learning:** couple learning debt to delivery ([c9837df](https://github.com/klarkc/govenv/commit/c9837df3b9625d267ace851951e923a17dc72621))
+* **runtime:** govern repository collaboration capability ([201f88d](https://github.com/klarkc/govenv/commit/201f88d6e700b766afcf0c40b06f4cbcdd8104b8))
 
 
 ### Miscellaneous
