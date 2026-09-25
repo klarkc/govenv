@@ -183,6 +183,14 @@
 
 </details>
 
+<details>
+<summary>□ <strong>P7 — Language-neutral Govenv applications</strong></summary>
+
+- ◇ **GV120** Define a canonical, versioned, language-neutral Governance IR as the semantic boundary between Govenv's Agda reference formalization and Govenv applications: compile governed identities, obligations, transitions, capabilities, authorization, evidence/certificates, and environment/runtime requirements into the IR with semantic-preservation assurance; language-specific provers, checkers, and adapters may validate certificates or reconstruct local proofs from that IR but must not independently redefine governance semantics.
+- ◇ **GV121** Provide Agda formatting and linting as an external Govenv application rather than core semantic authority: prefer adopting a mature ecosystem formatter/linter when one becomes available; otherwise, once Govenv is sufficiently mature, allow a separately distributed formatter/linter to be developed using Govenv itself, with treefmt-compatible formatting and Protocol-style diagnostics while preserving the distinction between formatting/advice and constitutional validity.
+
+</details>
+
 ## Getting started
 
 Govenv currently uses devenv only as its Stage 0 bootstrap environment.

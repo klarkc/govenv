@@ -1,5 +1,5 @@
 govenv-direction-review-snapshot-v2
-review-index 0
-review-rationale "GV119 made human authority over agent-paced evolution explicit in Purpose; GV118 adds governed collaboration runtime already covered by reproducible tooling/runtime. Current and Next were re-reviewed against both changes, with GV116 remaining the immediate gap."
+review-index 1
+review-rationale "GV120 and GV121 establish a distinct post-bootstrap phase for language-neutral Govenv applications: Agda remains the reference formalization through self-hosting and distribution, P7 introduces the versioned IR boundary, and Agda formatting/linting is deferred as an external application that prefers ecosystem reuse before bespoke implementation. The complete direction was re-reviewed; this later phase does not displace GV116, GV117, or GV118 from the nearer sequence, so Current and Next remain accurate."
 current "Govenv is in P1 with compiler-checked direction, consolidation closure, human-learning continuity, and Stage-0 GitHub collaboration available. Constitutional history remains partial; GV116 is the immediate gap, followed by dependency/environment authority in GV117 and the broader collaboration boundary in GV118."
 next "Complete GV116 by deriving the remaining roadmap and release lifecycle from append-only constitutional history, then resolve dependency/environment authority in GV117 and close GV118's governed collaboration boundary before broader runtime and journal work."
