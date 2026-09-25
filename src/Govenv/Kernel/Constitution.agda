@@ -201,6 +201,13 @@ private
     allGovernanceIndices h ++ (governanceIndexOf d ∷ [])
   allGovernanceIndices (h ▻ _) = allGovernanceIndices h
 
+  allSupersededGovernance : History → List Nat
+  allSupersededGovernance ε = []
+  allSupersededGovernance (h ▻ supersede s) =
+    allSupersededGovernance h ++
+    (governanceRefIndex (Supersession.previous s) ∷ [])
+  allSupersededGovernance (h ▻ _) = allSupersededGovernance h
+
   allEstablished : History → List Nat
   allEstablished ε = []
   allEstablished (h ▻ establish e) =
@@ -356,8 +363,12 @@ resolution h p with everEstablishedᵇ h p
 ...   | true = abandonedResolution
 ...   | false = pendingResolution
 
+data GovernanceLifecycle : Set where
+  pending completed mixedCompleted abandoned : GovernanceLifecycle
+
 data GovernanceGlyph : Set where
   diamond check mixed cross : GovernanceGlyph
+
 private
   anyPending : History → List Nat → Bool
   anyPending h = any (pendingᵇ h)
@@ -368,27 +379,51 @@ private
   anyAbandoned : History → List Nat → Bool
   anyAbandoned h = any (wasAbandonedᵇ h)
 
-private
-  glyphFor : Bool → Bool → Bool → GovernanceGlyph
-  glyphFor true _ _ = diamond
-  glyphFor false true true = mixed
-  glyphFor false true false = check
-  glyphFor false false _ = cross
+  lifecycleFor : Bool → Bool → Bool → GovernanceLifecycle
+  lifecycleFor true _ _ = pending
+  lifecycleFor false true true = mixedCompleted
+  lifecycleFor false true false = completed
+  lifecycleFor false false _ = abandoned
 
-governanceGlyph : History → Nat → GovernanceGlyph
-governanceGlyph h g with GovernanceSubjects h g
-... | [] = diamond
+  glyphForLifecycle : GovernanceLifecycle → GovernanceGlyph
+  glyphForLifecycle pending = diamond
+  glyphForLifecycle completed = check
+  glyphForLifecycle mixedCompleted = mixed
+  glyphForLifecycle abandoned = cross
+
+governanceLifecycle : History → Nat → GovernanceLifecycle
+governanceLifecycle h g with GovernanceSubjects h g
+... | [] = pending
 ... | subjects =
-  glyphFor
+  lifecycleFor
     (anyPending h subjects)
     (anyEstablished h subjects)
     (anyAbandoned h subjects)
+
+governanceGlyph : History → Nat → GovernanceGlyph
+governanceGlyph h g = glyphForLifecycle (governanceLifecycle h g)
 
 GovernanceDeclared : History → Nat → Set
 GovernanceDeclared h g = g ∈ allGovernanceIndices h
 
 governanceDeclared? : (h : History) → (g : Nat) → Dec (GovernanceDeclared h g)
 governanceDeclared? h g = g ∈? allGovernanceIndices h
+
+GovernanceSuperseded : History → Nat → Set
+GovernanceSuperseded h g = g ∈ allSupersededGovernance h
+
+governanceSuperseded? :
+  (h : History) → (g : Nat) → Dec (GovernanceSuperseded h g)
+governanceSuperseded? h g = g ∈? allSupersededGovernance h
+
+successorOf : History → Nat → Maybe GovernanceRef
+successorOf ε g = nothing
+successorOf (h ▻ supersede s) g with successorOf h g
+... | just successor = just successor
+... | nothing with sameNat g (governanceRefIndex (Supersession.previous s))
+...   | true = just (Supersession.successor s)
+...   | false = nothing
+successorOf (h ▻ _) g = successorOf h g
 
 Fresh : History → Nat → Set
 Fresh h p = ¬ Declared h p
@@ -565,6 +600,7 @@ SupersessionEndpointsValid : History → Supersession → Set
 SupersessionEndpointsValid h s =
   GovernanceDeclared h (governanceRefIndex (Supersession.previous s)) ×
   GovernanceDeclared h (governanceRefIndex (Supersession.successor s)) ×
+  ¬ GovernanceSuperseded h (governanceRefIndex (Supersession.previous s)) ×
   ¬ (governanceRefIndex (Supersession.previous s) ≡
      governanceRefIndex (Supersession.successor s))
 
@@ -573,6 +609,7 @@ supersessionEndpointsValid? :
 supersessionEndpointsValid? h s =
   governanceDeclared? h (governanceRefIndex (Supersession.previous s)) ×-dec
   governanceDeclared? h (governanceRefIndex (Supersession.successor s)) ×-dec
+  ¬? (governanceSuperseded? h (governanceRefIndex (Supersession.previous s))) ×-dec
   ¬? (governanceRefIndex (Supersession.previous s) ≟
       governanceRefIndex (Supersession.successor s))
 
@@ -629,5 +666,11 @@ record Constitution : Set₁ where
 Obligation : Constitution → Nat → Set
 Obligation c p = Active (Constitution.history c) p
 
+constitutionLifecycle : Constitution → Nat → GovernanceLifecycle
+constitutionLifecycle c g = governanceLifecycle (Constitution.history c) g
+
+constitutionSuccessor : Constitution → Nat → Maybe GovernanceRef
+constitutionSuccessor c g = successorOf (Constitution.history c) g
+
 constitutionGlyph : Constitution → Nat → GovernanceGlyph
-constitutionGlyph c g = governanceGlyph (Constitution.history c) g
+constitutionGlyph c g = glyphForLifecycle (constitutionLifecycle c g)
