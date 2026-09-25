@@ -46,7 +46,7 @@ nextTarget = governanceTarget (GVR 116) refl
 
 nextSummary : BoundedText 400
 nextSummary = boundedText
-  "Migrate roadmap and release governance to append-only constitutional history in GV116, then resolve dependency/environment authority in GV117 before resuming broader agent/runtime and social-publishing work."
+  "Migrate roadmap and release governance to append-only constitutional history in GV116, then resolve dependency/environment authority in GV117 and the governed collaboration-tool boundary in GV118 before resuming broader agent/runtime and social-publishing work."
   refl
 
 nextClaims : List (NextClaim roadmap)
@@ -66,5 +66,5 @@ next : Next roadmap
 next = nextReview nextSummary nextClaims nextGapCoverage
 
 review : DirectionReview roadmap purpose
-review = directionReview source refl current next (suc zero)
+review = directionReview source refl current next zero
 ```

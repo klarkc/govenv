@@ -130,6 +130,7 @@ roadmap = roadmapOf (
     ├ GV 36 "Compile valid projects through a devenv backend." ◇
     ├ GV 37 "Expose `govenv shell`, `govenv test`, and `govenv up`." ◇
     ├ GV 106 "Make `govenv shell` establish supported editor and coding-agent integrations through the active runtime backend for agents launched within that shell, including lifecycle hooks, LSP, and Git fallback boundaries, while never packaging or taking ownership of the coding-agent executable itself." ◇
+    ├ GV 118 "Make repository-collaboration tooling an explicit governed runtime capability: the active shell must provide the project-selected provider CLI needed for candidate publication, beginning with GitHub pull-request authoring through `gh` in the devenv backend and later through `govenv shell`; agents must be able to discover and use that capability from Protocol without depending on a ChatGPT connector, IDE integration, or other out-of-band tool, while authentication remains an external runtime concern and collaboration tooling creates no semantic or authorization authority beyond the governed candidate and explicit human merge boundaries." ◇
   ) ╟ (P 6 "Product bootstrap, self-hosting, and distribution" □
     ┬ GV 38 "Ship a standalone `govenv` entrypoint and managed runtime setup." ◇
     ├ GV 40 "Keep runtime backends replaceable behind the typed IR boundary." ↪ GVR 67

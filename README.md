@@ -17,7 +17,7 @@
 
 **Current:** Govenv is in P1 with compiler-checked project direction and consolidation closure established. The declared observations extracted from the 2026-09-23 recovery corpus are fully dispositioned; remaining gaps are explicit roadmap work led by constitutional-history migration and dependency/environment authority classification.
 
-**Next:** Migrate roadmap and release governance to append-only constitutional history in GV116, then resolve dependency/environment authority in GV117 before resuming broader agent/runtime and social-publishing work.
+**Next:** Migrate roadmap and release governance to append-only constitutional history in GV116, then resolve dependency/environment authority in GV117 and the governed collaboration-tool boundary in GV118 before resuming broader agent/runtime and social-publishing work.
 
 > Governance IDs are immutable historical references. Definitions and owning phases never change after introduction; abandoned work is cancelled, while corrections or changed intent require a newer GV and explicit supersession.
 
@@ -167,6 +167,7 @@
 - ◇ **GV36** Compile valid projects through a devenv backend.
 - ◇ **GV37** Expose `govenv shell`, `govenv test`, and `govenv up`.
 - ◇ **GV106** Make `govenv shell` establish supported editor and coding-agent integrations through the active runtime backend for agents launched within that shell, including lifecycle hooks, LSP, and Git fallback boundaries, while never packaging or taking ownership of the coding-agent executable itself.
+- ◇ **GV118** Make repository-collaboration tooling an explicit governed runtime capability: the active shell must provide the project-selected provider CLI needed for candidate publication, beginning with GitHub pull-request authoring through `gh` in the devenv backend and later through `govenv shell`; agents must be able to discover and use that capability from Protocol without depending on a ChatGPT connector, IDE integration, or other out-of-band tool, while authentication remains an external runtime concern and collaboration tooling creates no semantic or authorization authority beyond the governed candidate and explicit human merge boundaries.
 
 </details>
 
