@@ -16,9 +16,11 @@ _++_ : String → String → String
 _++_ = primStringAppend
 
 renderDirectionReviewSnapshot : DirectionReviewSnapshot → String
-renderDirectionReviewSnapshot (directionReviewSnapshot reviewIndex current next) =
-  "govenv-direction-review-snapshot-v1\n" ++
+renderDirectionReviewSnapshot
+  (directionReviewSnapshot reviewIndex reviewRationale current next) =
+  "govenv-direction-review-snapshot-v2\n" ++
   "review-index " ++ primShowNat reviewIndex ++ "\n" ++
+  "review-rationale " ++ primShowString reviewRationale ++ "\n" ++
   "current " ++ primShowString current ++ "\n" ++
   "next " ++ primShowString next ++ "\n"
 

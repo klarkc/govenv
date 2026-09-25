@@ -1,4 +1,5 @@
-govenv-direction-review-snapshot-v1
+govenv-direction-review-snapshot-v2
 review-index 0
-current "Govenv is in P1 with compiler-checked project direction and consolidation closure established. The declared observations extracted from the 2026-09-23 recovery corpus are fully dispositioned; remaining gaps are explicit roadmap work led by constitutional-history migration and dependency/environment authority classification."
-next "Migrate roadmap and release governance to append-only constitutional history in GV116, then resolve dependency/environment authority in GV117 and the governed collaboration-tool boundary in GV118 before resuming broader agent/runtime and social-publishing work."
+review-rationale "GV119 made human authority over agent-paced evolution explicit in Purpose; GV118 adds governed collaboration runtime already covered by reproducible tooling/runtime. Current and Next were re-reviewed against both changes, with GV116 remaining the immediate gap."
+current "Govenv is in P1 with compiler-checked direction, consolidation closure, human-learning continuity, and Stage-0 GitHub collaboration available. Constitutional history remains partial; GV116 is the immediate gap, followed by dependency/environment authority in GV117 and the broader collaboration boundary in GV118."
+next "Complete GV116 by deriving the remaining roadmap and release lifecycle from append-only constitutional history, then resolve dependency/environment authority in GV117 and close GV118's governed collaboration boundary before broader runtime and journal work."
