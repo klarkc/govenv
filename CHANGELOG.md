@@ -56,7 +56,7 @@
 + Replace the mechanically derived README Current/Next status of GV94 with a governed project-direction review while preserving roadmap structural validity: Current is a bounded human-facing summary anchored by typed coverage of the exact governed project and roadmap state; Next is a bounded human-facing summary of the selected gap between Purpose and Current; every relevant source subject must receive an explicit typed disposition, source changes invalidate review freshness, and the compiler verifies bounds, provenance, coverage, references, and vigilance freshness while the agent supplies semantic judgment and the human authorizes that judgment through the pull request.
 ```
 
-Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `79c0803..fd1d2d0`.
+Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `79c0803..a41faa5`.
 <!-- govenv-governance-impact:end -->
 
 
@@ -64,6 +64,7 @@ Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit
 
 * **ci:** validate transient candidate materializations ([cfd24b6](https://github.com/klarkc/govenv/commit/cfd24b689158f9ec979d862ebf4e6c351b569db4))
 * **consolidation:** normalize recovery provenance ([4a3ffea](https://github.com/klarkc/govenv/commit/4a3ffea93338529fc6fb66ddca1f91e2166a9395))
+* **protocol:** require evidence for vigilance reviews ([bbdc00c](https://github.com/klarkc/govenv/commit/bbdc00c1e236cb1a6e7b4085fd872a124a95551c))
 
 
 ### Governance
@@ -78,6 +79,7 @@ Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit
 * **learning:** couple learning debt to delivery ([c9837df](https://github.com/klarkc/govenv/commit/c9837df3b9625d267ace851951e923a17dc72621))
 * **runtime:** govern repository collaboration capability ([464091b](https://github.com/klarkc/govenv/commit/464091bec4191589b5040cdec62415ad8f900dc5))
 * **runtime:** add GitHub auth onboarding hook ([fd1d2d0](https://github.com/klarkc/govenv/commit/fd1d2d061fab1dc4f548dd6d44c7b437e1f38458))
+* **constitution:** allow late formal propositions ([a41faa5](https://github.com/klarkc/govenv/commit/a41faa57967b42546d0d922ebda6680d53f6042a))
 
 
 ### Miscellaneous
