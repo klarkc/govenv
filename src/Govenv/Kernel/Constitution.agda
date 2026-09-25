@@ -6,7 +6,7 @@ module Govenv.Kernel.Constitution where
 -- Constitution is the authoritative boundary because it carries a proof that
 -- every extension is structurally ready and supplies the required formal evidence.
 
-open import Agda.Builtin.Equality using (_≡_)
+open import Agda.Builtin.Equality using (_≡_; refl)
 open import Agda.Builtin.Maybe using (Maybe; just; nothing)
 open import Agda.Builtin.Nat using (Nat)
 open import Agda.Builtin.String using (String)
@@ -28,7 +28,7 @@ open import Data.List.Relation.Unary.Unique.Propositional using (Unique)
 open import Data.List.Relation.Unary.Unique.DecPropositional _≟_
   using (unique?)
 import Data.Maybe.Properties as MaybeProperties
-open import Relation.Nullary using (Dec; ¬_; no)
+open import Relation.Nullary using (Dec; ¬_; yes; no)
 open import Relation.Nullary.Decidable
   using (does; _×-dec_; _⊎-dec_; ¬?)
 open import Govenv.Kernel.Identifier using
@@ -66,6 +66,16 @@ record GovernanceDeclaration : Set₁ where
     phase : PhaseId phaseIndex phaseDescription
     propositions : List SomeProposition
 
+-- Formal truth may be introduced after the human GovernanceId contract. This is
+-- essential for migrating legacy pending contracts without inventing Statements.
+-- Validation below permits late propositions only while the owning governance
+-- lifecycle remains pending and the owner has not been superseded.
+record PropositionDeclaration : Set₁ where
+  constructor propositionDeclaration
+  field
+    owner : GovernanceRef
+    subject : SomeProposition
+
 record Establishment : Set where
   constructor establishment
   field
@@ -91,6 +101,7 @@ record Supersession : Set₁ where
 
 data HistoryEntry : Set₁ where
   declare   : GovernanceDeclaration → HistoryEntry
+  propose   : PropositionDeclaration → HistoryEntry
   establish : Establishment → HistoryEntry
   abandon   : Nat → HistoryEntry
   supersede : Supersession → HistoryEntry
@@ -123,6 +134,12 @@ private
   declarationIndices : GovernanceDeclaration → List Nat
   declarationIndices d =
     map propositionIndexOf (GovernanceDeclaration.propositions d)
+
+  proposedIndex : PropositionDeclaration → Nat
+  proposedIndex p = propositionIndexOf (PropositionDeclaration.subject p)
+
+  propositionOwnerIndex : PropositionDeclaration → Nat
+  propositionOwnerIndex p = governanceRefIndex (PropositionDeclaration.owner p)
 
   establishmentIndices : List Establishment → List Nat
   establishmentIndices = map establishmentIndex
@@ -160,6 +177,11 @@ declaredProposition ε p = nothing
 declaredProposition (h ▻ declare d) p with declaredProposition h p
 ... | just declared = just declared
 ... | nothing = lookupProposition p (GovernanceDeclaration.propositions d)
+declaredProposition (h ▻ propose d) p with declaredProposition h p
+... | just declared = just declared
+... | nothing with sameNat p (proposedIndex d)
+...   | true = just (PropositionDeclaration.subject d)
+...   | false = nothing
 declaredProposition (h ▻ _) p = declaredProposition h p
 
 EvidenceAt : History → Nat → Set
@@ -193,6 +215,8 @@ private
   allPropositions ε = []
   allPropositions (h ▻ declare d) =
     allPropositions h ++ declarationIndices d
+  allPropositions (h ▻ propose d) =
+    allPropositions h ++ (proposedIndex d ∷ [])
   allPropositions (h ▻ _) = allPropositions h
 
   allGovernanceIndices : History → List Nat
@@ -308,6 +332,11 @@ origin (h ▻ declare d) p with origin h p
 ... | nothing with declaredHere p d
 ...   | true = just (governanceIndexOf d)
 ...   | false = nothing
+origin (h ▻ propose d) p with origin h p
+... | just g = just g
+... | nothing with sameNat p (proposedIndex d)
+...   | true = just (propositionOwnerIndex d)
+...   | false = nothing
 origin (h ▻ _) p = origin h p
 
 private
@@ -315,6 +344,9 @@ private
   currentResponsibilityMaybe ε _ = nothing
   currentResponsibilityMaybe (h ▻ declare d) p with declaredHere p d
   ... | true = just (governanceIndexOf d)
+  ... | false = currentResponsibilityMaybe h p
+  currentResponsibilityMaybe (h ▻ propose d) p with sameNat p (proposedIndex d)
+  ... | true = just (propositionOwnerIndex d)
   ... | false = currentResponsibilityMaybe h p
   currentResponsibilityMaybe (h ▻ abandon q) p with sameNat p q
   ... | true = nothing
@@ -347,6 +379,9 @@ GovernanceSubjects : History → Nat → List Nat
 GovernanceSubjects ε _ = []
 GovernanceSubjects (h ▻ declare d) g with sameNat g (governanceIndexOf d)
 ... | true = GovernanceSubjects h g ++ declarationIndices d
+... | false = GovernanceSubjects h g
+GovernanceSubjects (h ▻ propose d) g with sameNat g (propositionOwnerIndex d)
+... | true = GovernanceSubjects h g ++ (proposedIndex d ∷ [])
 ... | false = GovernanceSubjects h g
 GovernanceSubjects (h ▻ supersede s) g with sameNat g (governanceRefIndex (Supersession.successor s))
 ... | true = GovernanceSubjects h g ++ dispositionSubjects (Supersession.dispositions s)
@@ -416,6 +451,17 @@ governanceSuperseded? :
   (h : History) → (g : Nat) → Dec (GovernanceSuperseded h g)
 governanceSuperseded? h g = g ∈? allSupersededGovernance h
 
+GovernanceOpenForPropositions : History → Nat → Set
+GovernanceOpenForPropositions h g = governanceLifecycle h g ≡ pending
+
+governanceOpenForPropositions? :
+  (h : History) → (g : Nat) → Dec (GovernanceOpenForPropositions h g)
+governanceOpenForPropositions? h g with governanceLifecycle h g
+... | pending = yes refl
+... | completed = no (λ ())
+... | mixedCompleted = no (λ ())
+... | abandoned = no (λ ())
+
 successorOf : History → Nat → Maybe GovernanceRef
 successorOf ε g = nothing
 successorOf (h ▻ supersede s) g with successorOf h g
@@ -450,6 +496,22 @@ declarationValid? h d =
   governanceFresh? h d ×-dec
   all? (fresh? h) (declarationIndices d) ×-dec
   unique? (declarationIndices d)
+
+PropositionDeclarationValid : History → PropositionDeclaration → Set
+PropositionDeclarationValid h d =
+  GovernanceDeclared h (propositionOwnerIndex d) ×
+  ¬ GovernanceSuperseded h (propositionOwnerIndex d) ×
+  GovernanceOpenForPropositions h (propositionOwnerIndex d) ×
+  Fresh h (proposedIndex d)
+
+propositionDeclarationValid? :
+  (h : History) → (d : PropositionDeclaration) →
+  Dec (PropositionDeclarationValid h d)
+propositionDeclarationValid? h d =
+  governanceDeclared? h (propositionOwnerIndex d) ×-dec
+  ¬? (governanceSuperseded? h (propositionOwnerIndex d)) ×-dec
+  governanceOpenForPropositions? h (propositionOwnerIndex d) ×-dec
+  fresh? h (proposedIndex d)
 
 EstablishmentReady : History → Establishment → Set
 EstablishmentReady h e = Pending h (establishmentIndex e)
@@ -632,6 +694,7 @@ supersessionReady? h s =
 
 EntryReady : History → HistoryEntry → Set
 EntryReady h (declare d) = DeclarationValid h d
+EntryReady h (propose d) = PropositionDeclarationValid h d
 EntryReady h (establish e) = EstablishmentReady h e
 EntryReady h (abandon p) = AbandonmentValid h p
 EntryReady h (supersede s) = SupersessionReady h s
@@ -639,12 +702,14 @@ EntryReady h (supersede s) = SupersessionReady h s
 entryReady? :
   (h : History) → (entry : HistoryEntry) → Dec (EntryReady h entry)
 entryReady? h (declare d) = declarationValid? h d
+entryReady? h (propose d) = propositionDeclarationValid? h d
 entryReady? h (establish e) = establishmentReady? h e
 entryReady? h (abandon p) = abandonmentValid? h p
 entryReady? h (supersede s) = supersessionReady? h s
 
 EntryEvidence : History → HistoryEntry → Set
 EntryEvidence h (declare d) = ⊤
+EntryEvidence h (propose d) = ⊤
 EntryEvidence h (establish e) = EvidenceAt h (establishmentIndex e)
 EntryEvidence h (abandon p) = ⊤
 EntryEvidence h (supersede s) = EmbeddedEstablishmentEvidence h s
