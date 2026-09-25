@@ -22,17 +22,17 @@ private
 assessmentSubjectChanged : Bool
 assessmentSubjectChanged =
   not
-    ( sameCandidateKind
+    ( _and_
+      (sameCandidateKind
         previousAssessmentKind
-        (CandidateLearningAssessment.kind assessment)
-      and
-      sameLearningImpact
-        previousAssessmentImpact
-        (CandidateLearningAssessment.impact assessment)
-      and
-      sameLearningBypass
-        previousAssessmentBypass
-        (CandidateLearningAssessment.bypass assessment)
+        (CandidateLearningAssessment.kind assessment))
+      (_and_
+        (sameLearningImpact
+          previousAssessmentImpact
+          (CandidateLearningAssessment.impact assessment))
+        (sameLearningBypass
+          previousAssessmentBypass
+          (CandidateLearningAssessment.bypass assessment)))
     )
 
 assessmentEvidenceChanged : Bool
