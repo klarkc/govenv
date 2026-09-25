@@ -6,7 +6,7 @@
 ### Governance impact
 
 **Phase:** ▣ P1 — unchanged  
-**Items:** 1 completed · 1 advanced · 8 introduced · 3 superseded
+**Items:** 1 completed · 1 advanced · 10 introduced · 3 superseded
 
 #### Completed · 1
 
@@ -20,7 +20,7 @@
 | :---: | --- |
 | **GV84 ◇ ↑** | Make observed invariant regressions counterexample-closing: once a contradiction to a governed or relied-upon invariant is recorded as an observed regression, its repair is incomplete until the counterexample is preserved as governed evidence, the missing or incorrectly scoped assurance boundary is corrected or overstated governance superseded, and candidate validation rejects recurrence before the affected workflow may succeed. |
 
-#### Introduced · 8
+#### Introduced · 10
 
 | GV | Proposition |
 | :---: | --- |
@@ -32,6 +32,8 @@
 | **+ GV117 ◇** | Classify dependency and environment authority according to GV101: keep reuse preference, ecosystem investigation, and contributor dependency-selection guidance in Protocol, but move repository-validity properties into Governance when they determine canonical project state, including the target absence of versioned devenv.yaml, governed materialization ownership of devenv.nix, transient non-authoritative devenv.lock state, and the prohibition on competing package-manager dependency authority; materialization and runtime backends must project those governed decisions without re-owning them. |
 | **+ GV119 ✓** | Keep human learning coupled to conceptual project evolution: represent revision-bound learning requirements, human-produced challenge/response evidence, and outstanding learning debt without claiming to prove a principal's mental state; pull-request learning is a soft gate that may be bypassed only explicitly for urgent corrective work while preserving the resulting debt, feature and concept-expanding refactor work is blocked while debt remains, patch releases may carry known debt, and major or minor releases require zero outstanding learning debt. Expose status, catch-up, and review entrypoints from the governed developer environment. |
 | **+ GV118 ◇** | Make repository-collaboration tooling an explicit governed runtime capability: the active shell must provide the project-selected provider CLI needed for candidate publication, beginning with GitHub pull-request authoring through `gh` in the devenv backend and later through `govenv shell`; agents must be able to discover and use that capability from Protocol without depending on a ChatGPT connector, IDE integration, or other out-of-band tool, while authentication remains an external runtime concern and collaboration tooling creates no semantic or authorization authority beyond the governed candidate and explicit human merge boundaries. |
+| **+ GV120 ◇** | Define a canonical, versioned, language-neutral Governance IR as the semantic boundary between Govenv's Agda reference formalization and Govenv applications: compile governed identities, obligations, transitions, capabilities, authorization, evidence/certificates, and environment/runtime requirements into the IR with semantic-preservation assurance; language-specific provers, checkers, and adapters may validate certificates or reconstruct local proofs from that IR but must not independently redefine governance semantics. |
+| **+ GV121 ◇** | Provide Agda formatting and linting as an external Govenv application rather than core semantic authority: prefer adopting a mature ecosystem formatter/linter when one becomes available; otherwise, once Govenv is sufficiently mature, allow a separately distributed formatter/linter to be developed using Govenv itself, with treefmt-compatible formatting and Protocol-style diagnostics while preserving the distinction between formatting/advice and constitutional validity. |
 
 #### Superseded · 3
 
@@ -56,7 +58,7 @@
 + Replace the mechanically derived README Current/Next status of GV94 with a governed project-direction review while preserving roadmap structural validity: Current is a bounded human-facing summary anchored by typed coverage of the exact governed project and roadmap state; Next is a bounded human-facing summary of the selected gap between Purpose and Current; every relevant source subject must receive an explicit typed disposition, source changes invalidate review freshness, and the compiler verifies bounds, provenance, coverage, references, and vigilance freshness while the agent supplies semantic judgment and the human authorizes that judgment through the pull request.
 ```
 
-Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `79c0803..a41faa5`.
+Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `79c0803..6f88389`.
 <!-- govenv-governance-impact:end -->
 
 
@@ -80,6 +82,8 @@ Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit
 * **runtime:** govern repository collaboration capability ([464091b](https://github.com/klarkc/govenv/commit/464091bec4191589b5040cdec62415ad8f900dc5))
 * **runtime:** add GitHub auth onboarding hook ([fd1d2d0](https://github.com/klarkc/govenv/commit/fd1d2d061fab1dc4f548dd6d44c7b437e1f38458))
 * **constitution:** allow late formal propositions ([a41faa5](https://github.com/klarkc/govenv/commit/a41faa57967b42546d0d922ebda6680d53f6042a))
+* **roadmap:** add language-neutral application phase ([5ca5af5](https://github.com/klarkc/govenv/commit/5ca5af592d6b3dc367339a92f358ba61a81c5311))
+* **constitution:** add one-shot genesis boundary ([6f88389](https://github.com/klarkc/govenv/commit/6f883899d1b680bb8e73ae7f486937edf7e19587))
 
 
 ### Miscellaneous
