@@ -14,7 +14,7 @@ module Govenv.DirectionReview where
 
 open import Agda.Builtin.Equality using (refl)
 open import Agda.Builtin.List using (List; []; _∷_)
-open import Agda.Builtin.Nat using (zero)
+open import Agda.Builtin.Nat using (zero; suc)
 open import Govenv.Kernel.DirectionReview
 open import Govenv.Kernel.Identifier using (GVR)
 open import Govenv.Kernel.Release using (snapshotRoadmap)
@@ -66,5 +66,5 @@ next : Next roadmap
 next = nextReview nextSummary nextClaims nextGapCoverage
 
 review : DirectionReview roadmap purpose
-review = directionReview source refl current next zero
+review = directionReview source refl current next (suc zero)
 ```

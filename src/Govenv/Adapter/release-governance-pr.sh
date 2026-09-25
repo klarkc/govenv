@@ -544,6 +544,8 @@ if [[ -z "${release_version}" || ! "${release_version}" =~ ^[0-9]+\.[0-9]+\.[0-9
   exit 4
 fi
 
+bash src/Govenv/Adapter/learning-release-gate.sh "${worktree}" "${release_version}"
+
 current_body="${tmp}/body.current.md"
 updated_body="${tmp}/body.updated.md"
 gh pr view "${release_pr}" --json body --jq '.body // ""' > "${current_body}"
