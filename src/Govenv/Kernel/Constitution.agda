@@ -34,7 +34,9 @@ open import Relation.Nullary using (Dec; ¬_; yes; no)
 open import Relation.Nullary.Decidable
   using (does; _×-dec_; _⊎-dec_; ¬?)
 open import Govenv.Kernel.Identifier using
-  (GovernanceId; GovernanceRef; PhaseId; IdentifierRef; indexOf; descriptionOf)
+  ( GovernanceId; GovernanceRef; PhaseId; SomePhaseId; IdentifierRef
+  ; P; GVR; indexOf; descriptionOf; someIdentifier
+  )
 open import Govenv.Kernel.Constitution.Genesis using
   ( Genesis; GenesisState; GenesisGovernance
   ; pendingAtCutover; completedAtCutover; abandonedAtCutover; supersededAtCutover
@@ -323,6 +325,11 @@ phaseDescriptionAt (h ▻ declare d) p with phaseDescriptionAt h p
 ...   | false = nothing
 phaseDescriptionAt (h ▻ _) p = phaseDescriptionAt h p
 
+phaseIdentity : History → Nat → Maybe SomePhaseId
+phaseIdentity h phase with phaseDescriptionAt h phase
+... | nothing = nothing
+... | just description = just (someIdentifier (P phase description))
+
 governancePhase : History → Nat → Maybe Nat
 governancePhase ε g = nothing
 governancePhase (h ▻ bootstrap genesis) g with governancePhase h g
@@ -440,6 +447,11 @@ private
   ... | just (reformulated _) = nothing
   ... | nothing = currentResponsibilityMaybe h p
   currentResponsibilityMaybe (h ▻ _) p = currentResponsibilityMaybe h p
+
+responsibleGovernance : History → Nat → Maybe GovernanceRef
+responsibleGovernance h subject with currentResponsibilityMaybe h subject
+... | nothing = nothing
+... | just governance = just (GVR governance)
 
 ResponsibleTo : History → Nat → Nat → Set
 ResponsibleTo h g p = currentResponsibilityMaybe h p ≡ just g
@@ -581,6 +593,11 @@ private
 
 currentPhase : History → Maybe Nat
 currentPhase h = currentPhaseFrom h (allPhaseIndices h)
+
+currentPhaseIdentity : History → Maybe SomePhaseId
+currentPhaseIdentity h with currentPhase h
+... | nothing = nothing
+... | just phase = phaseIdentity h phase
 
 GovernanceOwnedByPhase : History → Nat → Nat → Set
 GovernanceOwnedByPhase h phase governance =
