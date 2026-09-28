@@ -16,8 +16,8 @@ open import Data.Bool.ListAction using (all; any)
 open import Data.Empty using (⊥)
 open import Data.Product.Base using (_×_; _,_)
 open import Data.Sum.Base using (_⊎_)
-open import Data.Nat.Base using (_<_)
-open import Data.Nat.Properties using (_≟_; _<?_)
+open import Data.Nat.Base using (_<_; _≤_)
+open import Data.Nat.Properties using (_≟_; _<?_; _≤?_)
 open import Data.List.Base using (List; []; _∷_; _++_; map; filterᵇ)
 open import Data.List.Membership.Propositional using (_∈_)
 open import Data.List.Membership.DecPropositional _≟_ using (_∈?_)
@@ -582,6 +582,36 @@ private
 currentPhase : History → Maybe Nat
 currentPhase h = currentPhaseFrom h (allPhaseIndices h)
 
+GovernanceOwnedByPhase : History → Nat → Nat → Set
+GovernanceOwnedByPhase h phase governance =
+  governancePhase h governance ≡ just phase
+
+governanceOwnedByPhase? :
+  (h : History) → (phase governance : Nat) →
+  Dec (GovernanceOwnedByPhase h phase governance)
+governanceOwnedByPhase? h phase governance =
+  MaybeProperties.≡-dec _≟_ (governancePhase h governance) (just phase)
+
+GovernanceExistsInPhase : History → Nat → Set
+GovernanceExistsInPhase h phase =
+  Any (GovernanceOwnedByPhase h phase) (allGovernanceIndices h)
+
+governanceExistsInPhase? :
+  (h : History) → (phase : Nat) → Dec (GovernanceExistsInPhase h phase)
+governanceExistsInPhase? h phase =
+  any? (governanceOwnedByPhase? h phase) (allGovernanceIndices h)
+
+ExistingPhaseWritable : History → Nat → Set
+ExistingPhaseWritable h phase with currentPhase h
+... | just current = current ≤ phase
+... | nothing = ¬ GovernanceExistsInPhase h phase
+
+existingPhaseWritable? :
+  (h : History) → (phase : Nat) → Dec (ExistingPhaseWritable h phase)
+existingPhaseWritable? h phase with currentPhase h
+... | just current = current ≤? phase
+... | nothing = ¬? (governanceExistsInPhase? h phase)
+
 GovernanceOpenForPropositions : History → Nat → Set
 GovernanceOpenForPropositions h g = governanceLifecycle h g ≡ pending
 
@@ -704,14 +734,17 @@ fresh? h p = ¬? (declared? h p)
 GovernancePhaseValid : History → GovernanceDeclaration → Set
 GovernancePhaseValid h d with phaseDescriptionAt h (governancePhaseIndex d)
 ... | nothing = PhaseAfterExisting h (governancePhaseIndex d)
-... | just description = description ≡ governancePhaseDescription d
+... | just description =
+  description ≡ governancePhaseDescription d ×
+  ExistingPhaseWritable h (governancePhaseIndex d)
 
 governancePhaseValid? :
   (h : History) → (d : GovernanceDeclaration) → Dec (GovernancePhaseValid h d)
 governancePhaseValid? h d with phaseDescriptionAt h (governancePhaseIndex d)
 ... | nothing = phaseAfterExisting? h (governancePhaseIndex d)
 ... | just description =
-  StringProperties._≟_ description (governancePhaseDescription d)
+  StringProperties._≟_ description (governancePhaseDescription d) ×-dec
+  existingPhaseWritable? h (governancePhaseIndex d)
 
 GovernanceFresh : History → GovernanceDeclaration → Set
 GovernanceFresh h d = ¬ GovernanceDeclared h (governanceIndexOf d)
