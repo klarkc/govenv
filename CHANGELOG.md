@@ -58,7 +58,7 @@
 + Replace the mechanically derived README Current/Next status of GV94 with a governed project-direction review while preserving roadmap structural validity: Current is a bounded human-facing summary anchored by typed coverage of the exact governed project and roadmap state; Next is a bounded human-facing summary of the selected gap between Purpose and Current; every relevant source subject must receive an explicit typed disposition, source changes invalidate review freshness, and the compiler verifies bounds, provenance, coverage, references, and vigilance freshness while the agent supplies semantic judgment and the human authorizes that judgment through the pull request.
 ```
 
-Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `79c0803..a9870a9`.
+Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `79c0803..3c9c7d5`.
 <!-- govenv-governance-impact:end -->
 
 
@@ -67,6 +67,7 @@ Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit
 * **ci:** validate transient candidate materializations ([cfd24b6](https://github.com/klarkc/govenv/commit/cfd24b689158f9ec979d862ebf4e6c351b569db4))
 * **consolidation:** normalize recovery provenance ([4a3ffea](https://github.com/klarkc/govenv/commit/4a3ffea93338529fc6fb66ddca1f91e2166a9395))
 * **protocol:** require evidence for vigilance reviews ([bbdc00c](https://github.com/klarkc/govenv/commit/bbdc00c1e236cb1a6e7b4085fd872a124a95551c))
+* **constitution:** prevent completed phase reopening ([3c9c7d5](https://github.com/klarkc/govenv/commit/3c9c7d5a27ec6ee82fe21d3cda1a634f4e618bdd))
 
 
 ### Governance
