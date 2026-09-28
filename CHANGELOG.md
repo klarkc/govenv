@@ -58,7 +58,7 @@
 + Replace the mechanically derived README Current/Next status of GV94 with a governed project-direction review while preserving roadmap structural validity: Current is a bounded human-facing summary anchored by typed coverage of the exact governed project and roadmap state; Next is a bounded human-facing summary of the selected gap between Purpose and Current; every relevant source subject must receive an explicit typed disposition, source changes invalidate review freshness, and the compiler verifies bounds, provenance, coverage, references, and vigilance freshness while the agent supplies semantic judgment and the human authorizes that judgment through the pull request.
 ```
 
-Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `79c0803..40f0fd1`.
+Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `79c0803..78f0a5f`.
 <!-- govenv-governance-impact:end -->
 
 
@@ -88,6 +88,7 @@ Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit
 * **constitution:** add history-prefix snapshots ([7ccf5e0](https://github.com/klarkc/govenv/commit/7ccf5e04c364f2d710fb29f9918d0a4ae03f2760))
 * **constitution:** derive phase progress from history ([a9870a9](https://github.com/klarkc/govenv/commit/a9870a933a1f2f5d326f4949788bbb79fbb5a00a))
 * **release:** derive constitutional history delta ([40f0fd1](https://github.com/klarkc/govenv/commit/40f0fd131617cf9a8064539a3e7c5643febf8d9b))
+* **materialization:** define constitutional snapshot v3 ([78f0a5f](https://github.com/klarkc/govenv/commit/78f0a5fe51603fd3c661be1daae9ffdee4d26756))
 
 
 ### Miscellaneous
