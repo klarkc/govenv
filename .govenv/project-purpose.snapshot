@@ -1,4 +1,4 @@
 govenv-project-purpose-snapshot-v2
-review-index 1
-review-rationale "Review of the complete resulting roadmap after GV121 found the purpose unchanged: P7 keeps language-neutral applications downstream of the same self-governing environment model, and the deferred Agda formatter/linter is an external application rather than a new core purpose."
+review-index 2
+review-rationale "GV123 now makes the learning gate operationally reachable from zero through governed prompts, exact human-response capture, and debt-reducing evidence-only pull requests; this strengthens the existing human-authority purpose without changing it."
 purpose "Turn every repository into a self-governing developer environment: define what valid means once, let agents move fast without outrunning human authority, and reproduce the same tooling, automation, and runtime anywhere."

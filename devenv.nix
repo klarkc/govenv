@@ -432,11 +432,24 @@ let
     agda -i . -i src -i ${agdaStdlib}/src src/Govenv/Experiment/ConstitutionalHistory/StdlibScenarios.agda
   '';
 
+  checkLearningSurface = ''
+    agda -i . -i src src/Govenv/Adapter/LearningStatus.agda
+    agda -i . -i src src/Govenv/Adapter/LearningBootstrap.agda
+    agda -i . -i src src/Govenv/Adapter/LearningPromptCatalog.agda
+  '';
+
   learningStatus = ''
     rm -rf .govenv/learning-status-build
     mkdir -p .govenv/learning-status-build
     agda -i . -i src --compile --compile-dir=.govenv/learning-status-build src/Govenv/Adapter/LearningStatus.agda >/dev/null
     .govenv/learning-status-build/LearningStatus
+  '';
+
+  learningBootstrap = ''
+    rm -rf .govenv/learning-bootstrap-build
+    mkdir -p .govenv/learning-bootstrap-build
+    agda -i . -i src --compile --compile-dir=.govenv/learning-bootstrap-build src/Govenv/Adapter/LearningBootstrap.agda >/dev/null
+    .govenv/learning-bootstrap-build/LearningBootstrap
   '';
 
   checkMaterializations = ''
@@ -497,11 +510,24 @@ in
       status)
         ${learningStatus}
         ;;
+      bootstrap)
+        ${learningBootstrap}
+        ;;
       catch-up)
+        ${learningBootstrap}
+        echo
         ${learningStatus}
         echo
-        echo "Work through each outstanding claim from its bound revision."
-        echo "Preserve the challenge and the human response as learning evidence; agent confidence is not evidence."
+        echo "Work from the historical baseline through prospective debt."
+        echo "Record each exact human response with: govenv-learning answer <key>"
+        ;;
+      answer)
+        if [ "$#" -lt 2 ]; then
+          key=""
+        else
+          key="$2"
+        fi
+        bash src/Govenv/Adapter/learning-answer.sh "$key"
         ;;
       review)
         ${learningStatus}
@@ -520,7 +546,7 @@ in
         exit 5
         ;;
       *)
-        echo "usage: govenv-learning {status|catch-up|review}" >&2
+        echo "usage: govenv-learning {status|bootstrap|catch-up|answer <key>|review}" >&2
         exit 2
         ;;
     esac
@@ -530,11 +556,26 @@ in
     ${learningStatus}
   '';
 
+  tasks."govenv:learning:candidate".exec = ''
+    bash src/Govenv/Adapter/learning-candidate-gate.sh
+  '';
+
+  tasks."govenv:learning:bootstrap".exec = ''
+    ${learningBootstrap}
+  '';
+
   tasks."govenv:learning:catch-up".exec = ''
+    ${learningBootstrap}
+    echo
     ${learningStatus}
     echo
-    echo "Work through each outstanding claim from its bound revision."
-    echo "Preserve the challenge and the human response as learning evidence; agent confidence is not evidence."
+    echo "Work from the historical baseline through prospective debt."
+    echo "Record each exact human response with: govenv-learning answer <key>"
+  '';
+
+  tasks."govenv:learning:answer".exec = ''
+    key="$(printenv GOVENV_LEARNING_PROMPT_KEY 2>/dev/null || true)"
+    bash src/Govenv/Adapter/learning-answer.sh "$key"
   '';
 
   tasks."govenv:learning:review".exec = ''
@@ -581,6 +622,7 @@ in
     agda -i . -i src -i ${agdaStdlib}/src Govenv.lagda.md
     ${checkArchitectureAssurance}
     ${checkConstitutionalHistoryExperiment}
+    ${checkLearningSurface}
     ${checkMaterializations}
     ${checkRepositoryMetadataAdapter}
     ${checkAdminAdapters}

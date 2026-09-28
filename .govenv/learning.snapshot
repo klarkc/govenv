@@ -1,2 +1,13 @@
-govenv-learning-snapshot-v1
-debt-clear true
+govenv-learning-snapshot-v3
+bootstrap-complete false
+debt-count 12
+debt-clear false
+candidate-allowed true
+assessment-kind corrective
+assessment-impact expands
+assessment-bypass urgent-corrective
+review-index 0
+review-rationale "GV119 promised a soft PR learning gate but candidate CI did not enforce it; GV122 adds the missing PR boundary and GV123 makes that gate reachable from zero through a governed bootstrap baseline. This corrective candidate preserves all new learning requirements as debt through the urgent corrective bypass."
+requirement "Explain why candidate learning classification remains a Protocol judgment while the resulting PR and release gates are governed." "eac603e07e6eae7b5dc7c2d762d422003c4459a4"
+requirement "Explain why an urgent corrective bypass preserves learning debt and therefore blocks later conceptual expansion until catch-up closes it." "eac603e07e6eae7b5dc7c2d762d422003c4459a4"
+requirement "Explain why from-zero bootstrap is a pinned Protocol-curated baseline, why it teaches effective semantics rather than replaying every historical commit, and why outstanding debt is derived from bootstrap plus carried debt minus human evidence." "eac603e07e6eae7b5dc7c2d762d422003c4459a4"

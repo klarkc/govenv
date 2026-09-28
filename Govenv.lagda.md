@@ -15,6 +15,7 @@ open import Govenv.Administration
 open import Govenv.Assurance
 open import Govenv.Consolidation
 open import Govenv.DirectionReview
+open import Govenv.LearningEvidence
 open import Govenv.Learning
 open import Govenv.Materialization
 open import Govenv.Materialization.Agents

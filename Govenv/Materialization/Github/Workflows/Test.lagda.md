@@ -67,6 +67,10 @@ previewCommand =
   "  fi\n" ++
   "} >> \"${GITHUB_STEP_SUMMARY}\""
 
+candidateLearningCommand : String
+candidateLearningCommand =
+  "nix run github:cachix/devenv/v2.3 -- tasks run govenv:learning:candidate"
+
 checkCommand : String
 checkCommand = "nix run github:cachix/devenv/v2.3 -- tasks run govenv:check"
 
@@ -79,6 +83,11 @@ candidateValidationSteps =
       materializeCommand []
   ∷ runStep "Record candidate materialization preview" nothing nothing
       previewCommand []
+  ∷ runStep "Check candidate learning gate" nothing
+      (just "github.event_name == 'pull_request'")
+      candidateLearningCommand
+      (binding "GOVENV_CANDIDATE_BASE_SHA"
+        (expression "github.event.pull_request.base.sha") ∷ [])
   ∷ runStep "Check materialized candidate" nothing nothing checkCommand []
   ∷ runStep "Run tests" nothing nothing testCommand []
   ∷ []
