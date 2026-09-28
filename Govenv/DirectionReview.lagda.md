@@ -28,7 +28,7 @@ source =
 
 currentSummary : BoundedText 400
 currentSummary = boundedText
-  "Govenv is in P1 with compiler-checked direction, consolidation closure, human-learning continuity, and Stage-0 GitHub collaboration available. Constitutional history remains partial; GV116 is the immediate gap, followed by dependency/environment authority in GV117 and the broader collaboration boundary in GV118."
+  "Govenv is in P1 with compiler-checked direction, a from-zero learning bootstrap, exact human-evidence capture, candidate learning gate, consolidation closure, and Stage-0 GitHub collaboration. Constitutional history remains partial; GV116 is still the immediate gap, followed by GV117 and GV118."
   refl
 
 currentSourceCoverage : CurrentCoverage
@@ -67,8 +67,8 @@ next = nextReview nextSummary nextClaims nextGapCoverage
 
 reviewRationale : String
 reviewRationale =
-  "GV120 and GV121 establish a distinct post-bootstrap phase for language-neutral Govenv applications: Agda remains the reference formalization through self-hosting and distribution, P7 introduces the versioned IR boundary, and Agda formatting/linting is deferred as an external application that prefers ecosystem reuse before bespoke implementation. The complete direction was re-reviewed; this later phase does not displace GV116, GV117, or GV118 from the nearer sequence, so Current and Next remain accurate."
+  "GV123 now closes the full from-zero path by adding exact human-evidence capture and a debt-reducing evidence-only candidate boundary. Current therefore advances from bootstrap-only reachability to operational closure, while GV116 remains the immediate project gap before GV117 and GV118."
 
 review : DirectionReview roadmap purpose
-review = directionReview source refl current next reviewRationale 1
+review = directionReview source refl current next reviewRationale 0
 ```

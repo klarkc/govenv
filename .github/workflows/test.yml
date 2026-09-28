@@ -39,6 +39,11 @@ jobs:
       run: "nix run github:cachix/devenv/v2.3 -- tasks run govenv:materialize"
     - name: "Record candidate materialization preview"
       run: "{\n  printf '%s\\n' '### Candidate materialization preview'\n  printf '%s\\n' ''\n  if [[ -z \"$(git status --porcelain)\" ]]; then\n    printf '%s\\n' 'No tracked materialization drift.'\n  else\n    printf '%s\\n' 'Deterministic post-authorization materialization preview:'\n    printf '%s\\n' '' 'Tracked files:'\n    git status --short\n    printf '%s\\n' '' 'Diff stat:'\n    git diff --stat\n  fi\n} >> \"${GITHUB_STEP_SUMMARY}\""
+    - name: "Check candidate learning gate"
+      if: "${{ github.event_name == 'pull_request' }}"
+      run: "nix run github:cachix/devenv/v2.3 -- tasks run govenv:learning:candidate"
+      env:
+        GOVENV_CANDIDATE_BASE_SHA: ${{ github.event.pull_request.base.sha }}
     - name: "Check materialized candidate"
       run: "nix run github:cachix/devenv/v2.3 -- tasks run govenv:check"
     - name: "Run tests"

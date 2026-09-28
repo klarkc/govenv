@@ -41,10 +41,10 @@ purpose = "Turn every repository into a self-governing developer environment: de
 
 purposeReviewRationale : String
 purposeReviewRationale =
-  "Review of the complete resulting roadmap after GV121 found the purpose unchanged: P7 keeps language-neutral applications downstream of the same self-governing environment model, and the deferred Agda formatter/linter is an external application rather than a new core purpose."
+  "GV123 now makes the learning gate operationally reachable from zero through governed prompts, exact human-response capture, and debt-reducing evidence-only pull requests; this strengthens the existing human-authority purpose without changing it."
 
 purposeReviewIndex : Nat
-purposeReviewIndex = 1
+purposeReviewIndex = 2
 
 website : String
 website = "https://klarkc.github.io/govenv/"
