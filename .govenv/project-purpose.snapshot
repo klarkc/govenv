@@ -1,4 +1,4 @@
 govenv-project-purpose-snapshot-v2
-review-index 2
-review-rationale "GV123 now makes the learning gate operationally reachable from zero through governed prompts, exact human-response capture, and debt-reducing evidence-only pull requests; this strengthens the existing human-authority purpose without changing it."
+review-index 3
+review-rationale "GV124 through GV126 make Agda language/LSP and formatting/linting explicit reproducible developer-tooling work while preserving tooling mechanics outside semantic authority and retaining GV121's eventual external-application boundary; the existing project purpose already covers this direction and remains unchanged."
 purpose "Turn every repository into a self-governing developer environment: define what valid means once, let agents move fast without outrunning human authority, and reproduce the same tooling, automation, and runtime anywhere."
