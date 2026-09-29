@@ -6,17 +6,18 @@
 ### Governance impact
 
 **Phase:** ▣ P1 — unchanged  
-**Items:** 3 introduced
+**Items:** 4 introduced
 
-#### Introduced · 3
+#### Introduced · 4
 
 | GV | Proposition |
 | :---: | --- |
 | **+ GV124 ✓** | Make Agda a first-class Stage-0 language capability through a Govenv-owned internal devenv module rather than an upstream dependency: the active devenv shell must provide the selected Agda toolchain and Agda language server, expose the LSP capability to editor and agent integrations, and keep this bootstrap/runtime wiring non-semantic so the later govenv shell can project the same capability through its runtime backend. |
-| **+ GV125 ◇** | Perform a fresh ecosystem investigation for reusable Agda formatting and linting reachable through LSP or a composable backend before implementing project-specific tooling: evaluate maintained candidates for .agda and literate .lagda.md support, document/range formatting, diagnostics or code actions, deterministic and idempotent output, syntax/source preservation, Nix packaging, and suitability for reuse behind a provider-neutral LSP boundary; dependency selection remains Protocol judgment rather than constitutional truth. |
+| **+ GV125 ✓** | Perform a fresh ecosystem investigation for reusable Agda formatting and linting reachable through LSP or a composable backend before implementing project-specific tooling: evaluate maintained candidates for .agda and literate .lagda.md support, document/range formatting, diagnostics or code actions, deterministic and idempotent output, syntax/source preservation, Nix packaging, and suitability for reuse behind a provider-neutral LSP boundary; dependency selection remains Protocol judgment rather than constitutional truth. |
 | **+ GV126 ◇** | Provide the selected Agda formatting and linting capability in the Stage-0 governed developer environment: adapt an adequate reusable implementation when GV125 finds one, otherwise implement a temporary in-repository formatter/linter exposed through the Agda LSP boundary, with deterministic/idempotent formatting and Protocol-style lint diagnostics that do not become constitutional validity; keep the client-facing boundary ejectable so GV121 can later move the implementation into an external Govenv application without changing editor or agent integration. |
+| **+ GV127 ◇** | Make the Agda stdlib style guide the versioned baseline rule set for the external Agda formatter/linter, while allowing Govenv to compose additional project-specific rules without mutating or silently redefining that baseline: give every rule stable identity and origin, distinguish baseline from custom coverage, maintain an explicit inventory of applicable style-guide rules and whether each is mechanically checked by lint, formatter, both, or intentionally not automatable, expose verified/applicable counts and percentages for baseline, custom, and total coverage, and treat 100% mechanically covered applicable baseline rules plus all enabled custom rules as the long-term target only after the baseline inventory itself is complete; partial inventories must never report 100% coverage. |
 
-Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `2674f71..bbd530b`.
+Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `2674f71..1147006`.
 <!-- govenv-governance-impact:end -->
 
 
@@ -28,6 +29,7 @@ Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit
 ### Governance
 
 * **roadmap:** open agda tooling vertical ([5abce77](https://github.com/klarkc/govenv/commit/5abce77739060739aa58df1624912b3e02579ed0))
+* **agda:** establish style baseline and reuse decision ([1147006](https://github.com/klarkc/govenv/commit/11470063d7f5c5016692d3f63d536f798b4d27d6))
 
 ## [0.2.9](https://github.com/klarkc/govenv/compare/v0.2.8...v0.2.9) (2026-09-28)
 <!-- govenv-release-freeze: version=0.2.9 base=v0.2.8 authorized=00458662f96d563aafca9babfc36bb5e6f8cc65d -->
