@@ -6,6 +6,7 @@ Govenv is the canonical project entrypoint and formal closure root.
 module Govenv where
 
 open import Govenv.Architecture
+open import Govenv.AgdaStyle
 open import Govenv.SourceLayout
 open import Govenv.Governance
 open import Govenv.Protocol
