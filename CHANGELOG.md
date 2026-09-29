@@ -12,12 +12,17 @@
 
 | GV | Proposition |
 | :---: | --- |
-| **+ GV124 ◇** | Make Agda a first-class Stage-0 language capability through a Govenv-owned internal devenv module rather than an upstream dependency: the active devenv shell must provide the selected Agda toolchain and Agda language server, expose the LSP capability to editor and agent integrations, and keep this bootstrap/runtime wiring non-semantic so the later govenv shell can project the same capability through its runtime backend. |
+| **+ GV124 ✓** | Make Agda a first-class Stage-0 language capability through a Govenv-owned internal devenv module rather than an upstream dependency: the active devenv shell must provide the selected Agda toolchain and Agda language server, expose the LSP capability to editor and agent integrations, and keep this bootstrap/runtime wiring non-semantic so the later govenv shell can project the same capability through its runtime backend. |
 | **+ GV125 ◇** | Perform a fresh ecosystem investigation for reusable Agda formatting and linting reachable through LSP or a composable backend before implementing project-specific tooling: evaluate maintained candidates for .agda and literate .lagda.md support, document/range formatting, diagnostics or code actions, deterministic and idempotent output, syntax/source preservation, Nix packaging, and suitability for reuse behind a provider-neutral LSP boundary; dependency selection remains Protocol judgment rather than constitutional truth. |
 | **+ GV126 ◇** | Provide the selected Agda formatting and linting capability in the Stage-0 governed developer environment: adapt an adequate reusable implementation when GV125 finds one, otherwise implement a temporary in-repository formatter/linter exposed through the Agda LSP boundary, with deterministic/idempotent formatting and Protocol-style lint diagnostics that do not become constitutional validity; keep the client-facing boundary ejectable so GV121 can later move the implementation into an external Govenv application without changing editor or agent integration. |
 
-Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `2674f71..5abce77`.
+Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `2674f71..bbd530b`.
 <!-- govenv-governance-impact:end -->
+
+
+### Features
+
+* **agda:** expose language server in devenv ([bbd530b](https://github.com/klarkc/govenv/commit/bbd530b36cb19122c1e2346944de5b7ecd4495d7))
 
 
 ### Governance
