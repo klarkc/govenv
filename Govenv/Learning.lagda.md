@@ -483,11 +483,11 @@ agdaToolingLesson =
     "agda-tooling-vertical"
     "15. Agda tooling vertical"
     "Govenv is opening a developer-tooling vertical that first makes Agda and its language server reproducible in Stage 0, then investigates formatter/linter reuse before implementing only the missing boundary, while keeping tooling advice outside constitutional validity."
-    "Govenv.Roadmap; Govenv.DirectionReview; GV121; GV126; GV127; GV128"
-    "Govenv.Roadmap GV121/GV126/GV127/GV128; Govenv.DirectionReview.next"
-    "Trace the selected Next from GV126 through GV128 and explain which pieces are environment/tooling capability rather than semantic authority."
-    "Explain why GV127 requires reuse investigation before GV128 implementation and why a todo roadmap item is not completion evidence."
-    "Explain how future assurance for GV126/GV128 must establish the capability without turning formatter/linter output into constitutional validity."
+    "Govenv.Roadmap; Govenv.DirectionReview; devenv.nix; Govenv.Assurance.GV126; GV121; GV126; GV127; GV128"
+    "devenv.nix languages.agda/mkAgdaLanguageServer; Govenv.Assurance.GV126; Govenv.Assurance.GV126.Counterexample.MissingLsp; Govenv.DirectionReview.next"
+    "Trace languages.agda.enable/lsp.enable from the Govenv-owned devenv module to the pinned Agda 2.8.0/ALS v8 shell capability, and explain why this wiring is environment capability rather than semantic authority."
+    "Trace the observed GV126 rule and MissingLsp counterexample, then explain why GV127 still requires reuse investigation before GV128 formatter/linter implementation."
+    "Explain what GV126 assurance establishes about the environment and why neither ALS nor future formatter/linter diagnostics become constitutional validity."
     agdaToolingRequirement
 
 carriedLessons : List BootstrapLesson
@@ -513,10 +513,10 @@ assessment =
   candidateLearningAssessment
     feature
     expands
-    "The candidate opens the Agda developer-tooling vertical on top of the authorized GV125 learning boundary: it introduces GV126 through GV128, selects Agda/LSP enablement as Next, preserves reuse-first formatter/linter selection, and does not use the urgent-corrective bypass."
+    "This stacked child establishes GV126 by adding a Govenv-owned languages.agda devenv module, a pinned Agda-2.8.0-compatible ALS v8 package, executable capability checks, and observed assurance. It preserves the parent Agda-tooling requirement and advances Next to the reuse-first GV127 investigation without treating parent candidate state as authorized evidence."
     (agdaToolingRequirement ∷ [])
     noBypass
-    0
+    1
 
 carriedDebt : LearningDebt
 carriedDebt = lessonRequirements carriedLessons
