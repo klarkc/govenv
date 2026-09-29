@@ -2,8 +2,9 @@
 
 Govenv preserves meaningful human authority by keeping conceptual project
 evolution coupled to demonstrated human learning. Learning evidence is
-revision-bound evidence that a human principal performed a challenge and
-response; it is not a proof of the principal's mental state.
+revision-bound evidence that a human principal responded under an explicit
+review contract; it is not a proof of the principal's mental state or of answer
+quality.
 
 Candidate learning assessment is an explicit Protocol judgment over the exact
 candidate delta. Its classification is human-reviewable rather than compiler-
@@ -15,8 +16,12 @@ classification or natural-language rationale is correct.
 The bootstrap baseline is likewise a Protocol judgment, pinned to the governed
 pre-GV122 frontier. It reconstructs the minimum causal learning path needed to
 review current Govenv semantics from zero rather than replaying every historical
-commit or superseded governance item. Superseded history is taught only when it
-is needed to explain the effective model. Prospective candidate debt then
+commit or superseded governance item. Each lesson identifies a semantically
+load-bearing review surface and separate semantic, code, and assurance probes.
+Debt reduction is bound to the exact current review contract, so changing that
+surface or those probes makes older evidence stale. The compiler proves this
+binding and structural presence, not that the selected surface is pedagogically
+sufficient or that the human understood it. Prospective candidate debt then
 continues from that baseline without relying on prior chat or agent memory.
 
 ```agda
@@ -26,7 +31,7 @@ module Govenv.Learning where
 
 open import Agda.Builtin.Bool using (Bool; true; false)
 open import Agda.Builtin.List using (List; []; _∷_)
-open import Agda.Builtin.String using (String; primStringEquality)
+open import Agda.Builtin.String using (String; primStringAppend; primStringEquality)
 open import Govenv.Kernel.Learning public
 open import Govenv.LearningEvidence public using
   (DemonstratedLearning; evidence)
@@ -38,10 +43,20 @@ record BootstrapLesson : Set where
     title : String
     context : String
     sources : String
-    challenge : String
+    reviewSurface : String
+    semanticProbe : String
+    codeProbe : String
+    assuranceProbe : String
     requirement : LearningRequirement
 
 private
+  infixr 5 _++_
+  infixr 4 _and_
+  infixr 3 _or_
+
+  _++_ : String → String → String
+  _++_ = primStringAppend
+
   _and_ : Bool → Bool → Bool
   true and right = right
   false and right = false
@@ -49,6 +64,30 @@ private
   _or_ : Bool → Bool → Bool
   true or right = true
   false or right = right
+
+stringPresent : String → Bool
+stringPresent value with primStringEquality value ""
+... | true = false
+... | false = true
+
+reviewContract : BootstrapLesson → String
+reviewContract lesson =
+  "Review surface: " ++ BootstrapLesson.reviewSurface lesson ++
+  " | Semantic probe: " ++ BootstrapLesson.semanticProbe lesson ++
+  " | Code probe: " ++ BootstrapLesson.codeProbe lesson ++
+  " | Assurance probe: " ++ BootstrapLesson.assuranceProbe lesson
+
+lessonReviewable : BootstrapLesson → Bool
+lessonReviewable lesson =
+  stringPresent (BootstrapLesson.reviewSurface lesson) and
+  stringPresent (BootstrapLesson.semanticProbe lesson) and
+  stringPresent (BootstrapLesson.codeProbe lesson) and
+  stringPresent (BootstrapLesson.assuranceProbe lesson)
+
+allLessonsReviewable : List BootstrapLesson → Bool
+allLessonsReviewable [] = true
+allLessonsReviewable (lesson ∷ rest) =
+  lessonReviewable lesson and allLessonsReviewable rest
 
 sameRequirement : LearningRequirement → LearningRequirement → Bool
 sameRequirement left right =
@@ -66,50 +105,81 @@ containsRequirement requirement (candidate ∷ rest) =
   sameRequirement requirement candidate or
   containsRequirement requirement rest
 
-requirementEvidenced :
+
+lessonEvidenced :
+  BootstrapLesson →
+  List DemonstratedLearning →
+  Bool
+lessonEvidenced lesson [] = false
+lessonEvidenced lesson (candidate ∷ rest) =
+  ( sameRequirement
+      (BootstrapLesson.requirement lesson)
+      (DemonstratedLearning.requirement candidate)
+    and
+    primStringEquality
+      (reviewContract lesson)
+      (DemonstratedLearning.reviewContract candidate) )
+  or lessonEvidenced lesson rest
+
+allLessonsEvidenced :
+  List BootstrapLesson →
+  List DemonstratedLearning →
+  Bool
+allLessonsEvidenced [] evidence = true
+allLessonsEvidenced (lesson ∷ rest) evidence =
+  lessonEvidenced lesson evidence and
+  allLessonsEvidenced rest evidence
+
+requirementEvidencedByLessons :
   LearningRequirement →
+  List BootstrapLesson →
   List DemonstratedLearning →
   Bool
-requirementEvidenced requirement [] = false
-requirementEvidenced requirement (candidate ∷ rest) =
-  sameRequirement requirement (DemonstratedLearning.requirement candidate) or
-  requirementEvidenced requirement rest
+requirementEvidencedByLessons requirement [] evidence = false
+requirementEvidencedByLessons requirement (lesson ∷ rest) evidence =
+  ( sameRequirement requirement (BootstrapLesson.requirement lesson) and
+    lessonEvidenced lesson evidence )
+  or requirementEvidencedByLessons requirement rest evidence
 
-allRequirementsEvidenced :
+allRequirementsEvidencedByLessons :
   LearningDebt →
+  List BootstrapLesson →
   List DemonstratedLearning →
   Bool
-allRequirementsEvidenced [] evidence = true
-allRequirementsEvidenced (requirement ∷ rest) evidence =
-  requirementEvidenced requirement evidence and
-  allRequirementsEvidenced rest evidence
+allRequirementsEvidencedByLessons [] lessons evidence = true
+allRequirementsEvidencedByLessons (requirement ∷ rest) lessons evidence =
+  requirementEvidencedByLessons requirement lessons evidence and
+  allRequirementsEvidencedByLessons rest lessons evidence
 
-allRequirementsRepresented :
+allRequirementsRepresentedByLessons :
   LearningDebt →
+  List BootstrapLesson →
   List DemonstratedLearning →
   LearningDebt →
   Bool
-allRequirementsRepresented [] evidence debt = true
-allRequirementsRepresented (requirement ∷ rest) evidence debt =
-  ( requirementEvidenced requirement evidence or
+allRequirementsRepresentedByLessons [] lessons evidence debt = true
+allRequirementsRepresentedByLessons (requirement ∷ rest) lessons evidence debt =
+  ( requirementEvidencedByLessons requirement lessons evidence or
     containsRequirement requirement debt )
   and
-  allRequirementsRepresented rest evidence debt
+  allRequirementsRepresentedByLessons rest lessons evidence debt
 
-pendingRequirements :
-  LearningDebt →
+pendingLessonRequirements :
+  List BootstrapLesson →
   List DemonstratedLearning →
   LearningDebt
-pendingRequirements [] evidence = []
-pendingRequirements (requirement ∷ rest) evidence
-  with requirementEvidenced requirement evidence
-... | true = pendingRequirements rest evidence
-... | false = requirement ∷ pendingRequirements rest evidence
+pendingLessonRequirements [] evidence = []
+pendingLessonRequirements (lesson ∷ rest) evidence
+  with lessonEvidenced lesson evidence
+... | true = pendingLessonRequirements rest evidence
+... | false =
+  BootstrapLesson.requirement lesson ∷
+  pendingLessonRequirements rest evidence
 
-appendDebt : LearningDebt → LearningDebt → LearningDebt
-appendDebt [] right = right
-appendDebt (requirement ∷ rest) right =
-  requirement ∷ appendDebt rest right
+lessonRequirements : List BootstrapLesson → LearningDebt
+lessonRequirements [] = []
+lessonRequirements (lesson ∷ rest) =
+  BootstrapLesson.requirement lesson ∷ lessonRequirements rest
 
 bootstrapBoundary : String
 bootstrapBoundary =
@@ -176,9 +246,11 @@ purposeLesson =
     "1. Purpose and human authority"
     "Start with why Govenv exists. The current purpose is the compressed result of the project's early repository-validity work and the later realization that fast agents must not silently outrun the human principal."
     "Govenv.Project; Govenv.DirectionReview; GV109-GV112; GV119"
+    "Govenv.Project.purpose; Govenv.Project.purposeReviewIndex/purposeReviewRationale; Govenv.DirectionReview; Govenv.Assurance.GV110; Govenv.Materialization.Readme"
     "In your own words: what failure is Govenv preventing, and why is human authority part of the product rather than merely a team convention?"
+    "Locate the canonical purpose, trace one projection of it, and identify the code that makes a mechanical purpose-review counter bump insufficient."
+    "If README or a review counter changed while the governed purpose/review evidence did not, explain which checks should reject the candidate and what they do not prove."
     purposeRequirement
-
 boundariesLesson : BootstrapLesson
 boundariesLesson =
   bootstrapLesson
@@ -186,9 +258,11 @@ boundariesLesson =
     "2. Semantic boundaries"
     "Govenv gradually separated constitutional semantics from contributor judgment, deterministic projection, and evidence-bearing verification. This separation is the foundation for deciding what may be compiler-proven."
     "Govenv.Governance; Govenv.Protocol; Govenv.Materialization; Govenv.Assurance; GV51; GV74; GV101"
+    "Govenv.Governance; Govenv.Protocol; Govenv.Materialization; Govenv.Assurance; Govenv.Kernel.Assurance"
     "Classify one example into each of Governance, Protocol, Materialization, and Assurance, and explain one thing each layer must not do."
+    "Pick one declaration from each boundary module and explain why its type or role belongs there rather than in another layer."
+    "Trace one governed property from semantic authority to materialization or assurance and identify where policy is forbidden from reappearing."
     boundariesRequirement
-
 authorizationLesson : BootstrapLesson
 authorizationLesson =
   bootstrapLesson
@@ -196,9 +270,11 @@ authorizationLesson =
     "3. Human authorization"
     "As automation expanded, Govenv made the pull-request merge the explicit semantic authorization event. Everything later produced by machines must retain provenance to that human-authorized revision without gaining independent authority."
     "Govenv.Authorization; Govenv.Github.Authorization; GV90; GV91"
+    "Govenv.Authorization; Govenv.Github.Authorization; Govenv.Materialization.ApplicationAuthorization; Govenv.Assurance.GV90"
     "Trace a candidate PR through human merge, a derived materialization commit, and an external effect. Where exactly does semantic authority enter, and where does it not?"
+    "Trace the constructors from candidate state through human pull-request merge and AuthorizedRevision to an authorized materialization application."
+    "Show why a bot credential, derived commit, or external read-back cannot construct fresh semantic authority on its own."
     authorizationRequirement
-
 constitutionLesson : BootstrapLesson
 constitutionLesson =
   bootstrapLesson
@@ -206,9 +282,11 @@ constitutionLesson =
     "4. Constitutional history"
     "The roadmap evolved from mutable status into append-only constitutional history. A one-shot Genesis boundary imports the legacy lifecycle at cutover; later history remains append-only. Human GovernanceId contracts and machine-checkable propositions stay distinct so formal truth can mature without rewriting the original human decision."
     "Govenv.Kernel.Constitution; Govenv.Kernel.Constitution.Genesis; Govenv.Assurance.GV95; Govenv.Assurance.GV116"
+    "Govenv.Kernel.Constitution; Govenv.Kernel.Constitution.Genesis; Govenv.Roadmap; Govenv.Assurance.GV116"
     "Explain the difference between the one-shot Genesis cutover and later history entries, then distinguish a GovernanceId contract from a Proposition and describe establish/supersede without treating history as mutable state."
+    "Locate the types and constructors for Genesis and later history, and trace how GovernanceId contracts remain distinct from formal Propositions."
+    "Identify one invariant preventing history rewrite or reopening and the assurance or counterexample that would expose a violation."
     constitutionRequirement
-
 assuranceLesson : BootstrapLesson
 assuranceLesson =
   bootstrapLesson
@@ -216,9 +294,11 @@ assuranceLesson =
     "5. Assurance and counterexamples"
     "Govenv learned repeatedly that a green check can coexist with a semantic contradiction. Counterexamples are therefore preserved and assurances are strengthened at the earliest boundary where the required information exists."
     "Govenv.Assurance; Govenv.Protocol semantic validation; GV74; GV84; GV88; GV99"
+    "Govenv.Kernel.Assurance; Govenv.Assurance; Govenv.Assurance.GV84; Govenv.Assurance.*.Counterexample"
     "If CI is green but you can point to a governed invariant the candidate violates, what should happen next and why?"
+    "Trace one completed governance item from its proposition through StaticEvidence or an observed Rule into completion coverage."
+    "Given a green CI result that contradicts governance, identify what must become a counterexample and which enforcement boundary must be strengthened."
     assuranceRequirement
-
 runtimeLesson : BootstrapLesson
 runtimeLesson =
   bootstrapLesson
@@ -226,9 +306,11 @@ runtimeLesson =
     "6. Agent and runtime capabilities"
     "Agent tooling moved from host-specific convenience toward a governed environment boundary. Shells may provide tools, hooks, and provider credentials, but those capabilities remain operational and cannot authorize semantics."
     "Govenv.Github.Authorization; Govenv.Protocol repository collaboration; GV103; GV107; GV118"
+    "Govenv.Protocol.repositoryCollaboration; Govenv.Github.Authorization; Govenv.Materialization; devenv.nix"
     "Explain what an authenticated coding agent may do through the Govenv environment and what still requires the human principal."
+    "Trace how repository-collaboration tooling is supplied operationally while authorization remains represented separately in governed types."
+    "Explain from the code why provider credentials or identity cannot construct human semantic authorization or merge authority."
     runtimeRequirement
-
 learningLesson : BootstrapLesson
 learningLesson =
   bootstrapLesson
@@ -236,9 +318,11 @@ learningLesson =
     "7. Learning continuity"
     "Once agent throughput became faster than human review comprehension, learning itself became part of preserving meaningful authority. Evidence records human challenge/response; it never claims to prove mental state."
     "Govenv.Learning; Govenv.Kernel.Learning; GV119"
+    "Govenv.Kernel.Learning; Govenv.Learning; Govenv.LearningEvidence; Govenv.Assurance.GV119"
     "Explain why an urgent corrective bypass must preserve debt, and why a later conceptual feature must wait until that debt is closed."
+    "Trace a LearningRequirement from outstanding debt through evidence matching to candidateAllowed and releaseLearningAllowed."
+    "Show where urgentCorrective permits a candidate while preserving debt, and where minor or major release remains closed."
     learningRequirementBaseline
-
 agdaLesson : BootstrapLesson
 agdaLesson =
   bootstrapLesson
@@ -246,9 +330,11 @@ agdaLesson =
     "8. Agda review literacy"
     "Govenv uses Agda as its current reference formalization. The roadmap now plans a later language-neutral Governance IR boundary, but until that exists the principal still needs enough Agda literacy to inspect the constructs carrying today's guarantees instead of trusting an agent's description of a proof."
     "Govenv.Kernel.*; Govenv.Assurance.*; representative data, record, indexed type, equality, and refl proofs"
+    "Govenv.Kernel.Learning; Govenv.Authorization; Govenv.Assurance.GV123; representative refl proofs"
     "Pick one current Govenv guarantee and identify which part is data, which part is a proposition/type, which value is the proof/evidence, and which nearby judgment remains outside compiler proof."
+    "For one guarantee, identify the data, proposition or type, constructor or value that inhabits it, and the equality/refl step if present."
+    "Identify a nearby natural-language or Protocol judgment that those types cannot honestly prove."
     agdaRequirement
-
 directionLesson : BootstrapLesson
 directionLesson =
   bootstrapLesson
@@ -256,9 +342,11 @@ directionLesson =
     "9. Current direction and vigilance"
     "After reconstructing the model, finish at the current frontier. Purpose and the exact Roadmap feed an explicit DirectionReview; triggered reviews require fresh rationale so counters cannot silently substitute for judgment. The nearer sequence remains GV116→GV117→GV118, while P7/GV120-GV121 records the later language-neutral application direction."
     "Govenv.DirectionReview; Govenv.Roadmap; Govenv.Project; GV110; GV111; GV112; GV120; GV121"
+    "Govenv.Project; Govenv.Roadmap; Govenv.DirectionReview; Govenv.Assurance.GV110; Govenv.Assurance.GV111"
     "State the current nearer Next sequence and the later P7 direction, then explain why changing either requires a real Purpose/Direction review rather than only incrementing a witness."
+    "Trace the governed inputs consumed by DirectionReview and the index/rationale fields used to establish review freshness."
+    "Explain why changing only a review index cannot satisfy the current assurance when the review trigger fires."
     directionRequirement
-
 bootstrapLessons : List BootstrapLesson
 bootstrapLessons =
     purposeLesson
@@ -273,22 +361,11 @@ bootstrapLessons =
   ∷ []
 
 bootstrapRequirements : LearningDebt
-bootstrapRequirements =
-    purposeRequirement
-  ∷ boundariesRequirement
-  ∷ authorizationRequirement
-  ∷ constitutionRequirement
-  ∷ assuranceRequirement
-  ∷ runtimeRequirement
-  ∷ learningRequirementBaseline
-  ∷ agdaRequirement
-  ∷ directionRequirement
-  ∷ []
+bootstrapRequirements = lessonRequirements bootstrapLessons
 
 bootstrapComplete : Bool
 bootstrapComplete =
-  allRequirementsEvidenced bootstrapRequirements evidence
-
+  allLessonsEvidenced bootstrapLessons evidence
 candidateBoundary : String
 candidateBoundary =
   "eac603e07e6eae7b5dc7c2d762d422003c4459a4"
@@ -311,16 +388,26 @@ bootstrapMechanicsRequirement =
     "Explain why from-zero bootstrap is a pinned Protocol-curated baseline, why it teaches effective semantics rather than replaying every historical commit, and why outstanding debt is derived from bootstrap plus carried debt minus human evidence."
     candidateBoundary
 
+reviewSurfaceBoundary : String
+reviewSurfaceBoundary = "2674f71092aff25891b36fc9b24f1034d68659da"
+
+reviewSurfaceRequirement : LearningRequirement
+reviewSurfaceRequirement =
+  learningRequirement
+    "Review the semantically load-bearing code and assurance surface for each learning lesson before its evidence may reduce debt, while keeping curriculum quality as Protocol judgment and never claiming to prove understanding."
+    reviewSurfaceBoundary
 gateSemanticsLesson : BootstrapLesson
 gateSemanticsLesson =
   bootstrapLesson
     "candidate-gate"
     "10. Candidate learning boundary"
-    "After the historical baseline, learn the boundary introduced by this candidate: classification remains human-reviewable Protocol judgment while the resulting gate is governed and machine-checked."
+    "After the historical baseline, learn the boundary introduced by the candidate gate: classification remains human-reviewable Protocol judgment while the resulting gate is governed and machine-checked."
     "Govenv.Learning; Govenv.Kernel.Learning; GV122"
-    (LearningRequirement.claim gateSemanticsRequirement)
+    "Govenv.Kernel.Learning.candidateLearningAllowed; Govenv.Learning.assessment; src/Govenv/Adapter/LearningCandidateVigilance.agda; src/Govenv/Adapter/learning-candidate-gate.sh; Govenv.Assurance.GV122"
+    "Explain why candidate learning classification remains a Protocol judgment while the resulting PR and release gates are governed."
+    "Trace a substantive PR from learning snapshot fields through assessment vigilance and candidateAllowed to the CI success or failure boundary."
+    "Identify which parts are machine-checked and which classification or rationale quality remains Protocol judgment."
     gateSemanticsRequirement
-
 bypassDebtLesson : BootstrapLesson
 bypassDebtLesson =
   bootstrapLesson
@@ -328,9 +415,11 @@ bypassDebtLesson =
     "11. Corrective bypass debt"
     "Urgent corrective work may restore a broken enforcement boundary before learning is complete, but that exception must not silently erase what the human still needs to learn."
     "Govenv.Learning; Govenv.Kernel.Learning; GV119; GV122"
-    (LearningRequirement.claim bypassDebtRequirement)
+    "Govenv.Kernel.Learning.candidateLearningAllowed; Govenv.Learning.outstanding; Govenv.Assurance.GV119; Govenv.Assurance.GV122"
+    "Explain why an urgent corrective bypass preserves learning debt and therefore blocks later conceptual expansion until catch-up closes it."
+    "Follow the urgentCorrective branch and show how unsatisfied requirements remain represented in outstanding debt."
+    "Show why a later feature or refactor cannot reuse that bypass to proceed while the debt remains open."
     bypassDebtRequirement
-
 bootstrapMechanicsLesson : BootstrapLesson
 bootstrapMechanicsLesson =
   bootstrapLesson
@@ -338,14 +427,29 @@ bootstrapMechanicsLesson =
     "12. Bootstrap reconstruction"
     "The from-zero path is a pinned Protocol-curated reconstruction of effective semantics, not a replay of every historical commit. It joins the prospective debt model instead of creating a weaker parallel authority."
     "Govenv.Learning; Govenv.LearningEvidence; GV123"
-    (LearningRequirement.claim bootstrapMechanicsRequirement)
+    "Govenv.Learning.bootstrapLessons/outstanding; Govenv.LearningEvidence; src/Govenv/Adapter/learning-answer.sh; src/Govenv/Adapter/learning-candidate-gate.sh; Govenv.Assurance.GV123"
+    "Explain why from-zero bootstrap is a pinned Protocol-curated baseline, why it teaches effective semantics rather than replaying every historical commit, and why outstanding debt is derived from bootstrap plus carried debt minus human evidence."
+    "Trace one bootstrap lesson from governed curriculum rendering to exact human evidence and then to evidence-only debt reduction."
+    "Explain why an evidence-only PR must reduce debt and why unrelated semantic changes make that path invalid."
     bootstrapMechanicsRequirement
-
+reviewSurfaceLesson : BootstrapLesson
+reviewSurfaceLesson =
+  bootstrapLesson
+    "review-surface"
+    "13. Review-surface-bound learning"
+    "Human review exposed that a semantic-only answer could reduce learning debt without the principal inspecting the semantically load-bearing code or assurance that carries the guarantee. Learning progress now binds evidence to an explicit review contract."
+    "Govenv.Learning; Govenv.LearningEvidence; Govenv.Assurance.GV123; GV124"
+    "Govenv.Learning.reviewContract/lessonEvidenced; Govenv.LearningEvidence; src/Govenv/Projection/LearningPromptCatalog.agda; src/Govenv/Adapter/learning-answer.sh; Govenv.Assurance.GV124"
+    "Explain why a semantic-only answer is insufficient evidence for a lesson whose purpose is to make the principal capable of reviewing current effective semantics."
+    "Trace how a lesson's review contract is rendered, captured, matched against evidence, and then used to derive outstanding debt."
+    "Explain what the compiler can prove about review-contract freshness and what remains human judgment about whether the response demonstrates adequate understanding."
+    reviewSurfaceRequirement
 carriedLessons : List BootstrapLesson
 carriedLessons =
     gateSemanticsLesson
   ∷ bypassDebtLesson
   ∷ bootstrapMechanicsLesson
+  ∷ reviewSurfaceLesson
   ∷ []
 
 appendLessons : List BootstrapLesson → List BootstrapLesson → List BootstrapLesson
@@ -356,43 +460,35 @@ appendLessons (lesson ∷ rest) right =
 allLearningPrompts : List BootstrapLesson
 allLearningPrompts =
   appendLessons bootstrapLessons carriedLessons
-
 assessment : CandidateLearningAssessment
 assessment =
   candidateLearningAssessment
     corrective
     expands
-    "GV119 promised a soft PR learning gate but candidate CI did not enforce it; GV122 adds the missing PR boundary and GV123 makes that gate reachable from zero through a governed bootstrap baseline. This corrective candidate preserves all new learning requirements as debt through the urgent corrective bypass."
-    ( gateSemanticsRequirement
-    ∷ bypassDebtRequirement
-    ∷ bootstrapMechanicsRequirement
-    ∷ [] )
+    "Human review exposed that learning debt could decrease after a semantic-only answer without inspecting the code and assurance carrying the guarantee; GV124 closes that review-surface hole and preserves the new learning requirement as debt through the urgent corrective bypass."
+    (reviewSurfaceRequirement ∷ [])
     urgentCorrective
-    0
+    1
 
 carriedDebt : LearningDebt
-carriedDebt =
-  gateSemanticsRequirement
-  ∷ bypassDebtRequirement
-  ∷ bootstrapMechanicsRequirement
-  ∷ []
+carriedDebt = lessonRequirements carriedLessons
 
 outstanding : LearningDebt
 outstanding =
-  pendingRequirements
-    (appendDebt bootstrapRequirements carriedDebt)
-    evidence
+  pendingLessonRequirements allLearningPrompts evidence
 
 assessmentRequirementsClosed : Bool
 assessmentRequirementsClosed =
-  allRequirementsEvidenced
+  allRequirementsEvidencedByLessons
     (CandidateLearningAssessment.requirements assessment)
+    allLearningPrompts
     evidence
 
 assessmentRequirementsPreserved : Bool
 assessmentRequirementsPreserved =
-  allRequirementsRepresented
+  allRequirementsRepresentedByLessons
     (CandidateLearningAssessment.requirements assessment)
+    allLearningPrompts
     evidence
     outstanding
 
@@ -408,3 +504,9 @@ candidateAllowed =
     outstanding
     (CandidateLearningAssessment.bypass assessment)
 ```
+
+[executed on device: solo098 (ee17d3e4-8041-4f18-9fe7-4f36099458e3)]
+
+[executed on device: solo098 (ee17d3e4-8041-4f18-9fe7-4f36099458e3)]
+
+[executed on device: solo098 (ee17d3e4-8041-4f18-9fe7-4f36099458e3)]

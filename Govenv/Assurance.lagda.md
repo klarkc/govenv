@@ -47,6 +47,8 @@ import Govenv.Assurance.GV122.Counterexample.UngatedCandidate
 import Govenv.Assurance.GV123 as GV123
 import Govenv.Assurance.GV123.Counterexample.ProspectiveOnly
 import Govenv.Assurance.GV123.Counterexample.UnclosableBootstrap
+import Govenv.Assurance.GV124 as GV124
+import Govenv.Assurance.GV124.Counterexample.SemanticOnlyProgress
 open import Govenv.Kernel.Assurance
 open import Govenv.Kernel.Identifier using (P; GV)
 open import Govenv.Kernel.Roadmap using (Roadmap; roadmapOf; _▣; _◇; _✓; _├_)
@@ -98,6 +100,7 @@ assurances =
   ∷ assures (statically GV119.evidence)
   ∷ assures (statically GV122.evidence)
   ∷ assures (statically GV123.evidence)
+  ∷ assures (statically GV124.evidence)
   ∷ []
 
 pendingRoadmap : Roadmap

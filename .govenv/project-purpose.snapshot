@@ -1,4 +1,4 @@
 govenv-project-purpose-snapshot-v2
-review-index 2
-review-rationale "GV123 now makes the learning gate operationally reachable from zero through governed prompts, exact human-response capture, and debt-reducing evidence-only pull requests; this strengthens the existing human-authority purpose without changing it."
+review-index 3
+review-rationale "GV124 tightens learning evidence from semantic-only challenge capture to review-contract-bound code and assurance review. This directly strengthens the existing promise that agents must not outrun human authority, so the complete roadmap still fits the canonical purpose unchanged."
 purpose "Turn every repository into a self-governing developer environment: define what valid means once, let agents move fast without outrunning human authority, and reproduce the same tooling, automation, and runtime anywhere."

@@ -1,9 +1,11 @@
 # Human learning evidence
 
-This module stores exact human-produced challenge/response evidence used to close
-Govenv learning requirements. The capture tool may mechanically append the
-human principal identity, governed requirement, governed challenge, and exact
-response, but it must not synthesize or rewrite the response.
+This module stores exact human-produced review-contract/response evidence used
+to close Govenv learning requirements. The capture tool may mechanically append
+the human principal identity, governed requirement, exact current review
+contract, and exact response, but it must not synthesize, rewrite, or grade the
+response. Review-contract matching is evidence freshness, not proof of mental
+state or response quality.
 
 ```agda
 {-# OPTIONS --safe #-}
@@ -23,7 +25,7 @@ record DemonstratedLearning : Set where
   field
     requirement : LearningRequirement
     principal : HumanPrincipal
-    challenge : String
+    reviewContract : String
     response : String
 
 claimedHumanPrincipal : String → HumanPrincipal
