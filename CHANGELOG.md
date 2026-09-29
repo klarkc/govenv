@@ -2,6 +2,32 @@
 
 ## [Unreleased]
 
+<!-- govenv-governance-impact:start -->
+### Governance impact
+
+**Phase:** ▣ P1 — unchanged  
+**Items:** 1 advanced · 1 introduced
+
+#### Advanced · 1
+
+| GV | Proposition |
+| :---: | --- |
+| **GV84 ◇ ↑** | Make observed invariant regressions counterexample-closing: once a contradiction to a governed or relied-upon invariant is recorded as an observed regression, its repair is incomplete until the counterexample is preserved as governed evidence, the missing or incorrectly scoped assurance boundary is corrected or overstated governance superseded, and candidate validation rejects recurrence before the affected workflow may succeed. |
+
+#### Introduced · 1
+
+| GV | Proposition |
+| :---: | --- |
+| **+ GV124 ✓** | Bind learning-debt reduction to the exact current review contract for each governed lesson: every lesson must identify a non-empty semantically load-bearing review surface together with semantic, code, and assurance probes; human evidence closes a lesson only when both its learning requirement and exact review contract match, so changing that contract makes older evidence stale. Curriculum selection, review-surface adequacy, and response quality remain Protocol judgment, and compiler checks must never claim to prove human understanding. |
+
+Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `2674f71..0e2f077`.
+<!-- govenv-governance-impact:end -->
+
+
+### Bug Fixes
+
+* **learning:** bind evidence to review contracts ([0e2f077](https://github.com/klarkc/govenv/commit/0e2f077513fafb5a474a29ce4929dafb705a2435))
+
 ## [0.2.9](https://github.com/klarkc/govenv/compare/v0.2.8...v0.2.9) (2026-09-28)
 <!-- govenv-release-freeze: version=0.2.9 base=v0.2.8 authorized=00458662f96d563aafca9babfc36bb5e6f8cc65d -->
 
