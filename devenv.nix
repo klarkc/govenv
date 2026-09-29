@@ -137,6 +137,10 @@ let
     printf '%s\n' "$als_version" | grep -Fq 'Agda v2.8.0 Language Server v8'
   '';
 
+  checkAgdaStyle = ''
+    bash src/Govenv/Adapter/agda-style.sh
+  '';
+
   materializeChangelog = output: ''
     changelog_tmp="${output}.tmp.$$"
     trap 'rm -f "$changelog_tmp"' EXIT
@@ -692,6 +696,8 @@ in
 
   tasks."govenv:materialize:check".exec = checkMaterializations;
 
+  tasks."govenv:agda-style".exec = checkAgdaStyle;
+
   tasks."govenv:repository-metadata:build".exec = buildRepositoryMetadataAdapter;
 
   tasks."govenv:admin:build".exec = buildAdminAdapters;
@@ -702,6 +708,7 @@ in
     ${checkConstitutionalHistoryExperiment}
     ${checkLearningSurface}
     ${validateAgdaLanguageCapability}
+    ${checkAgdaStyle}
     ${checkMaterializations}
     ${checkRepositoryMetadataAdapter}
     ${checkAdminAdapters}
