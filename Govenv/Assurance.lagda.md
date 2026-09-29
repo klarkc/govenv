@@ -53,6 +53,7 @@ import Govenv.Assurance.GV125 as GV125
 import Govenv.Assurance.GV125.Counterexample.StackedPullRequestHardGate
 import Govenv.Assurance.GV126 as GV126
 import Govenv.Assurance.GV126.Counterexample.MissingLsp
+import Govenv.Assurance.GV127 as GV127
 open import Govenv.Kernel.Assurance
 open import Govenv.Kernel.Identifier using (P; GV)
 open import Govenv.Kernel.Roadmap using (Roadmap; roadmapOf; _▣; _◇; _✓; _├_)
@@ -107,6 +108,7 @@ assurances =
   ∷ assures (statically GV124.evidence)
   ∷ assures (statically GV125.evidence)
   ∷ assures (checked GV126.evidence)
+  ∷ assures (statically GV127.evidence)
   ∷ []
 
 pendingRoadmap : Roadmap

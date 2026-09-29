@@ -415,6 +415,15 @@ agdaToolingRequirement =
     "Explain the Agda tooling vertical: why Stage-0 first exposes Agda and ALS through a Govenv-owned devenv module, why formatter/linter selection is reuse-first, why formatting and lint diagnostics remain non-constitutional tooling, and why GV121 remains the later external-application ejection boundary."
     agdaToolingBoundary
 
+agdaStyleBoundary : String
+agdaStyleBoundary = "d14d9fe7d1990c815141cb00ff79990709fd791d"
+
+agdaStyleRequirement : LearningRequirement
+agdaStyleRequirement =
+  learningRequirement
+    "Explain how Govenv inherits the versioned Agda stdlib style guide as a baseline, composes project-specific rules without mutating that baseline, measures baseline/custom/total mechanical coverage, and prevents a partial rule inventory from claiming the long-term 100% applicable-rule target."
+    agdaStyleBoundary
+
 gateSemanticsLesson : BootstrapLesson
 gateSemanticsLesson =
   bootstrapLesson
@@ -490,6 +499,19 @@ agdaToolingLesson =
     "Explain what GV126 assurance establishes about the environment and why neither ALS nor future formatter/linter diagnostics become constitutional validity."
     agdaToolingRequirement
 
+agdaStyleLesson : BootstrapLesson
+agdaStyleLesson =
+  bootstrapLesson
+    "agda-style-baseline"
+    "16. Agda style baseline and coverage"
+    "The formatter/linter rule model inherits the Agda stdlib style guide as an upstream baseline and composes Govenv-specific rules separately. Coverage is measurable from the start, but a partial baseline inventory must never be presented as full style-guide coverage."
+    "Govenv.AgdaStyle; src/Govenv/Adapter/agda-style.sh; devenv.nix; Govenv.Roadmap GV129"
+    "Govenv.AgdaStyle.RuleOrigin/Mechanism/rules/baselineInventoryComplete; src/Govenv/Adapter/agda-style.sh; devenv.nix govenv:agda-style; GV129"
+    "Explain the difference between stdlib baseline rules and Govenv custom rules, and why custom extension must not silently redefine the upstream baseline."
+    "Trace the initial baseline/custom/mechanism counters through govenv:agda-style and show why baseline-inventory=partial prevents a 100% coverage claim."
+    "Explain why GV127 establishes only the reuse decision, why the current checks are partial Stage-0 tooling, and what GV129 still requires before the 100% target can be established."
+    agdaStyleRequirement
+
 carriedLessons : List BootstrapLesson
 carriedLessons =
     gateSemanticsLesson
@@ -498,6 +520,7 @@ carriedLessons =
   ∷ reviewSurfaceLesson
   ∷ stackedCandidateLesson
   ∷ agdaToolingLesson
+  ∷ agdaStyleLesson
   ∷ []
 
 appendLessons : List BootstrapLesson → List BootstrapLesson → List BootstrapLesson
@@ -513,10 +536,10 @@ assessment =
   candidateLearningAssessment
     feature
     expands
-    "This stacked child establishes GV126 by adding a Govenv-owned languages.agda devenv module, a pinned Agda-2.8.0-compatible ALS v8 package, executable capability checks, and observed assurance. It preserves the parent Agda-tooling requirement and advances Next to the reuse-first GV127 investigation without treating parent candidate state as authorized evidence."
-    (agdaToolingRequirement ∷ [])
+    "This stacked child closes the reuse-first GV127 investigation, records the decision to reuse lint components while supplying the missing formatting/LSP boundary in GV128, and introduces GV129 plus an explicitly partial stdlib-baseline/custom-rule coverage model. Parent Agda-tooling debt remains represented as candidate state rather than authorized evidence."
+    (agdaStyleRequirement ∷ [])
     noBypass
-    1
+    2
 
 carriedDebt : LearningDebt
 carriedDebt = lessonRequirements carriedLessons

@@ -28,7 +28,7 @@ source =
 
 currentSummary : BoundedText 400
 currentSummary = boundedText
-  "Govenv is in P1 with authorization-aware stacked-candidate learning. Agda 2.8.0 and matching ALS v8 are now a first-class internal devenv language capability with an observed assurance boundary. The Agda tooling vertical advances to formatter/linter reuse investigation before any bespoke implementation."
+  "Govenv is in P1 with Agda 2.8.0 and ALS v8 exposed through the internal devenv language module. The reuse investigation found viable lint components but no maintained formatter/LSP solution spanning .agda and .lagda.md. A partial stdlib-baseline plus Govenv custom-rule catalog now reports coverage without claiming completeness."
   refl
 
 currentSourceCoverage : CurrentCoverage
@@ -42,32 +42,32 @@ current : Current source
 current = currentReview currentSummary currentSourceCoverage
 
 nextTarget : GovernanceTarget roadmap
-nextTarget = governanceTarget (GVR 127) refl
+nextTarget = governanceTarget (GVR 128) refl
 
 nextSummary : BoundedText 400
 nextSummary = boundedText
-  "Execute GV127's fresh Agda formatter/linter ecosystem investigation against the now-working Agda/ALS environment, then use GV128 to integrate an adequate reusable implementation or the narrowest temporary in-repository fallback behind the same LSP-facing boundary."
+  "Execute GV128 by composing reusable Agda lint capabilities where they fit and supplying the missing deterministic formatter/LSP adapter in Stage 0. Keep the rule model extensible from the stdlib baseline with Govenv custom rules, while GV129 retains the later complete inventory and 100% mechanically covered applicable-rule target."
   refl
 
 nextClaims : List (NextClaim roadmap)
 nextClaims =
   nextClaim (planned nextTarget)
-    "GV126 closes the missing Stage-0 Agda/LSP substrate; GV127 is now the explicit reuse-first decision point before any project-specific formatter/linter implementation."
+    "GV127 found reusable lint components but no adequate formatter/LSP implementation; GV128 now owns the narrow Stage-0 composition and missing formatting boundary."
   ∷ []
 
 nextGapCoverage : GapCoverage roadmap
 nextGapCoverage = gapCoverage
   (addressedNow (planned nextTarget)
-    "The long-term purpose includes reproducible developer tooling; with the language/LSP substrate established, GV127 now tests ecosystem reuse before Govenv owns additional Agda tooling implementation.")
+    "The long-term purpose includes reproducible tooling; GV128 now turns the reuse decision into a deterministic formatter/linter capability without making style advice constitutional validity.")
   (addressedNow (planned nextTarget)
-    "Current state exposes Agda 2.8.0 and ALS v8 through the internal devenv language module; the remaining immediate gap is selecting the formatter/linter implementation boundary from fresh evidence.")
+    "Current state has the Agda/LSP substrate, an explicit ecosystem disposition, and partial style-rule metrics; the immediate gap is integrating reusable lint and the missing formatter/LSP adapter.")
 
 next : Next roadmap
 next = nextReview nextSummary nextClaims nextGapCoverage
 
 reviewRationale : String
 reviewRationale =
-  "GV126 is now established by a Govenv-owned internal devenv language module, a pinned Agda-2.8.0-compatible ALS v8 package, executable version checks, and observed assurance. Current therefore advances to the reuse-first GV127 investigation while the candidate remains composition state rather than authorized evidence."
+  "GV127 records the reuse-first investigation: ALS v8 supplies no formatting capability, current lint tools are useful only as components, and no adequate maintained formatter spans the required source forms and LSP boundary. GV129 records the later stdlib-baseline/custom-rule coverage target, so Current advances to GV128 without changing purpose."
 
 review : DirectionReview roadmap purpose
 review = directionReview source refl current next reviewRationale 0
