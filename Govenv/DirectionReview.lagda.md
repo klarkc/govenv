@@ -28,7 +28,7 @@ source =
 
 currentSummary : BoundedText 400
 currentSummary = boundedText
-  "Govenv is in P1 with compiler-checked direction, a from-zero learning bootstrap, exact human-evidence capture, candidate learning gate, consolidation closure, and Stage-0 GitHub collaboration. The selected next vertical is Agda developer tooling: internal devenv language/LSP support first, then formatter/linter reuse investigation and implementation."
+  "Govenv is in P1 with compiler-checked direction and Stage-0 GitHub collaboration. Agda 2.8.0 and its matching ALS v8 are now a first-class internal devenv language capability with a verified LSP handshake. The Agda tooling vertical advances to formatter/linter reuse investigation before any bespoke implementation."
   refl
 
 currentSourceCoverage : CurrentCoverage
@@ -42,32 +42,32 @@ current : Current source
 current = currentReview currentSummary currentSourceCoverage
 
 nextTarget : GovernanceTarget roadmap
-nextTarget = governanceTarget (GVR 124) refl
+nextTarget = governanceTarget (GVR 125) refl
 
 nextSummary : BoundedText 400
 nextSummary = boundedText
-  "Complete GV124 by making Agda and its language server a first-class capability of a Govenv-owned internal devenv module, then execute GV125's formatter/linter ecosystem investigation and GV126's selected Stage-0 integration while preserving GV121 as the later external-application destination."
+  "Execute GV125's fresh Agda formatter/linter ecosystem investigation against the now-working Agda/ALS environment, then use GV126 to integrate an adequate reusable implementation or the narrowest temporary in-repository fallback behind the same LSP-facing boundary."
   refl
 
 nextClaims : List (NextClaim roadmap)
 nextClaims =
   nextClaim (planned nextTarget)
-    "The project is deliberately opening the Agda tooling vertical now; GV124 establishes the missing Stage-0 language/LSP substrate required before formatter/linter reuse or implementation can be evaluated coherently."
+    "GV124 closes the missing Stage-0 Agda/LSP substrate; GV125 is now the explicit reuse-first decision point before any project-specific formatter/linter implementation."
   ∷ []
 
 nextGapCoverage : GapCoverage roadmap
 nextGapCoverage = gapCoverage
   (addressedNow (planned nextTarget)
-    "The long-term purpose includes reproducing the same tooling and runtime anywhere; GV124 starts making the Agda development capability explicit and reproducible without assigning semantic authority to devenv wiring.")
+    "The long-term purpose includes reproducible developer tooling; with the language/LSP substrate established, GV125 now tests ecosystem reuse before Govenv owns additional Agda tooling implementation.")
   (addressedNow (planned nextTarget)
-    "Current state has Agda only as an explicitly installed package, not as a first-class language/LSP capability; GV124 closes that immediate developer-environment gap before formatter/linter work.")
+    "Current state now exposes Agda 2.8.0 and ALS v8 through the internal devenv language module; the remaining immediate gap is selecting the formatter/linter implementation boundary from fresh evidence.")
 
 next : Next roadmap
 next = nextReview nextSummary nextClaims nextGapCoverage
 
 reviewRationale : String
 reviewRationale =
-  "The project direction now deliberately opens an Agda developer-tooling vertical. GV124 adds a Govenv-owned internal devenv language/LSP module, GV125 requires fresh ecosystem reuse investigation, and GV126 supplies the selected Stage-0 formatter/linter capability while keeping GV121 as the later ejection target; this changes execution priority without changing project purpose."
+  "GV124 is now established by a Govenv-owned internal devenv language module, a pinned Agda-2.8.0-compatible ALS v8 package, executable version checks, and a successful LSP initialize handshake. Current therefore advances to the reuse-first GV125 investigation while project purpose remains unchanged."
 
 review : DirectionReview roadmap purpose
 review = directionReview source refl current next reviewRationale 0

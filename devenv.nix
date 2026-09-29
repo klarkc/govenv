@@ -1,7 +1,76 @@
-{ pkgs, ... }:
+{ pkgs, lib, ... }:
 
 let
   agdaStdlib = pkgs.agdaPackages.standard-library;
+
+  mkAgdaLanguageServer = pkgs:
+    pkgs.stdenv.mkDerivation {
+      pname = "agda-language-server";
+      version = "8";
+
+      src = pkgs.fetchurl {
+        url = "https://github.com/agda/agda-language-server/releases/download/v8/als-v8-Agda-2.8.0-ubuntu.zip";
+        hash = "sha256-uJIGGh6HTwal99wZKoRHIPDM6ZhQ19SZGgsow6CWlQI=";
+      };
+
+      nativeBuildInputs = [
+        pkgs.autoPatchelfHook
+        pkgs.makeWrapper
+        pkgs.unzip
+      ];
+
+      buildInputs = [
+        pkgs.gmp
+        pkgs.ncurses
+        pkgs.stdenv.cc.cc.lib
+        pkgs.zlib
+      ];
+
+      dontUnpack = true;
+      dontConfigure = true;
+      dontBuild = true;
+
+      installPhase = ''
+        runHook preInstall
+        mkdir -p "$out/bin" "$out/libexec/agda-language-server"
+        unzip -q "$src" -d "$out/libexec/agda-language-server"
+        chmod +x "$out/libexec/agda-language-server/als"
+        makeWrapper "$out/libexec/agda-language-server/als" "$out/bin/als"
+        runHook postInstall
+      '';
+    };
+
+  agdaLanguageModule = { config, pkgs, lib, ... }:
+    let
+      cfg = config.languages.agda;
+    in
+    {
+      options.languages.agda = {
+        enable = lib.mkEnableOption "tools for Agda development";
+
+        package = lib.mkOption {
+          type = lib.types.package;
+          default = pkgs.agda.withPackages [ pkgs.agdaPackages.standard-library ];
+          defaultText = lib.literalExpression "pkgs.agda.withPackages [ pkgs.agdaPackages.standard-library ]";
+          description = "The Agda toolchain to use.";
+        };
+
+        lsp = {
+          enable = lib.mkEnableOption "Agda Language Server" // { default = true; };
+
+          package = lib.mkOption {
+            type = lib.types.package;
+            default = mkAgdaLanguageServer pkgs;
+            defaultText = lib.literalExpression "Govenv's pinned Agda Language Server v8 package";
+            description = "The Agda language server package to use.";
+          };
+        };
+      };
+
+      config = lib.mkIf cfg.enable {
+        packages = [ cfg.package ] ++ lib.optional cfg.lsp.enable cfg.lsp.package;
+      };
+    };
 
   buildMaterializers = ''
     rm -rf .govenv/materialize-build
@@ -59,6 +128,13 @@ let
 
   validateRoadmapEvolution = ''
     bash src/Govenv/Adapter/roadmap-evolution.sh
+  '';
+
+  validateAgdaLanguageCapability = ''
+    agda_version="$(agda --version)"
+    als_version="$(als --version)"
+    printf '%s\n' "$agda_version" | grep -Fq 'Agda version 2.8.0'
+    printf '%s\n' "$als_version" | grep -Fq 'Agda v2.8.0 Language Server v8'
   '';
 
   materializeChangelog = output: ''
@@ -484,13 +560,15 @@ let
 
 in
 {
+  imports = [ agdaLanguageModule ];
+
+  languages.agda.enable = true;
+
   env.LANG = "C.UTF-8";
   env.LC_ALL = "C.UTF-8";
 
   packages = [
     pkgs.actionlint
-    pkgs.agda
-    agdaStdlib
     pkgs.diffutils
     pkgs.gh
     pkgs.ghc
@@ -623,6 +701,7 @@ in
     ${checkArchitectureAssurance}
     ${checkConstitutionalHistoryExperiment}
     ${checkLearningSurface}
+    ${validateAgdaLanguageCapability}
     ${checkMaterializations}
     ${checkRepositoryMetadataAdapter}
     ${checkAdminAdapters}
@@ -661,6 +740,7 @@ in
   '';
 
   enterTest = ''
+    ${validateAgdaLanguageCapability}
     agda -i . -i src -i ${agdaStdlib}/src Govenv.lagda.md
     ${checkMaterializations}
   '';

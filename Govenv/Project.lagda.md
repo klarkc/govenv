@@ -41,10 +41,10 @@ purpose = "Turn every repository into a self-governing developer environment: de
 
 purposeReviewRationale : String
 purposeReviewRationale =
-  "GV124 through GV126 make Agda language/LSP and formatting/linting explicit reproducible developer-tooling work while preserving tooling mechanics outside semantic authority and retaining GV121's eventual external-application boundary; the existing project purpose already covers this direction and remains unchanged."
+  "GV124 now establishes the internal reproducible Agda/ALS capability promised by the existing tooling direction; completing that substrate and advancing to reuse investigation strengthens execution of the existing purpose without changing the purpose itself."
 
 purposeReviewIndex : Nat
-purposeReviewIndex = 3
+purposeReviewIndex = 4
 
 website : String
 website = "https://klarkc.github.io/govenv/"
