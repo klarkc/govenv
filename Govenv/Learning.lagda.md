@@ -405,6 +405,16 @@ stackedCandidateRequirement =
   learningRequirement
     "Explain the difference between candidate-to-candidate composition and authorization-boundary merge: stacked candidates must refresh and preserve learning requirements, while only a candidate targeting the governed authorized branch is subject to the hard debt-closure gate and can create an AuthorizedRevision."
     stackedCandidateBoundary
+
+agdaToolingBoundary : String
+agdaToolingBoundary = "e4da1ba795e2cec8f9481a5c259aec386a44a2d4"
+
+agdaToolingRequirement : LearningRequirement
+agdaToolingRequirement =
+  learningRequirement
+    "Explain the Agda tooling vertical: why Stage-0 first exposes Agda and ALS through a Govenv-owned devenv module, why formatter/linter selection is reuse-first, why formatting and lint diagnostics remain non-constitutional tooling, and why GV121 remains the later external-application ejection boundary."
+    agdaToolingBoundary
+
 gateSemanticsLesson : BootstrapLesson
 gateSemanticsLesson =
   bootstrapLesson
@@ -466,6 +476,20 @@ stackedCandidateLesson =
     "Trace github.event.pull_request.base.sha/base.ref through the Test workflow and learning adapter to candidateComposition versus authorizationBoundary, then show what changes when a stacked PR is retargeted to the authorized branch."
     "Show why composition still rejects lost requirements, why the same open debt is rejected at the authorization boundary, and why a merge to candidateTarget cannot construct AuthorizedRevision."
     stackedCandidateRequirement
+
+agdaToolingLesson : BootstrapLesson
+agdaToolingLesson =
+  bootstrapLesson
+    "agda-tooling-vertical"
+    "15. Agda tooling vertical"
+    "Govenv is opening a developer-tooling vertical that first makes Agda and its language server reproducible in Stage 0, then investigates formatter/linter reuse before implementing only the missing boundary, while keeping tooling advice outside constitutional validity."
+    "Govenv.Roadmap; Govenv.DirectionReview; GV121; GV126; GV127; GV128"
+    "Govenv.Roadmap GV121/GV126/GV127/GV128; Govenv.DirectionReview.next"
+    "Trace the selected Next from GV126 through GV128 and explain which pieces are environment/tooling capability rather than semantic authority."
+    "Explain why GV127 requires reuse investigation before GV128 implementation and why a todo roadmap item is not completion evidence."
+    "Explain how future assurance for GV126/GV128 must establish the capability without turning formatter/linter output into constitutional validity."
+    agdaToolingRequirement
+
 carriedLessons : List BootstrapLesson
 carriedLessons =
     gateSemanticsLesson
@@ -473,6 +497,7 @@ carriedLessons =
   ∷ bootstrapMechanicsLesson
   ∷ reviewSurfaceLesson
   ∷ stackedCandidateLesson
+  ∷ agdaToolingLesson
   ∷ []
 
 appendLessons : List BootstrapLesson → List BootstrapLesson → List BootstrapLesson
@@ -486,12 +511,12 @@ allLearningPrompts =
 assessment : CandidateLearningAssessment
 assessment =
   candidateLearningAssessment
-    corrective
+    feature
     expands
-    "Stacked PRs #62 and #63 showed that GV122 applied the authorization hard gate to candidate-to-candidate composition. GV125 separates comparison-base freshness from the authorized-branch boundary, preserves unsatisfied child requirements through composition, and keeps this new learning requirement as debt through the urgent corrective bypass."
-    (stackedCandidateRequirement ∷ [])
-    urgentCorrective
-    2
+    "The candidate opens the Agda developer-tooling vertical on top of the authorized GV125 learning boundary: it introduces GV126 through GV128, selects Agda/LSP enablement as Next, preserves reuse-first formatter/linter selection, and does not use the urgent-corrective bypass."
+    (agdaToolingRequirement ∷ [])
+    noBypass
+    0
 
 carriedDebt : LearningDebt
 carriedDebt = lessonRequirements carriedLessons
