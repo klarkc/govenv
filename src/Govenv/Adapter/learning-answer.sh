@@ -28,13 +28,9 @@ line="$(
   exit 2
 }
 
-IFS=$'	' read -r prompt_key claim source_revision challenge <<< "$line"
+IFS=$'	' read -r prompt_key claim source_revision review_surface semantic_probe code_probe assurance_probe review_contract <<< "$line"
 
 evidence_file="Govenv/LearningEvidence.lagda.md"
-if grep -Fq -- "$claim" "$evidence_file"; then
-  echo "Learning evidence for '$prompt_key' is already recorded."
-  exit 0
-fi
 
 default_principal="$(git config user.email 2>/dev/null || true)"
 if [[ -z "$default_principal" ]]; then
@@ -64,8 +60,14 @@ printf '%s
 printf '%s
 ' "Bound revision: $source_revision"
 printf '%s
+' "Review surface: $review_surface"
+printf '%s
+' "Semantic probe: $semantic_probe"
+printf '%s
+' "Code probe: $code_probe"
+printf '%s
 
-' "Challenge: $challenge"
+' "Assurance probe: $assurance_probe"
 
 response=""
 if [[ -n "${GOVENV_LEARNING_RESPONSE_FILE:-}" ]]; then
@@ -81,7 +83,13 @@ else
     printf '%s
 ' "# Prompt key: $prompt_key"
     printf '%s
-' "# Challenge: $challenge"
+' "# Review surface: $review_surface"
+    printf '%s
+' "# Semantic probe: $semantic_probe"
+    printf '%s
+' "# Code probe: $code_probe"
+    printf '%s
+' "# Assurance probe: $assurance_probe"
     printf '%s
 ' "# Write your response below. Lines beginning with # are ignored."
     printf '
@@ -113,7 +121,7 @@ fi
 principal_literal="$(printf '%s' "$principal" | jq -Rs .)"
 claim_literal="$(printf '%s' "$claim" | jq -Rs .)"
 source_literal="$(printf '%s' "$source_revision" | jq -Rs .)"
-challenge_literal="$(printf '%s' "$challenge" | jq -Rs .)"
+challenge_literal="$(printf '%s' "$review_contract" | jq -Rs .)"
 response_literal="$(printf '%s' "$response" | jq -Rs .)"
 
 block_file="$(mktemp)"
