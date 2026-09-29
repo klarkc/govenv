@@ -28,7 +28,7 @@ source =
 
 currentSummary : BoundedText 400
 currentSummary = boundedText
-  "Govenv is in P1 with compiler-checked direction, a from-zero learning bootstrap whose evidence is bound to explicit review contracts, and an authorization-aware candidate learning gate that permits stacked composition without weakening the main authority boundary. Constitutional history remains partial; GV116 is still the immediate gap, followed by GV117 and GV118."
+  "Govenv is in P1 with review-contract-bound learning and an authorization-aware candidate gate that permits stacked composition without weakening main authorization. The selected next vertical is Agda developer tooling: internal devenv language/LSP support first, then formatter/linter reuse investigation and integration."
   refl
 
 currentSourceCoverage : CurrentCoverage
@@ -42,32 +42,32 @@ current : Current source
 current = currentReview currentSummary currentSourceCoverage
 
 nextTarget : GovernanceTarget roadmap
-nextTarget = governanceTarget (GVR 116) refl
+nextTarget = governanceTarget (GVR 126) refl
 
 nextSummary : BoundedText 400
 nextSummary = boundedText
-  "Complete GV116 by deriving the remaining roadmap and release lifecycle from append-only constitutional history, then resolve dependency/environment authority in GV117 and close GV118's governed collaboration boundary before broader runtime and journal work."
+  "Complete GV126 by making Agda and its language server a first-class capability of a Govenv-owned internal devenv module, then execute GV127's formatter/linter ecosystem investigation and GV128's selected Stage-0 integration while preserving GV121 as the later external-application destination."
   refl
 
 nextClaims : List (NextClaim roadmap)
 nextClaims =
   nextClaim (planned nextTarget)
-    "The recovery corpus is closed; its largest unresolved architectural gap is the history-first constitutional model tracked by GV116."
+    "The project deliberately opens the Agda tooling vertical now; GV126 establishes the missing Stage-0 language/LSP substrate required before formatter/linter reuse or implementation can be evaluated coherently."
   ∷ []
 
 nextGapCoverage : GapCoverage roadmap
 nextGapCoverage = gapCoverage
   (addressedNow (planned nextTarget)
-    "The long-term purpose now has a closed recovery context; GV116 addresses the most fundamental remaining semantic-model gap.")
+    "The long-term purpose includes reproducing the same tooling and runtime anywhere; GV126 starts making the Agda development capability explicit and reproducible without assigning semantic authority to devenv wiring.")
   (addressedNow (planned nextTarget)
-    "Current state records the recovery corpus as fully dispositioned and identifies constitutional-history migration as the next blocking gap.")
+    "Current state has authorization-aware stacked-candidate learning but Agda remains only an explicitly installed package; GV126 closes that immediate developer-environment gap before formatter/linter work.")
 
 next : Next roadmap
 next = nextReview nextSummary nextClaims nextGapCoverage
 
 reviewRationale : String
 reviewRationale =
-  "GV125 closes the stacked-PR learning-boundary gap by separating candidate composition from authorization: child candidates remain assessable and testable while only a candidate targeting the governed authorized branch faces the hard debt-closure gate and can create semantic authority. The selected Next remains GV116 followed by GV117 and GV118."
+  "With GV125 authorized, the project can compose the Agda tooling stack without conflating candidate composition with authorization. GV126 through GV128 now make the selected Agda developer-tooling vertical explicit while preserving the hard learning gate at the main authorization boundary and leaving project purpose unchanged."
 
 review : DirectionReview roadmap purpose
 review = directionReview source refl current next reviewRationale 0

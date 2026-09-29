@@ -41,10 +41,10 @@ purpose = "Turn every repository into a self-governing developer environment: de
 
 purposeReviewRationale : String
 purposeReviewRationale =
-  "GV125 aligns the learning gate with Govenv's existing authority boundary: stacked candidate composition remains testable while only the governed authorized target can create semantic authority. This preserves the purpose's promise that agents may move fast without outrunning human authority, so the canonical purpose remains unchanged."
+  "GV126 through GV128 make Agda language/LSP and formatting/linting explicit reproducible developer-tooling work while preserving tooling mechanics outside semantic authority and retaining GV121's eventual external-application boundary; the existing project purpose already covers this direction and remains unchanged."
 
 purposeReviewIndex : Nat
-purposeReviewIndex = 4
+purposeReviewIndex = 5
 
 website : String
 website = "https://klarkc.github.io/govenv/"
