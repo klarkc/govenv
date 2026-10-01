@@ -1,5 +1,5 @@
 govenv-direction-review-snapshot-v2
-review-index 0
-review-rationale "GV125 closes the stacked-PR learning-boundary gap by separating candidate composition from authorization: child candidates remain assessable and testable while only a candidate targeting the governed authorized branch faces the hard debt-closure gate and can create semantic authority. The selected Next remains GV116 followed by GV117 and GV118."
+review-index 1
+review-rationale "GV130-GV148 add a coherent future review-system vertical: governed budgets and normative identity, Protocol lifecycle/stewardship, portable adversarial roles and lenses, human-only decision evidence, defeasible judgments, canonical PR review packets, and meta-review of the review system itself. These additions strengthen human authorization but do not displace the more fundamental constitutional-history gap, so selected Next remains GV116 followed by GV117 and GV118."
 current "Govenv is in P1 with compiler-checked direction, a from-zero learning bootstrap whose evidence is bound to explicit review contracts, and an authorization-aware candidate learning gate that permits stacked composition without weakening the main authority boundary. Constitutional history remains partial; GV116 is still the immediate gap, followed by GV117 and GV118."
 next "Complete GV116 by deriving the remaining roadmap and release lifecycle from append-only constitutional history, then resolve dependency/environment authority in GV117 and close GV118's governed collaboration boundary before broader runtime and journal work."
