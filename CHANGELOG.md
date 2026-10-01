@@ -20,13 +20,14 @@
 | :---: | --- |
 | **+ GV124 ✓** | Bind learning-debt reduction to the exact current review contract for each governed lesson: every lesson must identify a non-empty semantically load-bearing review surface together with semantic, code, and assurance probes; human evidence closes a lesson only when both its learning requirement and exact review contract match, so changing that contract makes older evidence stale. Curriculum selection, review-surface adequacy, and response quality remain Protocol judgment, and compiler checks must never claim to prove human understanding. |
 
-Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `2674f71..0e2f077`.
+Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `2674f71..3843323`.
 <!-- govenv-governance-impact:end -->
 
 
 ### Bug Fixes
 
 * **learning:** bind evidence to review contracts ([0e2f077](https://github.com/klarkc/govenv/commit/0e2f077513fafb5a474a29ce4929dafb705a2435))
+* **learning:** close purpose review-surface gap ([3843323](https://github.com/klarkc/govenv/commit/38433231c279d030ffe68059b3b02eda2fe6d216))
 
 ## [0.2.9](https://github.com/klarkc/govenv/compare/v0.2.8...v0.2.9) (2026-09-28)
 <!-- govenv-release-freeze: version=0.2.9 base=v0.2.8 authorized=00458662f96d563aafca9babfc36bb5e6f8cc65d -->
