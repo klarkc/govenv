@@ -4,16 +4,24 @@ set -euo pipefail
 root="$(git rev-parse --show-toplevel)"
 cd "$root"
 
-base_sha="${GOVENV_CANDIDATE_BASE_SHA:-${1:-}}"
-if [[ -z "$base_sha" ]]; then
-  echo "Candidate learning gate requires GOVENV_CANDIDATE_BASE_SHA or a base SHA argument." >&2
+comparison_base_sha="${GOVENV_CANDIDATE_COMPARISON_BASE_SHA:-${GOVENV_CANDIDATE_BASE_SHA:-${1:-}}}"
+target_branch="${GOVENV_CANDIDATE_TARGET_BRANCH:-}"
+authorized_branch="${GOVENV_AUTHORIZED_BRANCH:-}"
+
+if [[ -z "$comparison_base_sha" || -z "$target_branch" || -z "$authorized_branch" ]]; then
+  echo "Candidate learning gate requires comparison-base SHA, target branch, and governed authorized branch." >&2
   exit 3
 fi
 
-git rev-parse --verify "$base_sha^{commit}" >/dev/null 2>&1 || {
-  echo "Candidate learning gate cannot resolve base revision: $base_sha" >&2
+git rev-parse --verify "$comparison_base_sha^{commit}" >/dev/null 2>&1 || {
+  echo "Candidate learning gate cannot resolve comparison base revision: $comparison_base_sha" >&2
   exit 3
 }
+
+candidate_boundary=candidateComposition
+if [[ "$target_branch" == "$authorized_branch" ]]; then
+  candidate_boundary=authorizationBoundary
+fi
 
 substantive_paths=()
 while IFS= read -r path; do
@@ -25,7 +33,7 @@ while IFS= read -r path; do
       substantive_paths+=("$path")
       ;;
   esac
-done < <(git diff --name-only "$base_sha"...HEAD --)
+done < <(git diff --name-only "$comparison_base_sha"...HEAD --)
 
 if [[ "${#substantive_paths[@]}" -eq 0 ]]; then
   echo "Learning candidate gate: no substantive candidate delta."
@@ -56,7 +64,7 @@ mkdir -p "$input_dir"
 
 previous_snapshot="$input_root/previous-learning.snapshot"
 previous_header=""
-if git show "$base_sha:.govenv/learning.snapshot" > "$previous_snapshot" 2>/dev/null; then
+if git show "$comparison_base_sha:.govenv/learning.snapshot" > "$previous_snapshot" 2>/dev/null; then
   previous_header="$(sed -n '1p' "$previous_snapshot")"
 fi
 
@@ -159,6 +167,9 @@ open import Agda.Builtin.Bool using (Bool; true; false)
 open import Agda.Builtin.Nat using (Nat)
 open import Agda.Builtin.String using (String)
 open import Govenv.Kernel.Learning
+
+candidateBoundary : CandidateLearningBoundary
+candidateBoundary = $candidate_boundary
 
 previousAssessmentAvailable : Bool
 previousAssessmentAvailable = $previous_available

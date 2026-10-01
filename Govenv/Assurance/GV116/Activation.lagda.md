@@ -55,10 +55,11 @@ merge =
     60
     reviewer
     (identifiedRevision "authorized-revision")
+    authorizedTarget
 
 authorization : AuthorizedRevision
 authorization =
-  authorizedRevision merge
+  authorizedRevision merge refl
 
 phase1 : SomePhaseId
 phase1 =

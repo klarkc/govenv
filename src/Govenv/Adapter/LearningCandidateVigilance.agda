@@ -8,7 +8,7 @@ open import Agda.Builtin.String using (primStringEquality)
 open import Govenv.Adapter.LearningCandidateObservation
 open import Govenv.Kernel.Learning
 open import Govenv.Kernel.Protocol using (protocolReviewFresh)
-open import Govenv.Learning using (assessment; candidateAllowed)
+open import Govenv.Learning using (assessment; candidateAllowed; candidateComposable)
 
 private
   not : Bool → Bool
@@ -56,5 +56,9 @@ assessmentFresh with previousAssessmentAvailable
 candidateAssessmentVigilance : assessmentFresh ≡ true
 candidateAssessmentVigilance = refl
 
-candidateLearningGate : candidateAllowed ≡ true
+candidateLearningGate :
+  candidateBoundaryAllowed
+    candidateBoundary
+    candidateComposable
+    candidateAllowed ≡ true
 candidateLearningGate = refl

@@ -1,4 +1,4 @@
 govenv-project-purpose-snapshot-v2
-review-index 3
-review-rationale "GV124 tightens learning evidence from semantic-only challenge capture to review-contract-bound code and assurance review. This directly strengthens the existing promise that agents must not outrun human authority, so the complete roadmap still fits the canonical purpose unchanged."
+review-index 4
+review-rationale "GV125 aligns the learning gate with Govenv's existing authority boundary: stacked candidate composition remains testable while only the governed authorized target can create semantic authority. This preserves the purpose's promise that agents may move fast without outrunning human authority, so the canonical purpose remains unchanged."
 purpose "Turn every repository into a self-governing developer environment: define what valid means once, let agents move fast without outrunning human authority, and reproduce the same tooling, automation, and runtime anywhere."

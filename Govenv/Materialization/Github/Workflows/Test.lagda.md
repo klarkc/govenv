@@ -11,6 +11,7 @@ open import Agda.Builtin.Bool using (true)
 open import Agda.Builtin.List using (List; []; _∷_)
 open import Agda.Builtin.Maybe using (just; nothing)
 open import Agda.Builtin.String using (String; primStringAppend)
+open import Govenv.Administration using (authorizedBranch)
 open import Govenv.Github.Authorization using (testJob)
 open import Govenv.Materialization
 open import Govenv.Materialization.Github.Workflows.Workflow
@@ -86,8 +87,13 @@ candidateValidationSteps =
   ∷ runStep "Check candidate learning gate" nothing
       (just "github.event_name == 'pull_request'")
       candidateLearningCommand
-      (binding "GOVENV_CANDIDATE_BASE_SHA"
-        (expression "github.event.pull_request.base.sha") ∷ [])
+      ( binding "GOVENV_CANDIDATE_COMPARISON_BASE_SHA"
+          (expression "github.event.pull_request.base.sha")
+      ∷ binding "GOVENV_CANDIDATE_TARGET_BRANCH"
+          (expression "github.event.pull_request.base.ref")
+      ∷ binding "GOVENV_AUTHORIZED_BRANCH"
+          (literal authorizedBranch)
+      ∷ [])
   ∷ runStep "Check materialized candidate" nothing nothing checkCommand []
   ∷ runStep "Run tests" nothing nothing testCommand []
   ∷ []

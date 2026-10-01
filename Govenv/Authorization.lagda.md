@@ -1,6 +1,6 @@
 # Authorization
 
-Authorization models the trust boundary between candidate repository states and governed effects. A candidate becomes authoritative only through an explicit human pull-request merge; later repository revisions and external effects may retain that authority only as derived outcomes with causal provenance to the accepted revision.
+Authorization models the trust boundary between candidate repository states and governed effects. Human review may compose one candidate into another candidate, but only a human pull-request merge into the governed authorization target creates semantic authority. Later repository revisions and external effects may retain that authority only as derived outcomes with causal provenance to the accepted authorized revision.
 
 ```agda
 {-# OPTIONS --safe #-}
@@ -31,17 +31,23 @@ record HumanPrincipal : Set where
     principal : Principal
     isHuman : Principal.kind principal ≡ human
 
+data PullRequestTarget : Set where
+  candidateTarget authorizedTarget : PullRequestTarget
+
 record HumanPullRequestMerge : Set where
   constructor humanPullRequestMerge
   field
     pullRequest : Nat
     principal : HumanPrincipal
     acceptedRevision : Revision
+    target : PullRequestTarget
 
 record AuthorizedRevision : Set where
   constructor authorizedRevision
   field
     authorization : HumanPullRequestMerge
+    targetIsAuthorized :
+      HumanPullRequestMerge.target authorization ≡ authorizedTarget
 
 revisionOf : AuthorizedRevision → Revision
 revisionOf authorized =

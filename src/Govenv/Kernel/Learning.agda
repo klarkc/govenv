@@ -17,6 +17,9 @@ data LearningImpact : Set where
 data LearningBypass : Set where
   noBypass urgentCorrective : LearningBypass
 
+data CandidateLearningBoundary : Set where
+  candidateComposition authorizationBoundary : CandidateLearningBoundary
+
 record LearningRequirement : Set where
   constructor learningRequirement
   field
@@ -113,6 +116,24 @@ private
   baseGate corrective debt urgentCorrective | false = true
   baseGate candidate debt bypass | false = false
 
+candidateCompositionAllowed :
+  CandidateKind →
+  LearningImpact →
+  Bool →
+  Bool →
+  Bool →
+  LearningBypass →
+  Bool
+candidateCompositionAllowed kind impact hasRequirements closed preserved bypass
+  with learningEvidenceShapeValid kind impact hasRequirements bypass
+... | false = false
+... | true with expandsRequirementsValid impact hasRequirements
+...   | false = false
+candidateCompositionAllowed kind impact hasRequirements true preserved bypass
+  | true | true = true
+candidateCompositionAllowed kind impact hasRequirements false preserved bypass
+  | true | true = preserved
+
 candidateLearningAllowed :
   CandidateKind →
   LearningImpact →
@@ -133,6 +154,14 @@ candidateLearningAllowed kind expands hasRequirements false false debt urgentCor
   | true | true = false
 candidateLearningAllowed kind impact hasRequirements closed preserved debt bypass
   | true | true = baseGate kind debt bypass
+
+candidateBoundaryAllowed :
+  CandidateLearningBoundary →
+  Bool →
+  Bool →
+  Bool
+candidateBoundaryAllowed candidateComposition composable authorizable = composable
+candidateBoundaryAllowed authorizationBoundary composable authorizable = authorizable
 
 prLearningAllowed : CandidateKind → LearningDebt → LearningBypass → Bool
 prLearningAllowed candidate debt bypass =
