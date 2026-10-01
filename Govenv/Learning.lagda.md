@@ -244,9 +244,9 @@ purposeLesson =
   bootstrapLesson
     "purpose"
     "1. Purpose and human authority"
-    "Start with why Govenv exists. The current purpose is the compressed result of the project's early repository-validity work and the later realization that fast agents must not silently outrun the human principal."
-    "Govenv.Project; Govenv.DirectionReview; GV109-GV112; GV119"
-    "Govenv.Project.purpose; Govenv.Project.purposeReviewIndex/purposeReviewRationale; Govenv.DirectionReview; Govenv.Assurance.GV110; Govenv.Materialization.Readme"
+    "Start with why Govenv exists. Before the code and assurance probes, teach the minimum Agda substrate needed to review this lesson: equality propositions (_≡_), refl, definitional reduction, and the meaning of the boolean arguments flowing into protocolReviewFresh. This primer is prerequisite instruction, not separate learning evidence."
+    "Govenv.Project; Govenv.DirectionReview; Govenv.Kernel.Protocol; Govenv.Adapter.PurposeVigilance; Govenv.Assurance.GV110; Govenv.Assurance.GV110.Counterexample.MechanicalBump; Govenv.Materialization.Readme; Govenv.Materialization.ProjectPurposeSnapshot; Govenv.Adapter.Readme; roadmap-evolution adapter; governed materialization check"
+    "Govenv.Project.purpose/purposeReviewIndex/purposeReviewRationale; Govenv.DirectionReview; src/Govenv/Kernel/Protocol.agda; Govenv.Assurance.GV110; Govenv.Assurance.GV110.Counterexample.MechanicalBump; Govenv.Materialization.ProjectPurposeSnapshot; src/Govenv/Adapter/PurposeVigilance.agda; src/Govenv/Adapter/roadmap-evolution.sh; Govenv.Materialization.Readme; src/Govenv/Adapter/Readme.agda; devenv.nix checkMaterializations README equality boundary"
     "In your own words: what failure is Govenv preventing, and why is human authority part of the product rather than merely a team convention?"
     "Locate the canonical purpose, trace one projection of it, and identify the code that makes a mechanical purpose-review counter bump insufficient."
     "If README or a review counter changed while the governed purpose/review evidence did not, explain which checks should reject the candidate and what they do not prove."
@@ -465,7 +465,7 @@ assessment =
   candidateLearningAssessment
     corrective
     expands
-    "Human review exposed that learning debt could decrease after a semantic-only answer without inspecting the code and assurance carrying the guarantee; GV124 closes that review-surface hole and preserves the new learning requirement as debt through the urgent corrective bypass."
+    "Independent catch-up testing found that GV124's purpose lesson bound evidence to a review surface too small to answer its own code and assurance probes. The corrective candidate preserves the observed surface-sufficiency regression, expands the contract to the actual load-bearing path, front-loads the minimum Agda substrate, and keeps the GV124 learning requirement as debt through the urgent corrective bypass."
     (reviewSurfaceRequirement ∷ [])
     urgentCorrective
     1

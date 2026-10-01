@@ -7,5 +7,5 @@ assessment-kind corrective
 assessment-impact expands
 assessment-bypass urgent-corrective
 review-index 1
-review-rationale "Human review exposed that learning debt could decrease after a semantic-only answer without inspecting the code and assurance carrying the guarantee; GV124 closes that review-surface hole and preserves the new learning requirement as debt through the urgent corrective bypass."
+review-rationale "Independent catch-up testing found that GV124's purpose lesson bound evidence to a review surface too small to answer its own code and assurance probes. The corrective candidate preserves the observed surface-sufficiency regression, expands the contract to the actual load-bearing path, front-loads the minimum Agda substrate, and keeps the GV124 learning requirement as debt through the urgent corrective bypass."
 requirement "Review the semantically load-bearing code and assurance surface for each learning lesson before its evidence may reduce debt, while keeping curriculum quality as Protocol judgment and never claiming to prove understanding." "2674f71092aff25891b36fc9b24f1034d68659da"
