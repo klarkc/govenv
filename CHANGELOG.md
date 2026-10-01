@@ -2,6 +2,9 @@
 
 ## [Unreleased]
 
+## [0.2.10](https://github.com/klarkc/govenv/compare/v0.2.9...v0.2.10) (2026-10-01)
+<!-- govenv-release-freeze: version=0.2.10 base=v0.2.9 authorized=1b9dec51b44a49b4c2fe951a25b4918788c342b4 -->
+
 <!-- govenv-governance-impact:start -->
 ### Governance impact
 
