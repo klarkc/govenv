@@ -405,6 +405,15 @@ stackedCandidateRequirement =
   learningRequirement
     "Explain the difference between candidate-to-candidate composition and authorization-boundary merge: stacked candidates must refresh and preserve learning requirements, while only a candidate targeting the governed authorized branch is subject to the hard debt-closure gate and can create an AuthorizedRevision."
     stackedCandidateBoundary
+
+reviewSystemRoadmapBoundary : String
+reviewSystemRoadmapBoundary = "f9596052add2bffb380a0f2f5c4bb746b003945f"
+
+reviewSystemRoadmapRequirement : LearningRequirement
+reviewSystemRoadmapRequirement =
+  learningRequirement
+    "Explain why the planned review system separates machine-enforceable structure such as budgets, provenance, freshness, typed identity, and human/agent capability boundaries from Protocol judgments about budget appropriateness, lens applicability, review quality, and summary fidelity; and why agent or meta-review proposals require explicit HumanPrincipal acceptance before Protocol or Governance changes become effective."
+    reviewSystemRoadmapBoundary
 gateSemanticsLesson : BootstrapLesson
 gateSemanticsLesson =
   bootstrapLesson
@@ -466,6 +475,19 @@ stackedCandidateLesson =
     "Trace github.event.pull_request.base.sha/base.ref through the Test workflow and learning adapter to candidateComposition versus authorizationBoundary, then show what changes when a stacked PR is retargeted to the authorized branch."
     "Show why composition still rejects lost requirements, why the same open debt is rejected at the authorization boundary, and why a merge to candidateTarget cannot construct AuthorizedRevision."
     stackedCandidateRequirement
+
+reviewSystemRoadmapLesson : BootstrapLesson
+reviewSystemRoadmapLesson =
+  bootstrapLesson
+    "review-system-roadmap"
+    "15. Human review and adversarial agency roadmap"
+    "The roadmap now plans human-review infrastructure as a governed information and authority boundary: Protocol remains judgment-bearing and revisable, adversarial agents may propose objections and improvements, and only authenticated human decisions plus normal merge authorization can make normative changes effective."
+    "Govenv.Roadmap; Govenv.Protocol; Govenv.Project; Govenv.DirectionReview; GV101; GV110; GV125; GV130-GV148"
+    "Govenv.Roadmap GV130-GV148; Govenv.Protocol.humanFacingBudgetStewardship/protocolVsGovernance/protocolVigilanceWitnesses; Govenv.Project.purposeReviewRationale/purposeReviewIndex; Govenv.DirectionReview.reviewRationale/review; Govenv.Kernel.Protocol.protocolReviewFresh; Govenv.Authorization; Govenv.Assurance.GV110; Govenv.Assurance.GV125"
+    "Explain which parts of the planned review system are governable repository/authorization properties and which decisions must remain defeasible Protocol judgment, including budget stewardship and lens applicability."
+    "Trace this candidate's roadmap delta through Purpose/Direction vigilance and the learning assessment, then identify why GV130-GV148 remain pending contracts rather than already-established implementation guarantees."
+    "Show what the current compiler can prove about review freshness, candidate authorization, and human merge authority, and what it cannot yet prove about the future review-system GVs until their assurances are implemented."
+    reviewSystemRoadmapRequirement
 carriedLessons : List BootstrapLesson
 carriedLessons =
     gateSemanticsLesson
@@ -473,6 +495,7 @@ carriedLessons =
   ∷ bootstrapMechanicsLesson
   ∷ reviewSurfaceLesson
   ∷ stackedCandidateLesson
+  ∷ reviewSystemRoadmapLesson
   ∷ []
 
 appendLessons : List BootstrapLesson → List BootstrapLesson → List BootstrapLesson
@@ -486,12 +509,12 @@ allLearningPrompts =
 assessment : CandidateLearningAssessment
 assessment =
   candidateLearningAssessment
-    corrective
+    feature
     expands
-    "Post-GV125 integration testing exposed two legacy checks that still re-owned the authorization decision: the shell adapter rejected candidateAllowed=false after the typed boundary decision, and GV122 static assurance required the current candidate to be globally authorizable. This corrective removes both duplicate gates so candidateComposition can remain testable with preserved debt while authorizationBoundary still rejects the same debt."
-    (stackedCandidateRequirement ∷ [])
-    urgentCorrective
-    3
+    "This candidate expands the roadmap with GV130-GV148 and adds human-facing budget stewardship to Protocol. It now targets the governed authorized branch at main@f959605, so this edge is an authorization boundary: the new review-system learning requirement remains explicit, no bypass is requested, and open debt intentionally keeps authorization closed until the HumanPrincipal completes the required learning evidence."
+    (reviewSystemRoadmapRequirement ∷ [])
+    noBypass
+    0
 
 carriedDebt : LearningDebt
 carriedDebt = lessonRequirements carriedLessons
