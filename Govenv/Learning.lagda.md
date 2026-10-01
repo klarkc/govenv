@@ -488,10 +488,10 @@ assessment =
   candidateLearningAssessment
     corrective
     expands
-    "Stacked PRs #62 and #63 showed that GV122 applied the authorization hard gate to candidate-to-candidate composition. GV125 separates comparison-base freshness from the authorized-branch boundary, preserves unsatisfied child requirements through composition, and keeps this new learning requirement as debt through the urgent corrective bypass."
+    "Post-GV125 integration testing exposed two legacy checks that still re-owned the authorization decision: the shell adapter rejected candidateAllowed=false after the typed boundary decision, and GV122 static assurance required the current candidate to be globally authorizable. This corrective removes both duplicate gates so candidateComposition can remain testable with preserved debt while authorizationBoundary still rejects the same debt."
     (stackedCandidateRequirement ∷ [])
     urgentCorrective
-    2
+    3
 
 carriedDebt : LearningDebt
 carriedDebt = lessonRequirements carriedLessons

@@ -104,12 +104,6 @@ EOF
   exit 0
 fi
 
-candidate_allowed="$(awk '$1 == "candidate-allowed" { print $2; exit }' "$snapshot")"
-if [[ "$candidate_allowed" != true && "$candidate_allowed" != false ]]; then
-  echo "Learning snapshot has no valid candidate-allowed value." >&2
-  exit 4
-fi
-
 previous_available=false
 previous_kind=other
 previous_impact=none
@@ -199,9 +193,4 @@ if ! agda -i "$input_root" -i . -i src     src/Govenv/Adapter/LearningCandidateV
   exit 5
 fi
 
-if [[ "$candidate_allowed" != true ]]; then
-  echo "Learning candidate gate is closed by governed assessment/debt state." >&2
-  exit 5
-fi
-
-echo "Learning candidate gate: assessment is fresh and candidate is allowed."
+echo "Learning candidate gate: assessment is fresh and boundary decision is allowed."

@@ -51,6 +51,7 @@ import Govenv.Assurance.GV124 as GV124
 import Govenv.Assurance.GV124.Counterexample.SemanticOnlyProgress
 import Govenv.Assurance.GV125 as GV125
 import Govenv.Assurance.GV125.Counterexample.StackedPullRequestHardGate
+import Govenv.Assurance.GV125.Counterexample.BoundaryReownedByLegacyChecks
 open import Govenv.Kernel.Assurance
 open import Govenv.Kernel.Identifier using (P; GV)
 open import Govenv.Kernel.Roadmap using (Roadmap; roadmapOf; _▣; _◇; _✓; _├_)
