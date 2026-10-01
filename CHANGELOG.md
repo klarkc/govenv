@@ -6,7 +6,7 @@
 ### Governance impact
 
 **Phase:** ▣ P1 — unchanged  
-**Items:** 1 advanced · 2 introduced
+**Items:** 1 advanced · 5 introduced
 
 #### Advanced · 1
 
@@ -14,14 +14,17 @@
 | :---: | --- |
 | **GV84 ◇ ↑** | Make observed invariant regressions counterexample-closing: once a contradiction to a governed or relied-upon invariant is recorded as an observed regression, its repair is incomplete until the counterexample is preserved as governed evidence, the missing or incorrectly scoped assurance boundary is corrected or overstated governance superseded, and candidate validation rejects recurrence before the affected workflow may succeed. |
 
-#### Introduced · 2
+#### Introduced · 5
 
 | GV | Proposition |
 | :---: | --- |
 | **+ GV124 ✓** | Bind learning-debt reduction to the exact current review contract for each governed lesson: every lesson must identify a non-empty semantically load-bearing review surface together with semantic, code, and assurance probes; human evidence closes a lesson only when both its learning requirement and exact review contract match, so changing that contract makes older evidence stale. Curriculum selection, review-surface adequacy, and response quality remain Protocol judgment, and compiler checks must never claim to prove human understanding. |
 | **+ GV125 ✓** | Separate candidate composition from learning authorization: classify each pull-request relation as candidate-to-candidate composition or authorization-boundary review using the governed authorized branch; every substantive stacked child must refresh its learning assessment against the immediate comparison base and preserve unsatisfied requirements, but unresolved learning debt must not by itself block composing or testing an unmerged child candidate; apply the hard GV119/GV122 debt-closure gate only when a candidate targets the authorized branch, where the complete candidate state is reevaluated against that authorized base; evidence present only in an unmerged stack remains candidate state until an authorized merge; rebasing or retargeting requires fresh assessment; and a human merge into another candidate target cannot create an AuthorizedRevision. |
+| **+ GV126 ◇** | Make Agda a first-class Stage-0 language capability through a Govenv-owned internal devenv module rather than an upstream dependency: the active devenv shell must provide the selected Agda toolchain and Agda language server, expose the LSP capability to editor and agent integrations, and keep this bootstrap/runtime wiring non-semantic so the later govenv shell can project the same capability through its runtime backend. |
+| **+ GV127 ◇** | Perform a fresh ecosystem investigation for reusable Agda formatting and linting reachable through LSP or a composable backend before implementing project-specific tooling: evaluate maintained candidates for .agda and literate .lagda.md support, document/range formatting, diagnostics or code actions, deterministic and idempotent output, syntax/source preservation, Nix packaging, and suitability for reuse behind a provider-neutral LSP boundary; dependency selection remains Protocol judgment rather than constitutional truth. |
+| **+ GV128 ◇** | Provide the selected Agda formatting and linting capability in the Stage-0 governed developer environment: adapt an adequate reusable implementation when GV127 finds one, otherwise implement a temporary in-repository formatter/linter exposed through the Agda LSP boundary, with deterministic/idempotent formatting and Protocol-style lint diagnostics that do not become constitutional validity; keep the client-facing boundary ejectable so GV121 can later move the implementation into an external Govenv application without changing editor or agent integration. |
 
-Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `2674f71..dcd365e`.
+Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `2674f71..5008690`.
 <!-- govenv-governance-impact:end -->
 
 
@@ -30,6 +33,11 @@ Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit
 * **learning:** bind evidence to review contracts ([f50cf86](https://github.com/klarkc/govenv/commit/f50cf86a00a30b9623984e66af72feb8bc0341b1))
 * **learning:** close purpose review-surface gap ([995ab6f](https://github.com/klarkc/govenv/commit/995ab6f9ef4949f7b7bf7faefd93612d4db3d4ee))
 * **learning:** separate stack composition from authorization ([dcd365e](https://github.com/klarkc/govenv/commit/dcd365ec913caca350cc020aa9be3d79a78abce0))
+
+
+### Governance
+
+* **roadmap:** open agda tooling vertical ([5008690](https://github.com/klarkc/govenv/commit/5008690781bba25e31ca8558322f248d15b3ccac))
 
 ## [0.2.9](https://github.com/klarkc/govenv/compare/v0.2.8...v0.2.9) (2026-09-28)
 <!-- govenv-release-freeze: version=0.2.9 base=v0.2.8 authorized=00458662f96d563aafca9babfc36bb5e6f8cc65d -->
