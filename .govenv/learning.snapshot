@@ -6,6 +6,6 @@ candidate-allowed false
 assessment-kind feature
 assessment-impact expands
 assessment-bypass none
-review-index 0
-review-rationale "The candidate opens the Agda developer-tooling vertical on top of the authorized GV125 learning boundary and the merged #67 implementation repair: it introduces GV126 through GV128, selects Agda/LSP enablement as Next, preserves reuse-first formatter/linter selection, and does not use the urgent-corrective bypass."
+review-index 1
+review-rationale "This stacked child establishes GV126 on top of the repaired GV125 boundary by adding a Govenv-owned languages.agda devenv module, a pinned Agda-2.8.0-compatible ALS v8 package, executable capability checks, and observed assurance. It preserves the parent Agda-tooling requirement and advances Next to the reuse-first GV127 investigation without treating parent candidate state as authorized evidence."
 requirement "Explain the Agda tooling vertical: why Stage-0 first exposes Agda and ALS through a Govenv-owned devenv module, why formatter/linter selection is reuse-first, why formatting and lint diagnostics remain non-constitutional tooling, and why GV121 remains the later external-application ejection boundary." "f9596052add2bffb380a0f2f5c4bb746b003945f"
