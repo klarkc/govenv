@@ -1,11 +1,11 @@
 govenv-learning-snapshot-v3
 bootstrap-complete false
-debt-count 14
+debt-count 15
 debt-clear false
-candidate-allowed true
-assessment-kind corrective
+candidate-allowed false
+assessment-kind feature
 assessment-impact expands
-assessment-bypass urgent-corrective
-review-index 3
-review-rationale "Post-GV125 integration testing exposed two legacy checks that still re-owned the authorization decision: the shell adapter rejected candidateAllowed=false after the typed boundary decision, and GV122 static assurance required the current candidate to be globally authorizable. This corrective removes both duplicate gates so candidateComposition can remain testable with preserved debt while authorizationBoundary still rejects the same debt."
-requirement "Explain the difference between candidate-to-candidate composition and authorization-boundary merge: stacked candidates must refresh and preserve learning requirements, while only a candidate targeting the governed authorized branch is subject to the hard debt-closure gate and can create an AuthorizedRevision." "6e68a11e4d2c89cf3c747c34667a87d21c80cf35"
+assessment-bypass none
+review-index 0
+review-rationale "The candidate opens the Agda developer-tooling vertical on top of the authorized GV125 learning boundary and the merged #67 implementation repair: it introduces GV126 through GV128, selects Agda/LSP enablement as Next, preserves reuse-first formatter/linter selection, and does not use the urgent-corrective bypass."
+requirement "Explain the Agda tooling vertical: why Stage-0 first exposes Agda and ALS through a Govenv-owned devenv module, why formatter/linter selection is reuse-first, why formatting and lint diagnostics remain non-constitutional tooling, and why GV121 remains the later external-application ejection boundary." "f9596052add2bffb380a0f2f5c4bb746b003945f"
