@@ -67,8 +67,8 @@ next = nextReview nextSummary nextClaims nextGapCoverage
 
 reviewRationale : String
 reviewRationale =
-  "GV125 closes the stacked-PR learning-boundary gap by separating candidate composition from authorization: child candidates remain assessable and testable while only a candidate targeting the governed authorized branch faces the hard debt-closure gate and can create semantic authority. The selected Next remains GV116 followed by GV117 and GV118."
+  "GV130-GV148 add a coherent future review-system vertical: governed budgets and normative identity, Protocol lifecycle/stewardship, portable adversarial roles and lenses, human-only decision evidence, defeasible judgments, canonical PR review packets, and meta-review of the review system itself. These additions strengthen human authorization but do not displace the more fundamental constitutional-history gap, so selected Next remains GV116 followed by GV117 and GV118."
 
 review : DirectionReview roadmap purpose
-review = directionReview source refl current next reviewRationale 0
+review = directionReview source refl current next reviewRationale 1
 ```
