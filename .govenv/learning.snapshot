@@ -1,11 +1,11 @@
 govenv-learning-snapshot-v3
 bootstrap-complete false
-debt-count 15
+debt-count 16
 debt-clear false
 candidate-allowed false
 assessment-kind feature
 assessment-impact expands
 assessment-bypass none
-review-index 1
-review-rationale "This stacked child establishes GV126 by adding a Govenv-owned languages.agda devenv module, a pinned Agda-2.8.0-compatible ALS v8 package, executable capability checks, and observed assurance. It preserves the parent Agda-tooling requirement and advances Next to the reuse-first GV127 investigation without treating parent candidate state as authorized evidence."
-requirement "Explain the Agda tooling vertical: why Stage-0 first exposes Agda and ALS through a Govenv-owned devenv module, why formatter/linter selection is reuse-first, why formatting and lint diagnostics remain non-constitutional tooling, and why GV121 remains the later external-application ejection boundary." "e4da1ba795e2cec8f9481a5c259aec386a44a2d4"
+review-index 2
+review-rationale "This stacked child closes the reuse-first GV127 investigation, records the decision to reuse lint components while supplying the missing formatting/LSP boundary in GV128, and introduces GV129 plus an explicitly partial stdlib-baseline/custom-rule coverage model. Parent Agda-tooling debt remains represented as candidate state rather than authorized evidence."
+requirement "Explain how Govenv inherits the versioned Agda stdlib style guide as a baseline, composes project-specific rules without mutating that baseline, measures baseline/custom/total mechanical coverage, and prevents a partial rule inventory from claiming the long-term 100% applicable-rule target." "d14d9fe7d1990c815141cb00ff79990709fd791d"
