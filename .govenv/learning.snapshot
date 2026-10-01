@@ -6,6 +6,6 @@ candidate-allowed true
 assessment-kind corrective
 assessment-impact expands
 assessment-bypass urgent-corrective
-review-index 2
-review-rationale "Stacked PRs #62 and #63 showed that GV122 applied the authorization hard gate to candidate-to-candidate composition. GV125 separates comparison-base freshness from the authorized-branch boundary, preserves unsatisfied child requirements through composition, and keeps this new learning requirement as debt through the urgent corrective bypass."
+review-index 3
+review-rationale "Post-GV125 integration testing exposed two legacy checks that still re-owned the authorization decision: the shell adapter rejected candidateAllowed=false after the typed boundary decision, and GV122 static assurance required the current candidate to be globally authorizable. This corrective removes both duplicate gates so candidateComposition can remain testable with preserved debt while authorizationBoundary still rejects the same debt."
 requirement "Explain the difference between candidate-to-candidate composition and authorization-boundary merge: stacked candidates must refresh and preserve learning requirements, while only a candidate targeting the governed authorized branch is subject to the hard debt-closure gate and can create an AuthorizedRevision." "6e68a11e4d2c89cf3c747c34667a87d21c80cf35"
