@@ -28,7 +28,7 @@ source =
 
 currentSummary : BoundedText 400
 currentSummary = boundedText
-  "Govenv is in P1 with compiler-checked direction, a from-zero learning bootstrap whose evidence is bound to explicit semantic/code/assurance review contracts, candidate learning gate, consolidation closure, and Stage-0 GitHub collaboration. Constitutional history remains partial; GV116 is still the immediate gap, followed by GV117 and GV118."
+  "Govenv is in P1 with compiler-checked direction, a from-zero learning bootstrap whose evidence is bound to explicit review contracts, and an authorization-aware candidate learning gate that permits stacked composition without weakening the main authority boundary. Constitutional history remains partial; GV116 is still the immediate gap, followed by GV117 and GV118."
   refl
 
 currentSourceCoverage : CurrentCoverage
@@ -67,7 +67,7 @@ next = nextReview nextSummary nextClaims nextGapCoverage
 
 reviewRationale : String
 reviewRationale =
-  "GV124 closes the observed semantic-only learning counterexample by binding debt reduction to explicit review surfaces plus semantic, code, and assurance probes. Current therefore records a stronger reviewable-from-zero learning boundary, while the selected Next remains GV116 followed by GV117 and GV118."
+  "GV125 closes the stacked-PR learning-boundary gap by separating candidate composition from authorization: child candidates remain assessable and testable while only a candidate targeting the governed authorized branch faces the hard debt-closure gate and can create semantic authority. The selected Next remains GV116 followed by GV117 and GV118."
 
 review : DirectionReview roadmap purpose
 review = directionReview source refl current next reviewRationale 0

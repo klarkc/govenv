@@ -396,6 +396,15 @@ reviewSurfaceRequirement =
   learningRequirement
     "Review the semantically load-bearing code and assurance surface for each learning lesson before its evidence may reduce debt, while keeping curriculum quality as Protocol judgment and never claiming to prove understanding."
     reviewSurfaceBoundary
+
+stackedCandidateBoundary : String
+stackedCandidateBoundary = "6e68a11e4d2c89cf3c747c34667a87d21c80cf35"
+
+stackedCandidateRequirement : LearningRequirement
+stackedCandidateRequirement =
+  learningRequirement
+    "Explain the difference between candidate-to-candidate composition and authorization-boundary merge: stacked candidates must refresh and preserve learning requirements, while only a candidate targeting the governed authorized branch is subject to the hard debt-closure gate and can create an AuthorizedRevision."
+    stackedCandidateBoundary
 gateSemanticsLesson : BootstrapLesson
 gateSemanticsLesson =
   bootstrapLesson
@@ -444,12 +453,26 @@ reviewSurfaceLesson =
     "Trace how a lesson's review contract is rendered, captured, matched against evidence, and then used to derive outstanding debt."
     "Explain what the compiler can prove about review-contract freshness and what remains human judgment about whether the response demonstrates adequate understanding."
     reviewSurfaceRequirement
+
+stackedCandidateLesson : BootstrapLesson
+stackedCandidateLesson =
+  bootstrapLesson
+    "stacked-candidates"
+    "14. Candidate composition and authorization"
+    "Stacked pull requests exposed that the learning gate was treating every PR base as if it were already an authorization boundary. Candidate composition must remain reviewable and testable while preserving learning debt; only the governed authorized branch may turn a human merge into semantic authority."
+    "Govenv.Authorization; Govenv.Kernel.Learning; Govenv.Materialization.Github.Workflows.Test; GV122; GV125"
+    "Govenv.Authorization.PullRequestTarget/HumanPullRequestMerge/AuthorizedRevision; Govenv.Kernel.Learning.candidateCompositionAllowed/candidateBoundaryAllowed; src/Govenv/Adapter/LearningCandidateVigilance.agda; src/Govenv/Adapter/learning-candidate-gate.sh; Govenv.Materialization.Github.Workflows.Test; Govenv.Assurance.GV125; Govenv.Assurance.GV125.Counterexample.StackedPullRequestHardGate"
+    "Explain why unresolved learning may block authorization without blocking candidate-to-candidate composition, and why evidence present only in an unmerged parent remains candidate state rather than authorized learning."
+    "Trace github.event.pull_request.base.sha/base.ref through the Test workflow and learning adapter to candidateComposition versus authorizationBoundary, then show what changes when a stacked PR is retargeted to the authorized branch."
+    "Show why composition still rejects lost requirements, why the same open debt is rejected at the authorization boundary, and why a merge to candidateTarget cannot construct AuthorizedRevision."
+    stackedCandidateRequirement
 carriedLessons : List BootstrapLesson
 carriedLessons =
     gateSemanticsLesson
   ∷ bypassDebtLesson
   ∷ bootstrapMechanicsLesson
   ∷ reviewSurfaceLesson
+  ∷ stackedCandidateLesson
   ∷ []
 
 appendLessons : List BootstrapLesson → List BootstrapLesson → List BootstrapLesson
@@ -465,10 +488,10 @@ assessment =
   candidateLearningAssessment
     corrective
     expands
-    "Independent catch-up testing found that GV124's purpose lesson bound evidence to a review surface too small to answer its own code and assurance probes. The corrective candidate preserves the observed surface-sufficiency regression, expands the contract to the actual load-bearing path, front-loads the minimum Agda substrate, and keeps the GV124 learning requirement as debt through the urgent corrective bypass."
-    (reviewSurfaceRequirement ∷ [])
+    "Stacked PRs #62 and #63 showed that GV122 applied the authorization hard gate to candidate-to-candidate composition. GV125 separates comparison-base freshness from the authorized-branch boundary, preserves unsatisfied child requirements through composition, and keeps this new learning requirement as debt through the urgent corrective bypass."
+    (stackedCandidateRequirement ∷ [])
     urgentCorrective
-    1
+    2
 
 carriedDebt : LearningDebt
 carriedDebt = lessonRequirements carriedLessons
@@ -491,6 +514,17 @@ assessmentRequirementsPreserved =
     allLearningPrompts
     evidence
     outstanding
+
+candidateComposable : Bool
+candidateComposable =
+  candidateCompositionAllowed
+    (CandidateLearningAssessment.kind assessment)
+    (CandidateLearningAssessment.impact assessment)
+    (requirementsPresent
+      (CandidateLearningAssessment.requirements assessment))
+    assessmentRequirementsClosed
+    assessmentRequirementsPreserved
+    (CandidateLearningAssessment.bypass assessment)
 
 candidateAllowed : Bool
 candidateAllowed =

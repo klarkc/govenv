@@ -43,7 +43,9 @@ jobs:
       if: "${{ github.event_name == 'pull_request' }}"
       run: "nix run github:cachix/devenv/v2.3 -- tasks run govenv:learning:candidate"
       env:
-        GOVENV_CANDIDATE_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        GOVENV_CANDIDATE_COMPARISON_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        GOVENV_CANDIDATE_TARGET_BRANCH: ${{ github.event.pull_request.base.ref }}
+        GOVENV_AUTHORIZED_BRANCH: "main"
     - name: "Check materialized candidate"
       run: "nix run github:cachix/devenv/v2.3 -- tasks run govenv:check"
     - name: "Run tests"
