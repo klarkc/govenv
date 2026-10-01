@@ -8,4 +8,4 @@ assessment-impact expands
 assessment-bypass urgent-corrective
 review-index 2
 review-rationale "Stacked PRs #62 and #63 showed that GV122 applied the authorization hard gate to candidate-to-candidate composition. GV125 separates comparison-base freshness from the authorized-branch boundary, preserves unsatisfied child requirements through composition, and keeps this new learning requirement as debt through the urgent corrective bypass."
-requirement "Explain the difference between candidate-to-candidate composition and authorization-boundary merge: stacked candidates must refresh and preserve learning requirements, while only a candidate targeting the governed authorized branch is subject to the hard debt-closure gate and can create an AuthorizedRevision." "607792b336428a4ac22727aed55d6a2263fddbe0"
+requirement "Explain the difference between candidate-to-candidate composition and authorization-boundary merge: stacked candidates must refresh and preserve learning requirements, while only a candidate targeting the governed authorized branch is subject to the hard debt-closure gate and can create an AuthorizedRevision." "6e68a11e4d2c89cf3c747c34667a87d21c80cf35"

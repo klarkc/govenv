@@ -6,7 +6,7 @@
 ### Governance impact
 
 **Phase:** ▣ P1 — unchanged  
-**Items:** 1 advanced · 1 introduced
+**Items:** 1 advanced · 2 introduced
 
 #### Advanced · 1
 
@@ -14,13 +14,14 @@
 | :---: | --- |
 | **GV84 ◇ ↑** | Make observed invariant regressions counterexample-closing: once a contradiction to a governed or relied-upon invariant is recorded as an observed regression, its repair is incomplete until the counterexample is preserved as governed evidence, the missing or incorrectly scoped assurance boundary is corrected or overstated governance superseded, and candidate validation rejects recurrence before the affected workflow may succeed. |
 
-#### Introduced · 1
+#### Introduced · 2
 
 | GV | Proposition |
 | :---: | --- |
 | **+ GV124 ✓** | Bind learning-debt reduction to the exact current review contract for each governed lesson: every lesson must identify a non-empty semantically load-bearing review surface together with semantic, code, and assurance probes; human evidence closes a lesson only when both its learning requirement and exact review contract match, so changing that contract makes older evidence stale. Curriculum selection, review-surface adequacy, and response quality remain Protocol judgment, and compiler checks must never claim to prove human understanding. |
+| **+ GV125 ✓** | Separate candidate composition from learning authorization: classify each pull-request relation as candidate-to-candidate composition or authorization-boundary review using the governed authorized branch; every substantive stacked child must refresh its learning assessment against the immediate comparison base and preserve unsatisfied requirements, but unresolved learning debt must not by itself block composing or testing an unmerged child candidate; apply the hard GV119/GV122 debt-closure gate only when a candidate targets the authorized branch, where the complete candidate state is reevaluated against that authorized base; evidence present only in an unmerged stack remains candidate state until an authorized merge; rebasing or retargeting requires fresh assessment; and a human merge into another candidate target cannot create an AuthorizedRevision. |
 
-Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `2674f71..995ab6f`.
+Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `2674f71..62d11ee`.
 <!-- govenv-governance-impact:end -->
 
 
@@ -28,6 +29,7 @@ Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit
 
 * **learning:** bind evidence to review contracts ([f50cf86](https://github.com/klarkc/govenv/commit/f50cf86a00a30b9623984e66af72feb8bc0341b1))
 * **learning:** close purpose review-surface gap ([995ab6f](https://github.com/klarkc/govenv/commit/995ab6f9ef4949f7b7bf7faefd93612d4db3d4ee))
+* **learning:** separate stack composition from authorization ([62d11ee](https://github.com/klarkc/govenv/commit/62d11ee7c1e9df60ee10f41fac43bd66a0519db9))
 
 ## [0.2.9](https://github.com/klarkc/govenv/compare/v0.2.8...v0.2.9) (2026-09-28)
 <!-- govenv-release-freeze: version=0.2.9 base=v0.2.8 authorized=00458662f96d563aafca9babfc36bb5e6f8cc65d -->
