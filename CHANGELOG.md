@@ -21,7 +21,7 @@
 | **+ GV124 ✓** | Bind learning-debt reduction to the exact current review contract for each governed lesson: every lesson must identify a non-empty semantically load-bearing review surface together with semantic, code, and assurance probes; human evidence closes a lesson only when both its learning requirement and exact review contract match, so changing that contract makes older evidence stale. Curriculum selection, review-surface adequacy, and response quality remain Protocol judgment, and compiler checks must never claim to prove human understanding. |
 | **+ GV125 ✓** | Separate candidate composition from learning authorization: classify each pull-request relation as candidate-to-candidate composition or authorization-boundary review using the governed authorized branch; every substantive stacked child must refresh its learning assessment against the immediate comparison base and preserve unsatisfied requirements, but unresolved learning debt must not by itself block composing or testing an unmerged child candidate; apply the hard GV119/GV122 debt-closure gate only when a candidate targets the authorized branch, where the complete candidate state is reevaluated against that authorized base; evidence present only in an unmerged stack remains candidate state until an authorized merge; rebasing or retargeting requires fresh assessment; and a human merge into another candidate target cannot create an AuthorizedRevision. |
 
-Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `2674f71..1b9dec5`.
+Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `2674f71..a8aa1ee`.
 <!-- govenv-governance-impact:end -->
 
 
@@ -31,6 +31,11 @@ Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit
 * **learning:** close purpose review-surface gap ([995ab6f](https://github.com/klarkc/govenv/commit/995ab6f9ef4949f7b7bf7faefd93612d4db3d4ee))
 * **learning:** separate stack composition from authorization ([dcd365e](https://github.com/klarkc/govenv/commit/dcd365ec913caca350cc020aa9be3d79a78abce0))
 * **learning:** preserve candidate composition boundary ([1b9dec5](https://github.com/klarkc/govenv/commit/1b9dec51b44a49b4c2fe951a25b4918788c342b4))
+
+
+### Miscellaneous
+
+* **learning:** record purpose lesson evidence ([a8aa1ee](https://github.com/klarkc/govenv/commit/a8aa1ee4d1b22a80ef410ce78729227cee3e47a7))
 
 ## [0.2.9](https://github.com/klarkc/govenv/compare/v0.2.8...v0.2.9) (2026-09-28)
 <!-- govenv-release-freeze: version=0.2.9 base=v0.2.8 authorized=00458662f96d563aafca9babfc36bb5e6f8cc65d -->
