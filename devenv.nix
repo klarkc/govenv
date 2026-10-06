@@ -40,6 +40,16 @@ let
       '';
     };
 
+  mkAgdaStyleLanguageServer = pkgs: backend:
+    pkgs.writeShellApplication {
+      name = "als";
+      runtimeInputs = [ pkgs.python3 ];
+      text = ''
+        exec ${pkgs.python3}/bin/python3 ${./src/Govenv/Adapter/agda-style-lsp.py} \
+          --backend ${backend}/bin/als "$@"
+      '';
+    };
+
   agdaLanguageModule = { config, pkgs, lib, ... }:
     let
       cfg = config.languages.agda;
@@ -60,9 +70,9 @@ let
 
           package = lib.mkOption {
             type = lib.types.package;
-            default = mkAgdaLanguageServer pkgs;
-            defaultText = lib.literalExpression "Govenv's pinned Agda Language Server v8 package";
-            description = "The Agda language server package to use.";
+            default = mkAgdaStyleLanguageServer pkgs (mkAgdaLanguageServer pkgs);
+            defaultText = lib.literalExpression "Govenv's Stage-0 Agda style LSP proxy over ALS v8";
+            description = "The Agda language server package exposed to editors and agents.";
           };
         };
       };
@@ -139,6 +149,11 @@ let
 
   checkAgdaStyle = ''
     bash src/Govenv/Adapter/agda-style.sh
+  '';
+
+  validateAgdaStyleLspCapability = ''
+    ${pkgs.python3}/bin/python3 \
+      src/Govenv/Adapter/agda-style-lsp-test.py "$(command -v als)"
   '';
 
   materializeChangelog = output: ''
@@ -698,6 +713,8 @@ in
 
   tasks."govenv:agda-style".exec = checkAgdaStyle;
 
+  tasks."govenv:agda-style:lsp-check".exec = validateAgdaStyleLspCapability;
+
   tasks."govenv:repository-metadata:build".exec = buildRepositoryMetadataAdapter;
 
   tasks."govenv:admin:build".exec = buildAdminAdapters;
@@ -709,6 +726,7 @@ in
     ${checkLearningSurface}
     ${validateAgdaLanguageCapability}
     ${checkAgdaStyle}
+    ${validateAgdaStyleLspCapability}
     ${checkMaterializations}
     ${checkRepositoryMetadataAdapter}
     ${checkAdminAdapters}
