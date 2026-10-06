@@ -247,6 +247,7 @@ pullRequestBody number baseRevision headRevision roadmap delta = materialized
   (githubPullRequestBodySection number releaseGovernanceImpact afterReleaseHeadingInBody)
   automatic
   repository
+  authorizedOnly
   pullRequestBodySectionEquality
   (document baseRevision headRevision roadmap delta)
 
@@ -256,6 +257,7 @@ changelog baseRevision headRevision roadmap delta = materialized
   (repositoryFileSection "CHANGELOG.md" releaseGovernanceImpactInChangelog afterReleaseHeadingInFile)
   automatic
   repository
+  authorizedOnly
   repositoryFileSectionEquality
   (document baseRevision headRevision roadmap delta)
 
@@ -265,6 +267,7 @@ githubRelease tag baseRevision headRevision roadmap delta = materialized
   (githubReleaseBodySection tag releaseGovernanceImpactInRelease replaceCarriedChangelogSection)
   automatic
   repository
+  authorizedOnly
   githubReleaseBodySectionEquality
   (document baseRevision headRevision roadmap delta)
 ```

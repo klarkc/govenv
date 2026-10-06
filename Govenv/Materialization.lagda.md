@@ -1,6 +1,6 @@
 # Materialization
 
-Materialization defines canonical semantic target state from governed project data. Projection only encodes that state for a concrete target format, while adapters only observe, apply, or verify effects. Application, privilege, and verification are governed properties of each materialization target.
+Materialization defines canonical semantic target state from governed project data. Projection only encodes that state for a concrete target format, while adapters only observe, apply, or verify effects. Application mode, privilege, authority requirement, and verification are governed properties of each materialization target. Computing or rendering a candidate materialization does not itself require authority; `ApplicationPlan` governs only application to an authoritative repository or persistent external target.
 
 ```agda
 {-# OPTIONS --safe #-}
@@ -9,12 +9,20 @@ module Govenv.Materialization where
 
 open import Agda.Builtin.Nat using (Nat)
 open import Agda.Builtin.String using (String)
+open import Govenv.Authorization using (AuthorizedRevision)
 
 data Application : Set where
   automatic manual : Application
 
 data Privilege : Set where
   repository admin : Privilege
+
+data ApplicationAuthority : Set where
+  unprivileged authorizedOnly : ApplicationAuthority
+
+data ApplicationAuthorization : ApplicationAuthority → Set where
+  unprivilegedApplication : ApplicationAuthorization unprivileged
+  authorizedApplication : AuthorizedRevision → ApplicationAuthorization authorizedOnly
 
 data GithubRepositoryProperty : Set where
   repositoryDescription : GithubRepositoryProperty
@@ -42,6 +50,8 @@ data Target : Set where
   repositoryFileSection :
     String → RepositoryFileSection → RepositoryFileSectionPlacement → Target
   githubRepository : GithubRepositoryProperty → Target
+  githubRepositoryRuleset : String → Target
+  githubActionsEnvironment : String → Target
   githubPullRequestBodySection :
     Nat → GithubPullRequestSection → GithubPullRequestBodyPlacement → Target
   githubReleaseBodySection :
@@ -55,6 +65,10 @@ data Verification : Target → Set where
     Verification (repositoryFileSection path section placement)
   readBackEquality : {property : GithubRepositoryProperty} →
     Verification (githubRepository property)
+  rulesetReadBackEquality : {name : String} →
+    Verification (githubRepositoryRuleset name)
+  environmentBoundaryReadBackEquality : {name : String} →
+    Verification (githubActionsEnvironment name)
   pullRequestBodySectionEquality :
     {number : Nat} {section : GithubPullRequestSection}
     {placement : GithubPullRequestBodyPlacement} →
@@ -70,8 +84,18 @@ record Materialization (State : Set) : Set where
     target : Target
     application : Application
     privilege : Privilege
+    authority : ApplicationAuthority
     verification : Verification target
     state : State
+
+record ApplicationPlan
+  {State : Set}
+  (materialization : Materialization State)
+  : Set where
+  constructor applicationPlan
+  field
+    authorization :
+      ApplicationAuthorization (Materialization.authority materialization)
 
 versionedApplication : Application
 versionedApplication = automatic
@@ -79,9 +103,15 @@ versionedApplication = automatic
 versionedPrivilege : Privilege
 versionedPrivilege = repository
 
+versionedAuthority : ApplicationAuthority
+versionedAuthority = authorizedOnly
+
 adminApplication : Application
 adminApplication = manual
 
 adminPrivilege : Privilege
 adminPrivilege = admin
+
+adminAuthority : ApplicationAuthority
+adminAuthority = authorizedOnly
 ```

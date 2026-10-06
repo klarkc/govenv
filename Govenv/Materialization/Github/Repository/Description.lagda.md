@@ -16,6 +16,7 @@ materialization = materialized
   (githubRepository repositoryDescription)
   adminApplication
   adminPrivilege
+  adminAuthority
   readBackEquality
   description
 ```
