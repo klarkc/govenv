@@ -53,6 +53,8 @@ rules =
       "Require --safe in governed literate Agda and reusable kernel source."
   ∷ rule "govenv-no-kernel-postulate" govenv lint
       "Keep reusable kernel source free of postulates."
+  ∷ rule "govenv-no-trailing-whitespace" govenv formatter
+      "Remove trailing horizontal whitespace from Agda source lines."
   ∷ []
 
 count : {A : Set} → List A → Nat
