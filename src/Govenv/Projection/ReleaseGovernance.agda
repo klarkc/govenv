@@ -15,17 +15,12 @@ open import Govenv.Kernel.Release
 open GovernanceDelta
 open ItemImpact
 open import Govenv.Kernel.Roadmap using
-  ( ItemState; done; todo; cancelled; superseded )
+  ( ItemState; done; todo; cancelled; superseded; lookupGovernanceRef )
 open import Govenv.Materialization using (Materialization)
 open Materialization
 open import Govenv.Materialization.ReleaseGovernance
 open ImpactGroup
 open ReleaseDocument
-open ReleaseNote
-open ReleaseNoteGroup
-open ReleaseEntry
-open CandidateBoundary
-open ChangelogDocument
 open import Govenv.Projection.SemanticDiff
 
 infixr 5 _++_
@@ -286,90 +281,88 @@ renderDiffRow signStyle side spans =
   ifSign added = "+"
   ifSign plain = " "
 
-renderGithubPhaseChange : Maybe PhaseChange → String
-renderGithubPhaseChange nothing = ""
-renderGithubPhaseChange (just (phaseChange previous current)) =
-  "| **Phase:** " ++ renderPhaseId previous ++ " → " ++ renderPhaseId current ++ " |\n"
-
-renderGithubPropositionChange : Maybe PropositionChange → String
-renderGithubPropositionChange nothing = ""
-renderGithubPropositionChange
-  (just (propositionChange previous current)) =
+renderResolvedGithubSupersededCard :
+  SomeGovernanceId → SomeGovernanceId → String
+renderResolvedGithubSupersededCard previous current
+  with primStringEquality (renderDescription previous) (renderDescription current)
+... | true =
+    "<div align=\"center\">\n\n" ++
+    "| **" ++ renderGovernanceId previous ++ " ↪ " ++
+      renderGovernanceId current ++ "** |\n" ++
+    "| :---: |\n" ++
+    "| *proposition unchanged* |\n" ++
+    "| " ++ renderCompactDescription (renderDescription current) ++ " |\n\n" ++
+    "</div>\n\n"
+... | false =
+    "<div align=\"center\">\n\n" ++
+    "| **" ++ renderGovernanceId previous ++ " ↪ " ++
+      renderGovernanceId current ++ "** |\n" ++
+    "| :---: |\n" ++
     "| " ++ renderDiffRow removed oldSide spans ++ " |\n" ++
-    "| " ++ renderDiffRow added newSide spans ++ " |\n"
+    "| " ++ renderDiffRow added newSide spans ++ " |\n\n" ++
+    "</div>\n\n"
   where
   spans : List SemanticSpan
-  spans = semanticDiff previous current
+  spans = semanticDiff (renderDescription previous) (renderDescription current)
 
-renderResolvedGithubSupersededCard :
-  SomeGovernanceId →
-  SomeGovernanceId →
-  Maybe PhaseChange →
-  Maybe PropositionChange →
-  String
-renderResolvedGithubSupersededCard previous current phaseDelta propositionDelta =
-  "<div align=\"center\">\n\n" ++
-  "| **" ++ renderGovernanceId previous ++ " ↪ " ++
-    renderGovernanceId current ++ "** |\n" ++
-  "| :---: |\n" ++
-  renderGithubPhaseChange phaseDelta ++
-  renderGithubPropositionChange propositionDelta ++
-  "\n</div>\n\n"
-
-renderGithubSupersededCard : SupersessionDelta → String
-renderGithubSupersededCard
-  (resolvedSupersession previous current phaseDelta propositionDelta) =
-    renderResolvedGithubSupersededCard
-      previous current phaseDelta propositionDelta
-renderGithubSupersededCard (unresolvedSupersession previous replacement) =
+renderGithubSupersededCard :
+  ReleaseDocument → SomeGovernanceId → GovernanceRef → String
+renderGithubSupersededCard document previous replacement
+  with lookupGovernanceRef replacement (roadmap document)
+... | nothing =
   "<div align=\"center\">\n\n" ++
   "| **" ++ renderGovernanceId previous ++ " ↪ " ++ renderGovernanceRef replacement ++ "** |\n" ++
-  "| :---: |\n\n" ++
+  "| :---: |\n" ++
+  "| " ++ renderDescription previous ++ " |\n\n" ++
   "</div>\n\n"
+... | just current = renderResolvedGithubSupersededCard previous current
 
-renderGithubSupersededCards : List SupersessionDelta → String
-renderGithubSupersededCards [] = ""
-renderGithubSupersededCards (item ∷ rest) =
-  renderGithubSupersededCard item ++ renderGithubSupersededCards rest
+renderGithubSupersededCards : ReleaseDocument → List ItemImpact → String
+renderGithubSupersededCards document [] = ""
+renderGithubSupersededCards document
+  (impact itemId state (supersededProgress replacement) ∷ rest) =
+    renderGithubSupersededCard document itemId replacement ++
+    renderGithubSupersededCards document rest
+renderGithubSupersededCards document (item ∷ rest) =
+  renderGithubSupersededCards document rest
 
 renderGithubSupersededGroup : ReleaseDocument → ImpactGroup → String
-renderGithubSupersededGroup document group with supersessions document
+renderGithubSupersededGroup document group with items group
 ... | [] = ""
 ... | values =
   "#### Superseded · " ++ primShowNat (count group) ++ "\n\n" ++
-  renderGithubSupersededCards values
+  renderGithubSupersededCards document values
 
-renderPortablePhaseChange : Maybe PhaseChange → String
-renderPortablePhaseChange nothing = ""
-renderPortablePhaseChange (just (phaseChange previous current)) =
-  "**Phase:** " ++ renderPhaseId previous ++ " → " ++ renderPhaseId current ++ "\n\n"
-
-renderPortablePropositionChange : Maybe PropositionChange → String
-renderPortablePropositionChange nothing = ""
-renderPortablePropositionChange
-  (just (propositionChange previous current)) =
-    "```diff\n- " ++ previous ++ "\n+ " ++ current ++ "\n```\n\n"
-
-renderPortableSupersededCard : SupersessionDelta → String
-renderPortableSupersededCard
-  (resolvedSupersession previous current phaseDelta propositionDelta) =
+renderPortableSupersededCard :
+  ReleaseDocument → SomeGovernanceId → GovernanceRef → String
+renderPortableSupersededCard document previous replacement
+  with lookupGovernanceRef replacement (roadmap document)
+... | nothing =
+  "##### " ++ renderGovernanceId previous ++ " ↪ " ++ renderGovernanceRef replacement ++ "\n\n" ++
+  renderDescription previous ++ "\n\n"
+... | just current with primStringEquality (renderDescription previous) (renderDescription current)
+...   | true =
     "##### " ++ renderGovernanceId previous ++ " ↪ " ++ renderGovernanceId current ++ "\n\n" ++
-    renderPortablePhaseChange phaseDelta ++
-    renderPortablePropositionChange propositionDelta
-renderPortableSupersededCard (unresolvedSupersession previous replacement) =
-  "##### " ++ renderGovernanceId previous ++ " ↪ " ++ renderGovernanceRef replacement ++ "\n\n"
+    "*Proposition unchanged.* " ++ renderDescription current ++ "\n\n"
+...   | false =
+    "##### " ++ renderGovernanceId previous ++ " ↪ " ++ renderGovernanceId current ++ "\n\n" ++
+    "```diff\n- " ++ renderDescription previous ++ "\n+ " ++ renderDescription current ++ "\n```\n\n"
 
-renderPortableSupersededCards : List SupersessionDelta → String
-renderPortableSupersededCards [] = ""
-renderPortableSupersededCards (item ∷ rest) =
-  renderPortableSupersededCard item ++ renderPortableSupersededCards rest
+renderPortableSupersededCards : ReleaseDocument → List ItemImpact → String
+renderPortableSupersededCards document [] = ""
+renderPortableSupersededCards document
+  (impact itemId state (supersededProgress replacement) ∷ rest) =
+    renderPortableSupersededCard document itemId replacement ++
+    renderPortableSupersededCards document rest
+renderPortableSupersededCards document (item ∷ rest) =
+  renderPortableSupersededCards document rest
 
 renderPortableSupersededGroup : ReleaseDocument → ImpactGroup → String
-renderPortableSupersededGroup document group with supersessions document
+renderPortableSupersededGroup document group with items group
 ... | [] = ""
 ... | values =
   "#### Superseded · " ++ primShowNat (count group) ++ "\n\n" ++
-  renderPortableSupersededCards values
+  renderPortableSupersededCards document values
 
 renderGithubRelease : String → ReleaseDocument → String
 renderGithubRelease headingPrefix document =
@@ -406,79 +399,13 @@ renderBodyMaterialization : Materialization ReleaseDocument → String
 renderBodyMaterialization materialization =
   startMarker ++ renderGithubRelease "###" (state materialization) ++ endMarker
 
-renderPortableSection : ReleaseDocument → String
-renderPortableSection document =
-  startMarker ++ renderPortableRelease "###" document ++ endMarker
-
-renderHistoricalEntries : List String → String
-renderHistoricalEntries [] = ""
-renderHistoricalEntries (entry ∷ rest) =
-  entry ++ renderHistoricalEntries rest
-
-shortRevision : String → String
-shortRevision revision = primStringFromList (take 7 (primStringToList revision))
-
-renderReleaseNoteScope : String → String
-renderReleaseNoteScope scope with primStringEquality scope ""
-... | true = ""
-... | false = "**" ++ scope ++ ":** "
-
-renderReleaseNote : ReleaseNote → String
-renderReleaseNote note =
-  "* " ++ renderReleaseNoteScope (noteScope note) ++ noteDescription note ++
-  " ([" ++ shortRevision (noteRevision note) ++ "](" ++
-  noteRevisionUrl note ++ "))\n"
-
-renderReleaseNoteItems : List ReleaseNote → String
-renderReleaseNoteItems [] = ""
-renderReleaseNoteItems (note ∷ rest) =
-  renderReleaseNote note ++ renderReleaseNoteItems rest
-
-renderReleaseNoteGroup : ReleaseNoteGroup → String
-renderReleaseNoteGroup group with noteGroupItems group
-... | [] = ""
-... | items =
-  "\n\n### " ++ noteGroupLabel group ++ "\n\n" ++
-  renderReleaseNoteItems items
-
-renderReleaseNoteGroups : List ReleaseNoteGroup → String
-renderReleaseNoteGroups [] = ""
-renderReleaseNoteGroups (group ∷ rest) =
-  renderReleaseNoteGroup group ++ renderReleaseNoteGroups rest
-
-renderReleaseEntry : ReleaseEntry → String
-renderReleaseEntry entry =
-  renderPortableSection (entryDocument entry) ++
-  renderReleaseNoteGroups (entryNoteGroups entry)
-
-renderCandidateBoundary : CandidateBoundary → String
-renderCandidateBoundary boundary =
-  "<!-- govenv-release-freeze: version=" ++ candidateVersion boundary ++
-  " base=" ++ candidateBaseRef boundary ++
-  " authorized=" ++ candidateAuthorizedRevision boundary ++ " -->\n"
-
-renderChangelogCurrent : ChangelogCurrent → String
-renderChangelogCurrent emptyUnreleased = "## [Unreleased]\n"
-renderChangelogCurrent (unreleased entry) =
-  "## [Unreleased]\n\n" ++ renderReleaseEntry entry
-renderChangelogCurrent (frozenCandidate boundary entry) =
-  "## [Unreleased]\n\n" ++
-  candidateHeading boundary ++ "\n" ++
-  renderCandidateBoundary boundary ++ "\n" ++
-  renderReleaseEntry entry
-
-renderChangelogMaterialization : Materialization ChangelogDocument → String
+renderChangelogMaterialization : Materialization ReleaseDocument → String
 renderChangelogMaterialization materialization =
-  "# Changelog\n\n" ++
-  renderChangelogCurrent (current changelogState) ++ "\n" ++
-  renderHistoricalEntries (historicalEntries changelogState)
-  where
-  changelogState : ChangelogDocument
-  changelogState = state materialization
+  startMarker ++ renderPortableRelease "###" (state materialization) ++ endMarker
 
-renderPortableReleaseMaterialization : Materialization ReleaseDocument → String
-renderPortableReleaseMaterialization materialization =
-  renderPortableSection (state materialization)
+renderGithubReleaseMaterialization : Materialization ReleaseDocument → String
+renderGithubReleaseMaterialization materialization =
+  startMarker ++ renderGithubRelease "###" (state materialization) ++ endMarker
 
 renderError : GovernanceDeltaError → String
 renderError (itemRegressed itemId) =

@@ -13,36 +13,23 @@ open import Agda.Builtin.Bool using (true; false)
 open import Agda.Builtin.Equality using (_≡_; refl)
 open import Agda.Builtin.List using (List; []; _∷_)
 open import Agda.Builtin.Nat using (Nat)
-import Govenv.Assurance.GV1 as GV1
-import Govenv.Assurance.GV1.Counterexample.SourcePlacement
 import Govenv.Assurance.GV3 as GV3
 import Govenv.Assurance.GV4 as GV4
 import Govenv.Assurance.GV5 as GV5
 import Govenv.Assurance.GV6 as GV6
 import Govenv.Assurance.GV15 as GV15
 import Govenv.Assurance.GV16 as GV16
-import Govenv.Assurance.GV18 as GV18
 import Govenv.Assurance.GV20 as GV20
 import Govenv.Assurance.GV21 as GV21
-import Govenv.Assurance.GV44 as GV44
 import Govenv.Assurance.GV50 as GV50
 import Govenv.Assurance.GV52 as GV52
 import Govenv.Assurance.GV54 as GV54
 import Govenv.Assurance.GV68 as GV68
 import Govenv.Assurance.GV69 as GV69
 import Govenv.Assurance.GV70 as GV70
-import Govenv.Assurance.GV95 as GV95
-import Govenv.Assurance.GV101 as GV101
-import Govenv.Assurance.GV108 as GV108
-import Govenv.Assurance.GV109 as GV109
-import Govenv.Assurance.GV110 as GV110
-import Govenv.Assurance.GV111 as GV111
-import Govenv.Assurance.GV111.Counterexample.StaleTarget
-import Govenv.Assurance.GV112 as GV112
-import Govenv.Assurance.GV116
 open import Govenv.Kernel.Assurance
 open import Govenv.Kernel.Identifier using (P; GV)
-open import Govenv.Kernel.Roadmap using (Roadmap; roadmapOf; _▣; _◇; _✓; _├_)
+open import Govenv.Kernel.Roadmap using (Roadmap; roadmapOf; _▣; _◇; _✓)
 open import Govenv.Roadmap using (roadmap)
 
 data LegacyCompletion : Nat → Set where
@@ -51,6 +38,7 @@ data LegacyCompletion : Nat → Set where
   legacyGV2 : LegacyCompletion 2
   legacyGV19 : LegacyCompletion 19
   legacyGV22 : LegacyCompletion 22
+  legacyGV44 : LegacyCompletion 44
   legacyGV45 : LegacyCompletion 45
   legacyGV51 : LegacyCompletion 51
   legacyGV60 : LegacyCompletion 60
@@ -66,12 +54,11 @@ assurances =
   ∷ assures (statically GV6.evidence)
   ∷ assures (statically GV15.evidence)
   ∷ assures (statically GV16.evidence)
-  ∷ assures (statically GV18.evidence)
   ∷ assures (inherited legacyGV19)
   ∷ assures (statically GV20.evidence)
   ∷ assures (statically GV21.evidence)
   ∷ assures (inherited legacyGV22)
-  ∷ assures (statically GV44.evidence)
+  ∷ assures (inherited legacyGV44)
   ∷ assures (inherited legacyGV45)
   ∷ assures (statically GV50.evidence)
   ∷ assures (inherited legacyGV51)
@@ -81,13 +68,6 @@ assurances =
   ∷ assures (statically GV68.evidence)
   ∷ assures (statically GV69.evidence)
   ∷ assures (statically GV70.evidence)
-  ∷ assures (statically GV95.evidence)
-  ∷ assures (statically GV101.evidence)
-  ∷ assures (statically GV108.evidence)
-  ∷ assures (statically GV109.evidence)
-  ∷ assures (statically GV110.evidence)
-  ∷ assures (statically GV111.evidence)
-  ∷ assures (statically GV112.evidence)
   ∷ []
 
 pendingRoadmap : Roadmap
@@ -96,8 +76,7 @@ pendingRoadmap = roadmapOf
 
 unassuredDoneRoadmap : Roadmap
 unassuredDoneRoadmap = roadmapOf
-  ((P 1 "assurance-test" ▣)
-    ((GV 71 "unassured-done" ✓) ├ (GV 72 "pending" ◇)))
+  ((P 1 "assurance-test" ▣) (GV 71 "assurance-test" ✓))
 
 pendingNeedsNoAssurance :
   completionCoverage assurances pendingRoadmap ≡ true

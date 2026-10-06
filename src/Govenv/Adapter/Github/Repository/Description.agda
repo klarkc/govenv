@@ -1,9 +1,9 @@
-module Govenv.Adapter.Github.Workflows.Materialize where
+module Govenv.Adapter.Github.Repository.Description where
 
 open import Agda.Builtin.IO
 open import Agda.Builtin.String using (String)
 open import Agda.Builtin.Unit
-open import Govenv.Projection.Github.Workflows.Materialize using (render)
+open import Govenv.Projection.Github.Repository.Description using (renderDescription)
 
 postulate
   putStr : String → IO ⊤
@@ -12,4 +12,4 @@ postulate
 {-# COMPILE GHC putStr = Text.putStr #-}
 
 main : IO ⊤
-main = putStr render
+main = putStr renderDescription

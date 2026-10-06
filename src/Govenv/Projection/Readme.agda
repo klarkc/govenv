@@ -113,9 +113,11 @@ renderBadges [] = ""
 renderBadges (x ∷ xs) = "  " ++ renderBadge x ++ "\n" ++ renderBadges xs
 
 renderCurrent : Current → String
-renderCurrent (directionCurrent currentText nextText) =
-  "**Current:** " ++ currentText ++ "\n\n" ++
-  "**Next:** " ++ nextText ++ "\n\n"
+renderCurrent (activeCurrent label (someIdentifier phaseId) summary) =
+  "**" ++ label ++ ":** ▣ " ++ renderPhaseId phaseId ++ " — " ++
+  descriptionOf phaseId ++ ". " ++ summary ++ "\n\n"
+renderCurrent (roadmapComplete label message) =
+  "**" ++ label ++ ":** ■ " ++ message ++ "\n\n"
 
 renderHeading : HeadingLevel → Alignment → String → String
 renderHeading title centered value = "<h1 align=\"center\">" ++ value ++ "</h1>\n\n"

@@ -2,15 +2,12 @@
 set -euo pipefail
 
 explicit_snapshot="${GOVENV_PREVIOUS_ROADMAP_SNAPSHOT:-${1:-}}"
-explicit_purpose_snapshot="${GOVENV_PREVIOUS_PROJECT_PURPOSE_SNAPSHOT:-${2:-}}"
-explicit_direction_snapshot="${GOVENV_PREVIOUS_DIRECTION_REVIEW_SNAPSHOT:-${3:-}}"
 root="$(git rev-parse --show-toplevel)"
 cd "${root}"
 
 input_root=".govenv/roadmap-evolution-input"
 mkdir -p "${input_root}"
 
-previous_ref=""
 if [[ -n "${explicit_snapshot}" ]]; then
   snapshot_path="${explicit_snapshot}"
 else
@@ -26,30 +23,6 @@ else
     :
   else
     printf '%s\n' 'govenv-roadmap-snapshot-v2' 'phase absent' > "${snapshot_path}"
-  fi
-fi
-
-purpose_snapshot_path=""
-if [[ -n "${explicit_purpose_snapshot}" ]]; then
-  purpose_snapshot_path="${explicit_purpose_snapshot}"
-elif [[ -n "${previous_ref}" ]] &&
-     git rev-parse --verify "${previous_ref}^{commit}" >/dev/null 2>&1; then
-  candidate_purpose_snapshot="${input_root}/previous-project-purpose.snapshot"
-  if git show "${previous_ref}:.govenv/project-purpose.snapshot" \
-      > "${candidate_purpose_snapshot}" 2>/dev/null; then
-    purpose_snapshot_path="${candidate_purpose_snapshot}"
-  fi
-fi
-
-direction_snapshot_path=""
-if [[ -n "${explicit_direction_snapshot}" ]]; then
-  direction_snapshot_path="${explicit_direction_snapshot}"
-elif [[ -n "${previous_ref}" ]] &&
-     git rev-parse --verify "${previous_ref}^{commit}" >/dev/null 2>&1; then
-  candidate_direction_snapshot="${input_root}/previous-direction-review.snapshot"
-  if git show "${previous_ref}:.govenv/direction-review.snapshot" \
-      > "${candidate_direction_snapshot}" 2>/dev/null; then
-    direction_snapshot_path="${candidate_direction_snapshot}"
   fi
 fi
 
@@ -118,160 +91,6 @@ if [[ -z "${phase_expr}" ]]; then
   exit 3
 fi
 
-previous_purpose_available=false
-previous_purpose_expr='""'
-previous_purpose_review_index=0
-if [[ -n "${purpose_snapshot_path}" ]]; then
-  [[ -f "${purpose_snapshot_path}" ]] || {
-    echo "Governed project purpose snapshot is missing: ${purpose_snapshot_path}" >&2
-    exit 3
-  }
-
-  purpose_header=""
-  purpose_expr=""
-  purpose_review_index=""
-  while IFS= read -r line; do
-    case "${line}" in
-      govenv-project-purpose-snapshot-v1)
-        [[ -z "${purpose_header}" ]] || {
-          echo "Duplicate project purpose snapshot header." >&2
-          exit 3
-        }
-        purpose_header="${line}"
-        ;;
-      "review-index "*)
-        value="${line#review-index }"
-        [[ "${value}" =~ ^[0-9]+$ ]] || {
-          echo "Invalid project purpose review index: ${line}" >&2
-          exit 3
-        }
-        [[ -z "${purpose_review_index}" ]] || {
-          echo "Duplicate project purpose review index." >&2
-          exit 3
-        }
-        purpose_review_index="${value}"
-        ;;
-      "purpose "*)
-        value="${line#purpose }"
-        [[ "${value}" =~ ^\".*\"$ ]] || {
-          echo "Invalid project purpose snapshot value: ${line}" >&2
-          exit 3
-        }
-        [[ -z "${purpose_expr}" ]] || {
-          echo "Duplicate project purpose snapshot value." >&2
-          exit 3
-        }
-        purpose_expr="${value}"
-        ;;
-      "") ;;
-      *)
-        echo "Invalid project purpose snapshot line: ${line}" >&2
-        exit 3
-        ;;
-    esac
-  done < "${purpose_snapshot_path}"
-
-  [[ "${purpose_header}" == "govenv-project-purpose-snapshot-v1" ]] || {
-    echo "Unsupported project purpose snapshot format." >&2
-    exit 3
-  }
-  [[ -n "${purpose_expr}" ]] || {
-    echo "Project purpose snapshot has no purpose." >&2
-    exit 3
-  }
-  [[ -n "${purpose_review_index}" ]] || {
-    echo "Project purpose snapshot has no review index." >&2
-    exit 3
-  }
-
-  previous_purpose_available=true
-  previous_purpose_expr="${purpose_expr}"
-  previous_purpose_review_index="${purpose_review_index}"
-fi
-
-previous_direction_available=false
-previous_direction_review_index=0
-previous_current_expr='""'
-previous_next_expr='""'
-if [[ -n "${direction_snapshot_path}" ]]; then
-  [[ -f "${direction_snapshot_path}" ]] || {
-    echo "Governed direction review snapshot is missing: ${direction_snapshot_path}" >&2
-    exit 3
-  }
-
-  direction_header=""
-  direction_review_index=""
-  direction_current_expr=""
-  direction_next_expr=""
-  while IFS= read -r line; do
-    case "${line}" in
-      govenv-direction-review-snapshot-v1)
-        [[ -z "${direction_header}" ]] || {
-          echo "Duplicate direction review snapshot header." >&2
-          exit 3
-        }
-        direction_header="${line}"
-        ;;
-      "review-index "*)
-        value="${line#review-index }"
-        [[ "${value}" =~ ^[0-9]+$ ]] || {
-          echo "Invalid direction review index: ${line}" >&2
-          exit 3
-        }
-        [[ -z "${direction_review_index}" ]] || {
-          echo "Duplicate direction review index." >&2
-          exit 3
-        }
-        direction_review_index="${value}"
-        ;;
-      "current "*)
-        value="${line#current }"
-        [[ "${value}" =~ ^\".*\"$ ]] || {
-          echo "Invalid direction Current snapshot value: ${line}" >&2
-          exit 3
-        }
-        [[ -z "${direction_current_expr}" ]] || {
-          echo "Duplicate direction Current snapshot value." >&2
-          exit 3
-        }
-        direction_current_expr="${value}"
-        ;;
-      "next "*)
-        value="${line#next }"
-        [[ "${value}" =~ ^\".*\"$ ]] || {
-          echo "Invalid direction Next snapshot value: ${line}" >&2
-          exit 3
-        }
-        [[ -z "${direction_next_expr}" ]] || {
-          echo "Duplicate direction Next snapshot value." >&2
-          exit 3
-        }
-        direction_next_expr="${value}"
-        ;;
-      "") ;;
-      *)
-        echo "Invalid direction review snapshot line: ${line}" >&2
-        exit 3
-        ;;
-    esac
-  done < "${direction_snapshot_path}"
-
-  [[ "${direction_header}" == "govenv-direction-review-snapshot-v1" ]] || {
-    echo "Unsupported direction review snapshot format." >&2
-    exit 3
-  }
-  [[ -n "${direction_review_index}" && -n "${direction_current_expr}" &&
-     -n "${direction_next_expr}" ]] || {
-    echo "Direction review snapshot is incomplete." >&2
-    exit 3
-  }
-
-  previous_direction_available=true
-  previous_direction_review_index="${direction_review_index}"
-  previous_current_expr="${direction_current_expr}"
-  previous_next_expr="${direction_next_expr}"
-fi
-
 agda_list() {
   local expression="[]"
   local index value
@@ -297,48 +116,12 @@ module Govenv.Adapter.RoadmapEvolutionObservation where
 open import Govenv.Kernel.Identifier using (GVR)
 open import Govenv.Kernel.Release
 open import Govenv.Kernel.Roadmap using (done; todo; cancelled; superseded)
-open import Agda.Builtin.Bool using (Bool; true; false)
 open import Agda.Builtin.List using ([]; _∷_)
-open import Agda.Builtin.Nat using (Nat)
-open import Agda.Builtin.String using (String)
 
 previous : RoadmapSnapshot
 previous = roadmapSnapshot (${phase_expr}) (${items_expr})
-
-previousPurposeAvailable : Bool
-previousPurposeAvailable = ${previous_purpose_available}
-
-previousPurpose : String
-previousPurpose = ${previous_purpose_expr}
-
-previousPurposeReviewIndex : Nat
-previousPurposeReviewIndex = ${previous_purpose_review_index}
-
-previousDirectionReviewAvailable : Bool
-previousDirectionReviewAvailable = ${previous_direction_available}
-
-previousDirectionReviewIndex : Nat
-previousDirectionReviewIndex = ${previous_direction_review_index}
-
-previousCurrentSummary : String
-previousCurrentSummary = ${previous_current_expr}
-
-previousNextSummary : String
-previousNextSummary = ${previous_next_expr}
 EOF2
 
 agda -i "${input_root}" -i . -i src --compile \
   --compile-dir="${build_dir}" src/Govenv/Adapter/RoadmapEvolution.agda >/dev/null
 "${build_dir}/RoadmapEvolution"
-
-if ! agda -i "${input_root}" -i . -i src \
-    src/Govenv/Adapter/PurposeVigilance.agda >/dev/null; then
-  echo "Project purpose vigilance failed: review the complete resulting roadmap, then either advance purposeReviewIndex by one when reaffirming the current purpose or change purpose and reset the index to zero." >&2
-  exit 4
-fi
-
-if ! agda -i "${input_root}" -i . -i src \
-    src/Govenv/Adapter/DirectionReviewVigilance.agda >/dev/null; then
-  echo "Project direction review is stale: review Purpose × Current against the resulting roadmap, then update Current/Next or advance the direction-review witness exactly once when reaffirming them." >&2
-  exit 4
-fi

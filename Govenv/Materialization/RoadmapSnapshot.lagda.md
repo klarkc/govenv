@@ -20,7 +20,6 @@ materialization = materialized
   (repositoryFile ".govenv/roadmap.snapshot")
   versionedApplication
   versionedPrivilege
-  versionedAuthority
   trackedEquality
   snapshot
 ```

@@ -2,15 +2,16 @@
 
 module Govenv.Kernel.Architecture where
 
-open import Agda.Builtin.Reflection using (Name)
+open import Agda.Builtin.List
+open import Agda.Builtin.String using (String)
 
 data Role : Set where
-  governance protocol assurance kernel experiment materialization projection adapter : Role
+  closure constitution kernel materialization projection adapter generated : Role
 
-record Classification : Set where
-  constructor classify
+record Area : Set where
+  constructor area
   field
-    subject : Name
+    root : String
     role : Role
 
 record Dependency : Set where
@@ -18,3 +19,8 @@ record Dependency : Set where
   field
     from : Role
     to : Role
+
+record Architecture : Set where
+  field
+    areas : List Area
+    dependencies : List Dependency

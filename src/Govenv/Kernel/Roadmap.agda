@@ -3,7 +3,6 @@
 module Govenv.Kernel.Roadmap where
 
 open import Agda.Builtin.Bool using (Bool; true; false)
-open import Agda.Builtin.Equality using (_≡_)
 open import Agda.Builtin.List using (List; []; _∷_)
 open import Agda.Builtin.Maybe using (Maybe; just; nothing)
 open import Agda.Builtin.Nat using (Nat; zero; suc)
@@ -154,18 +153,6 @@ lookupGovernanceRef : GovernanceRef → Roadmap → Maybe SomeGovernanceId
 lookupGovernanceRef replacement =
   lookupGovernance (IdentifierRef.referenceIndex replacement)
 
-governanceReferenceExists : GovernanceRef → Roadmap → Bool
-governanceReferenceExists reference roadmap
-  with lookupGovernanceRef reference roadmap
-... | just governance = true
-... | nothing = false
-
-record GovernanceTarget (roadmap : Roadmap) : Set where
-  constructor governanceTarget
-  field
-    reference : GovernanceRef
-    validReference : governanceReferenceExists reference roadmap ≡ true
-
 data ChainShape : Set where
   finishedOnly activeAndFuture futureOnly progressingShape invalidShape : ChainShape
 
@@ -213,24 +200,10 @@ private
   itemsDone (membership governanceId (superseded replacement) relation ∷ rest) =
     itemsDone rest
 
-  itemsPending :
-    {phaseIdx : Nat} {phaseDescription : String}
-    {phase : PhaseId phaseIdx phaseDescription} →
-    List (Membership phase) → Bool
-  itemsPending [] = false
-  itemsPending (membership governanceId done relation ∷ rest) = itemsPending rest
-  itemsPending (membership governanceId todo relation ∷ rest) = true
-  itemsPending (membership governanceId cancelled relation ∷ rest) = itemsPending rest
-  itemsPending (membership governanceId (superseded replacement) relation ∷ rest) =
-    itemsPending rest
-
   finishedPhasesDone : List (PhaseNode finished) → Bool
   finishedPhasesDone [] = true
   finishedPhasesDone (phaseNode phaseId items ∷ rest) =
     itemsDone items and finishedPhasesDone rest
-
-  activePhasePending : PhaseNode active → Bool
-  activePhasePending (phaseNode phaseId items) = itemsPending items
 
   chainPhaseIndices : {shape : ChainShape} → RoadmapChain shape → List Nat
   chainPhaseIndices (finishedChain phases) = phaseIndices phases
@@ -263,15 +236,6 @@ private
   chainFinishedPhasesDone (progressingChain finishedPhases current futures) =
     finishedPhasesDone finishedPhases
   chainFinishedPhasesDone invalidChain = false
-
-  chainActivePhasePending :
-    {shape : ChainShape} → RoadmapChain shape → Bool
-  chainActivePhasePending (finishedChain phases) = true
-  chainActivePhasePending (activeChain current futures) = activePhasePending current
-  chainActivePhasePending (futureChain futures) = true
-  chainActivePhasePending (progressingChain finishedPhases current futures) =
-    activePhasePending current
-  chainActivePhasePending invalidChain = false
 
   supersessionsValidItems :
     {phaseIdx : Nat} {phaseDescription : String}
@@ -320,8 +284,7 @@ private
   integrity chain =
     strictlyIncreasing (chainPhaseIndices chain) and
     (uniqueNats (chainGovernanceIndices chain) and
-     (chainFinishedPhasesDone chain and
-      (chainActivePhasePending chain and chainSupersessionsValid chain)))
+     (chainFinishedPhasesDone chain and chainSupersessionsValid chain))
 
   appendShape : ChainShape → ChainShape → ChainShape
   appendShape finishedOnly finishedOnly = finishedOnly

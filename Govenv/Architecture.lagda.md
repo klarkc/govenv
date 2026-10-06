@@ -1,43 +1,44 @@
 # Architecture
 
-Govenv architecture is semantic, not path-derived. Architectural subjects are
-Agda declaration identities (`Name`) and roles describe their semantic place in
-the system. Source paths belong to `Govenv.SourceLayout`; the root closure is
-owned by `Govenv.lagda.md`; generated artifacts belong to their materialization
-authority. None of those transport/layout concerns is an architectural role.
-
-GV98 is still pending. This module therefore defines the architectural role
-vocabulary and allowed dependency directions without claiming that every
-repository declaration has already been classified or that those dependencies
-are already enforced.
+Govenv declares the architectural roles of repository areas and the dependency directions allowed between them. Enforcement will move from declaration to repository checking as the evaluator lands.
 
 ```agda
 {-# OPTIONS --safe #-}
 
 module Govenv.Architecture where
 
-open import Agda.Builtin.List using (List; []; _∷_)
+open import Agda.Builtin.List
+open import Agda.Builtin.Unit
 open import Govenv.Kernel.Architecture
 
-allowedDependencies : List Dependency
-allowedDependencies =
-    allow governance kernel
-  ∷ allow protocol governance
-  ∷ allow assurance governance
-  ∷ allow assurance protocol
-  ∷ allow assurance materialization
-  ∷ allow assurance projection
-  ∷ allow assurance kernel
-  ∷ allow experiment kernel
-  ∷ allow materialization governance
-  ∷ allow materialization protocol
-  ∷ allow materialization kernel
-  ∷ allow projection materialization
-  ∷ allow projection kernel
-  ∷ allow adapter governance
-  ∷ allow adapter assurance
-  ∷ allow adapter materialization
-  ∷ allow adapter projection
-  ∷ allow adapter kernel
-  ∷ []
+architecture : Architecture
+architecture = record
+  { areas =
+      area "Govenv.lagda.md" closure
+    ∷ area "Govenv/Materialization/" materialization
+    ∷ area "Govenv/" constitution
+    ∷ area "src/Govenv/Kernel/" kernel
+    ∷ area "src/Govenv/Projection/" projection
+    ∷ area "src/Govenv/Adapter/" adapter
+    ∷ area "README.md" generated
+    ∷ area ".govenv/roadmap.snapshot" generated
+    ∷ []
+  ; dependencies =
+      allow closure constitution
+    ∷ allow closure materialization
+    ∷ allow closure kernel
+    ∷ allow constitution kernel
+    ∷ allow materialization constitution
+    ∷ allow materialization kernel
+    ∷ allow projection materialization
+    ∷ allow projection kernel
+    ∷ allow adapter projection
+    ∷ []
+  }
+
+ArchitectureValid : Set
+ArchitectureValid = ⊤
+
+architectureValid : ArchitectureValid
+architectureValid = tt
 ```

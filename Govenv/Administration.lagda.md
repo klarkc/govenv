@@ -1,34 +1,24 @@
 # Administrative materialization
 
-Administrative authority has one human-supplied root. `GOVENV_ADMIN_TOKEN` is the current credential representing that root; replacing or rotating the token changes the credential, never the identity of the administrative authority. Candidate, agent, release, Pages, and repository Git-materializer paths must never consume the root credential. After human authorization, a dedicated main-only repository-administration effect job may consume it solely for deterministic GitHub API effects that require `Administration: write` and cannot be exercised by the derived deploy-key credential.
+Administrative materializations are governed targets whose canonical definitions require permissions broader than normal CI should hold. Their credentials stay behind an explicit manual privilege boundary; adapters only apply and verify the governed target state.
 
-## Administrative root
+## Stage 0 setup
 
-The only irreducible human bootstrap is provisioning `GOVENV_ADMIN_TOKEN` into the main-only `admin-materialization` environment. The fine-grained token is repository-restricted and requires **Administration: read/write** plus **Environments: read/write**. It intentionally receives no Actions, Contents, or Workflows permission.
+The current GitHub bootstrap is intentionally manual:
 
-From an `AuthorizedRevision`, `Admin Materialize` uses that root credential to derive and reconcile subordinate authority. No GitHub App, client ID, private key, deploy key, environment secret, variable, ruleset mutation, or individual administrative target may require a second manual provisioning ceremony.
+1. Open the repository **Settings → Environments** and create `admin-materialization`.
+2. Add the environment secret `GOVENV_ADMIN_TOKEN`.
+3. Create a fine-grained personal access token with **Resource owner** set to `klarkc` and repository access explicitly including `klarkc/govenv`.
+4. Grant only **Repository permissions → Administration: read and write** beyond GitHub's implicit minimum metadata access.
+5. Give the token a finite expiration and rotate it before expiry. The current repository setup uses a one-year expiration.
+6. Prefer protecting the environment with required admin reviewers when repository settings allow it.
+7. Run **Actions → Admin Materialize → Run workflow** and select a declared target.
 
-## Convergent setup
+The token must not be exposed to normal Test, Pages, or Release workflows. `Admin Materialize` is the only Stage 0 workflow allowed to consume it.
 
-GV92 requires the human-facing administrative operation to become one revision-bound `setup`, not a menu of independent targets. That setup is limited to bootstrap, recovery, authority-boundary reconciliation, and subordinate credential rotation. Ordinary project-state effects such as description, website, and topics are reconciled automatically after an `AuthorizedRevision` and are not setup steps. Re-running setup must converge partially configured authority state toward the canonical state and rotates the governed materializer keypair.
+## Current targets
 
-Every externally observable step retains apply → read-back → equality semantics. Secret values are not readable through GitHub and therefore are not constitutional data; governance owns their identity, placement, derivation procedure, and observable name boundary.
-
-## Authorized materializer
-
-The GV92/GV93 materializer design uses one repository-scoped write deploy key named `govenv-materializer`. The current convergent setup rotates this keypair on every successful execution: it first hardens `authorized-materialization` to `main`, generates an ephemeral Ed25519 keypair, replaces the complete repository deploy-key set with the governed public key, streams the private key into the environment secret `GOVENV_MATERIALIZER_SSH_KEY`, and deletes the runner-local key material. Rotation is used because GitHub does not expose environment secret values for read-back; each successful setup therefore re-establishes the private/public correspondence from one generated pair rather than trusting an unreadable prior value.
-
-GitHub rulesets grant bypass to the `DeployKey` actor class rather than to one deploy key identifier. Therefore the repository deploy-key set is governed as a closed set containing only the materializer key. Setup removes stale or unauthorized deploy keys and verifies the complete observed set before any DeployKey bypass may become active.
-
-The materializer credential creates no semantic authority: it may apply only deterministic effects causally derived from an `AuthorizedRevision`.
-
-## Candidate authoring
-
-Automated candidate authorship remains a distinct, unprivileged identity with ordinary content and pull-request capabilities but no authority to merge, bypass `main`, mutate persistent governed external state, or alter executable automation. GV92 forbids solving this boundary with another manually provisioned credential. The concrete platform mechanism remains intentionally abstract until those constraints are mechanically established.
-
-## Monotonic rollout
-
-GV91 still controls activation order. Setup may prepare environments and subordinate credentials before stronger rulesets exist, but an enforcement may become active only when every path needed to operate, verify, and repair under it already exists in an `AuthorizedRevision` and its prerequisite capabilities have been read-back verified.
+`github-description` is canonically defined by `Govenv.Materialization.Github.Repository.Description`, including its expected state, manual/admin capability, and read-back equality verification. The workflow applies only that projected value to GitHub repository metadata, verifies the observed value, and records the execution context as evidence.
 
 ```agda
 {-# OPTIONS --safe #-}
@@ -36,56 +26,9 @@ GV91 still controls activation order. Setup may prepare environments and subordi
 module Govenv.Administration where
 
 open import Agda.Builtin.String using (String)
-
-data AdministrativeRoot : Set where
-  govenvAdministrativeRoot : AdministrativeRoot
-
-record AdministrativeCredential (root : AdministrativeRoot) : Set where
-  constructor administrativeCredential
-  field
-    secretName : String
-
-adminCredential : AdministrativeCredential govenvAdministrativeRoot
-adminCredential = administrativeCredential "GOVENV_ADMIN_TOKEN"
-
-adminTokenSecret : String
-adminTokenSecret = AdministrativeCredential.secretName adminCredential
-
 adminEnvironment : String
 adminEnvironment = "admin-materialization"
 
-authorizedBranch : String
-authorizedBranch = "main"
-
-record DerivedCredential (root : AdministrativeRoot) : Set where
-  constructor derivedCredential
-  field
-    identity : String
-
-materializerCredential : DerivedCredential govenvAdministrativeRoot
-materializerCredential = derivedCredential "govenv-materializer"
-
-materializerDeployKeyTitle : String
-materializerDeployKeyTitle = DerivedCredential.identity materializerCredential
-
-candidateAuthorIdentity : String
-candidateAuthorIdentity = "candidate-author"
-
-materializerEnvironment : String
-materializerEnvironment = "authorized-materialization"
-
-materializerCredentialName : String
-materializerCredentialName = "GOVENV_MATERIALIZER_SSH_KEY"
-
-materializerBranch : String
-materializerBranch = authorizedBranch
-
-authorizedEffectsEnvironment : String
-authorizedEffectsEnvironment = "authorized-effects"
-
-pagesEnvironment : String
-pagesEnvironment = "github-pages"
-
-authorizationHumanLogin : String
-authorizationHumanLogin = "klarkc"
+adminTokenSecret : String
+adminTokenSecret = "GOVENV_ADMIN_TOKEN"
 ```

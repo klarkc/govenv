@@ -8,15 +8,15 @@ This module contains governed source data used by the repository README. `Govenv
 module Govenv.Readme where
 
 open import Govenv.Kernel.Readme
-open import Govenv.Project using (website)
 open import Govenv.Roadmap using (roadmap)
 
 readme : Readme
 readme = record
-  { docsUrl = website
+  { docsUrl = "https://klarkc.github.io/govenv/"
   ; agdaVersion = "2.8.0"
   ; releaseUrl = "https://github.com/klarkc/govenv/releases"
   ; licenseName = "Apache-2.0"
+  ; currentSummary = "`Verdict`, typed `Fact`, dependency-indexed `Rule`, typed roadmap structure, materialization closure, roadmap integrity, immutable governance identity, and typed release governance are in place; GV55 release-progress policy and its GV56 self-governing `Rule` are next."
   ; roadmapNote = "Governance IDs are immutable historical references. Definitions and owning phases never change after introduction; abandoned work is cancelled, while corrections or changed intent require a newer GV and explicit supersession."
   ; roadmap = roadmap
   ; gettingStartedTitle = "Getting started"
@@ -27,7 +27,7 @@ readme = record
   ; materializeSummary = "On `main`, the Materialize workflow applies versioned non-admin projections automatically and commits any tracked drift as a subsequent `chore(materialize)` commit. The command above remains available for local materialization."
   ; administrationTitle = "Administrative materialization"
   ; administrationUrl = "https://klarkc.github.io/govenv/Govenv.Administration.html"
-  ; administrationSummary = "Stage 0 administrative bootstrap, recovery, and credential rotation, including the `admin-materialization` environment and `GOVENV_ADMIN_TOKEN`, are documented as governed literate Agda rather than duplicated here. Ordinary project-state effects reconcile automatically after authorization."
+  ; administrationSummary = "Stage 0 setup for privileged targets, including the `admin-materialization` environment and `GOVENV_ADMIN_TOKEN`, is documented as governed literate Agda rather than duplicated here."
   ; testTitle = "Test"
   ; testCommand = "nix run github:cachix/devenv/v2.3 -- test"
   ; testSummary = "This type-checks the literate Agda entrypoint `Govenv.lagda.md`, its imported Govenv modules, and verifies governed generated artifacts such as `README.md`."
