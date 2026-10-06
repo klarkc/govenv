@@ -14,7 +14,6 @@ module Govenv.DirectionReview where
 
 open import Agda.Builtin.Equality using (refl)
 open import Agda.Builtin.List using (List; []; _∷_)
-open import Agda.Builtin.Nat using (zero)
 open import Agda.Builtin.String using (String)
 open import Govenv.Kernel.DirectionReview
 open import Govenv.Kernel.Identifier using (GVR)
@@ -68,8 +67,8 @@ next = nextReview nextSummary nextClaims nextGapCoverage
 
 reviewRationale : String
 reviewRationale =
-  "GV119 made human authority over agent-paced evolution explicit in Purpose; GV118 adds governed collaboration runtime already covered by reproducible tooling/runtime. Current and Next were re-reviewed against both changes, with GV116 remaining the immediate gap."
+  "GV120 makes language-neutral Governance IR the future application boundary while preserving one authoritative semantics in the reference formal model. The complete direction was re-reviewed; this belongs to P5 and does not displace GV116, GV117, or GV118 from the nearer sequence, so Current and Next remain accurate."
 
 review : DirectionReview roadmap purpose
-review = directionReview source refl current next reviewRationale zero
+review = directionReview source refl current next reviewRationale 1
 ```
