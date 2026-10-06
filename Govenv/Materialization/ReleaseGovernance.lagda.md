@@ -2,7 +2,7 @@
 
 This module owns the typed release governance document shared by the canonical portable changelog entry and enriched GitHub pull-request/release projections. Release Please owns surrounding release artifacts; Govenv owns this semantic section and its target-specific materializations.
 
-Release-section placement is version-specific. The target carries the exact Release Please version whose heading must own the governance section; read-back therefore verifies both section equality and placement. `ReleaseGovernance/placement-counterexample.md` preserves the PR #3 placement regression. `ReleaseGovernance/push-auth-counterexample.md` preserves the Stage B release-branch mutation regression from run #35. Candidate validation must reject recurrence of either counterexample before release materialization can succeed.
+Release-section placement is version-specific. The target carries the exact Release Please version whose heading must own the governance section; updating that target must preserve every other release entry and its governed section byte-for-byte, while read-back verifies the target section equality and placement. `ReleaseGovernance/placement-counterexample.md` preserves the PR #3 placement regression. `ReleaseGovernance/history-preservation-counterexample.md` preserves the observed loss of the historical `0.2.0` governance impact after materializing `0.2.1`. `ReleaseGovernance/push-auth-counterexample.md` preserves the Stage B release-branch mutation regression from run #35. Candidate validation must reject recurrence of these counterexamples before release materialization can succeed.
 
 ```agda
 {-# OPTIONS --safe #-}
