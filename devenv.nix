@@ -52,6 +52,11 @@ let
       bash src/Govenv/Adapter/release-governance-pr.sh >/dev/null
   '';
 
+  validateReleaseHistoryPreservationRegression = ''
+    GOVENV_RELEASE_HISTORY_COUNTEREXAMPLE=Govenv/Materialization/ReleaseGovernance/history-preservation-counterexample.md \
+      bash src/Govenv/Adapter/release-governance-pr.sh >/dev/null
+  '';
+
   validateReleasePushAuthorizationRegression = ''
     GOVENV_RELEASE_PUSH_AUTH_COUNTEREXAMPLE=Govenv/Materialization/ReleaseGovernance/push-auth-counterexample.md \
       bash src/Govenv/Adapter/release-governance-pr.sh >/dev/null
@@ -120,6 +125,7 @@ in
     ${checkMaterializations}
     ${checkAdminAdapters}
     ${validateReleasePlacementRegression}
+    ${validateReleaseHistoryPreservationRegression}
     ${validateReleasePushAuthorizationRegression}
   '';
 
