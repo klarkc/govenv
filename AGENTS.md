@@ -115,6 +115,14 @@ Prefer mature ecosystem primitives when they preserve or improve the desired sem
 
 When custom code is still preferable, be able to state why the available ecosystem alternative is semantically insufficient, would weaken the model, would introduce disproportionate complexity, or would impose an unjustified dependency or upgrade.
 
+## Product scope discipline — govern before providing
+
+Before adding a substantial new capability to Govenv core, decide whether Govenv must own its semantics or merely govern an independently implemented application, integration, or adapter. Default to governable contracts and external capabilities when doing so preserves authorization, assurance, reproducibility, and the canonical frontend. Treat domain implementation as a separate responsibility from defining and enforcing its governance.
+
+For a substantial core-scope expansion, record the governed obligation it serves, the alternatives investigated (including an external application or adapter), the semantic or enforcement reason a core implementation is needed, and which responsibilities the core would assume. This is a challengeable Protocol judgment, not a compiler-proven claim that a capability is uniquely necessary. Do not impose this review on ordinary refactors or small implementation choices, and do not ban justified internal implementations.
+
+The review should be presented with the candidate human authorization packet when the new capability materially expands core ownership. Mechanically verify only classification, provenance, references, presence, and freshness; human reviewers judge the architectural rationale. Reuse the planned HumanDecision/review-packet machinery rather than introducing a standalone vigilance witness.
+
 ## Semantic validation before check trust
 
 A successful automated check is evidence about the checks that currently exist; it is not permission to ignore a semantic contradiction that is already observable from established governance.

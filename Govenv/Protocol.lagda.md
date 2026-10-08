@@ -65,6 +65,9 @@ reuseFirstEngineeringPolicy = "## Reuse-first engineering policy\n\nThis protoco
 semanticValidationBeforeCheckTrust : String
 semanticValidationBeforeCheckTrust = "## Semantic validation before check trust\n\nA successful automated check is evidence about the checks that currently exist; it is not permission to ignore a semantic contradiction that is already observable from established governance.\n\nBefore declaring a governed candidate or pull request ready:\n\n1. Identify the established governance and obligations relevant to the changed paths, semantics, and effects.\n2. Compare the candidate semantically with those established requirements.\n3. Run the authoritative repository checks.\n4. Compare the governed expectation, the observed candidate state, and the check result.\n5. If the candidate observably contradicts established governance while the authoritative check succeeds, treat the divergence as a counterexample to assurance/enforcement rather than as a valid candidate.\n\nDo not silently erase such a counterexample by merely editing the candidate until the check passes. Preserve the observed contradiction in the appropriate governed evidence form and investigate the missing, incorrectly scoped, or overstated assurance boundary. A later repair should reject recurrence.\n\n"
 
+productScopeDiscipline : String
+productScopeDiscipline = "## Product scope discipline — govern before providing\n\nBefore adding a substantial new capability to Govenv core, decide whether Govenv must own its semantics or merely govern an independently implemented application, integration, or adapter. Default to governable contracts and external capabilities when doing so preserves authorization, assurance, reproducibility, and the canonical frontend. Treat domain implementation as a separate responsibility from defining and enforcing its governance.\n\nFor a substantial core-scope expansion, record the governed obligation it serves, the alternatives investigated (including an external application or adapter), the semantic or enforcement reason a core implementation is needed, and which responsibilities the core would assume. This is a challengeable Protocol judgment, not a compiler-proven claim that a capability is uniquely necessary. Do not impose this review on ordinary refactors or small implementation choices, and do not ban justified internal implementations.\n\nThe review should be presented with the candidate human authorization packet when the new capability materially expands core ownership. Mechanically verify only classification, provenance, references, presence, and freshness; human reviewers judge the architectural rationale. Reuse the planned HumanDecision/review-packet machinery rather than introducing a standalone vigilance witness.\n\n"
+
 preserveTheGovenvFrontend : String
 preserveTheGovenvFrontend = "## Preserve the Govenv frontend\n\nReuse should normally happen below the public Govenv model and DSL. Do not distort domain concepts merely to fit a library API.\n\n"
 
@@ -97,6 +100,7 @@ document =
   ++ commitAssistanceProvenance
   ++ developerJournal
   ++ reuseFirstEngineeringPolicy
+  ++ productScopeDiscipline
   ++ semanticValidationBeforeCheckTrust
   ++ preserveTheGovenvFrontend
   ++ documentationFollowsSemanticAuthority
