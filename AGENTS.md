@@ -123,6 +123,16 @@ For a substantial core-scope expansion, record the governed obligation it serves
 
 The review should be presented with the candidate human authorization packet when the new capability materially expands core ownership. Mechanically verify only classification, provenance, references, presence, and freshness; human reviewers judge the architectural rationale. Reuse the planned HumanDecision/review-packet machinery rather than introducing a standalone vigilance witness.
 
+## Application ejection prototypes (reversible incubation)
+
+For a capability proposed for Govenv core, or an existing implementation that may be separable, an agent may first run a bounded ejection prototype. This is a scoped architecture investigation, not a new validity gate, mandatory witness, or authorization to move code. Do not make routine refactors pay for an unnecessary rehearsal.
+
+State the proposed boundary before prototyping: the governed obligations, kernel contracts, evidence and human authority that must remain in Govenv; the functionality an application would own; its versioned inputs/outputs, capabilities, Nix-managed dependencies, data/privacy constraints, and its separately scoped governance. While incubated in this repository, application governance remains subordinate to the host authorization boundary; eventual independence cannot silently inherit Govenv semantic authority or credentials. Prefer a versioned Governance IR when available; until then use a declared provisional adapter instead of pretending an unstable kernel import is a portable API.
+
+Prototype the smallest useful independently runnable slice in an isolated experiment or worktree, without changing the authorized path or another agent's owned stacked branches. Compare representative accepted and rejected cases against existing behavior, including contract freshness, provenance, least privilege, and counterexamples; identify what was observed versus formally proved. Keep sensitive learning answers and credentials out of published prototypes. Record revisions, dependency direction, reproducibility, migration/rollback cost, and risks. A successful experiment never grants authority to the application.
+
+Close with a reviewable disposition: keep in core with rationale, incubate under application-specific governance, eject through a separately authorized migration, or defer/abandon. Before cutover, preserve or deliberately supersede established Governance through the normal human-authorized PR; demonstrate applicable semantic and operational parity, and require core-to-application dependency direction to remain forbidden. Use the planned GV98 architectural boundaries, GV120 interface contracts, and GV145 human review packets rather than inventing a parallel decision system. For open stacked PRs, deliver recommendations to their owner; do not rewrite, rebase, or publish to their branches without that owner's coordination.
+
 ## Semantic validation before check trust
 
 A successful automated check is evidence about the checks that currently exist; it is not permission to ignore a semantic contradiction that is already observable from established governance.

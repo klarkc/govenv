@@ -40,7 +40,7 @@
 | **+ GV138 ◇** | Materialize canonical agent roles and review lenses into supported coding-agent harnesses without creating secondary semantic authorities: begin with the actively used harness and prove portability through at least one materially different second harness; generated provider configuration may express only semantics supported by that harness, unsupported mappings must be explicit, reusable review reasoning remains separate from provider execution configuration, and handwritten harness prompts/configuration must not silently redefine canonical role or lens semantics. |
 | **+ GV146 ◇** | Materialize the canonical human review packet into provider pull requests and keep provider state subordinate to governed source: render deterministic GitHub-native review guidance and create/update it through the governed repository-collaboration path, currently gh; candidate revision changes make stale packet projections detectable and require refresh, provider-side handwritten edits must not become alternate review authority, and the renderer must aggregate commit assistance, packet-preparation, and adversarial-review provenance without conflating authorship, assistance, review, human decision, or merge authorization. |
 
-Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `2674f71..352a16c`.
+Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit metadata. SemVer remains independent. `2674f71..d89c366`.
 <!-- govenv-governance-impact:end -->
 
 
@@ -55,6 +55,11 @@ Derived from immutable typed roadmap snapshots and governed `Refs: GV…` commit
 ### Governance
 
 * **roadmap:** plan governed human review ([352a16c](https://github.com/klarkc/govenv/commit/352a16cff778d96ea4f3b4535320e60649edef2c))
+
+
+### Documentation
+
+* **protocol:** govern capability scope before providing ([d89c366](https://github.com/klarkc/govenv/commit/d89c36681e00d2ba5d3e90bcd2202f8c8852ee13))
 
 ## [0.2.9](https://github.com/klarkc/govenv/compare/v0.2.8...v0.2.9) (2026-09-28)
 <!-- govenv-release-freeze: version=0.2.9 base=v0.2.8 authorized=00458662f96d563aafca9babfc36bb5e6f8cc65d -->
